@@ -3605,16 +3605,6 @@
 		"oS": 3,
 		"uL": 1
 		},
-	"\/style.css": {
-		"aP": 0,
-		"bl": 0,
-		"ft": 16,
-		"ma": 0,
-		"oA": 1,
-		"oAP": "\/style-ck.css",
-		"oF": 0,
-		"oS": 0
-		},
 	"\/template-parts\/blog\/index.php": {
 		"ft": 8192,
 		"oA": 2,

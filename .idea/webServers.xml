@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="217f0685-b370-44ee-a10b-2069a74f1d36" name="Gospel Farm 2017 v2" url="http://dev.gospel-farm.ch">
+        <fileTransfer host="gospel-farm.ch" port="21" rootFolder="/gfarm2017_v2">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="21" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

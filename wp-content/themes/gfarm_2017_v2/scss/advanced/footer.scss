@@ -1,0 +1,71 @@
+footer {
+    width: 100%;
+    display: block;
+    padding-top: 100px;
+    padding-bottom: 40px;
+    height: auto;
+    position: relative;
+    color: $black;
+    background-image: url('images/footer_bg.jpg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    .content {
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+        display: block;
+
+        a.logo_gfarm {
+            background-image: url('images/logo_color.svg');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            width: 280px;
+            height: 150px;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        div.text {
+            font-family: $akrobat-semi-bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+
+            p {
+                padding: 5px 0;
+            }
+
+            a {
+                color: $black;
+                text-decoration: none;
+            }
+        }
+
+        div.gw {
+            margin: 40px 10px 20px;
+
+            span {
+                vertical-align: top;
+                margin: 14px 20px 0 0;
+                display: inline-block;
+            }
+
+            a.logo_gw {
+                vertical-align: top;
+                background-image: url('images/logo_gw.svg');
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: contain;
+                width: 122px;
+                height: 46px;
+                display: inline-block;
+                margin: 0 auto;
+
+            }
+        }
+    }
+
+}
+

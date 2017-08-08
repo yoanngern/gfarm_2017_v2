@@ -1,0 +1,159 @@
+
+article.content-page {
+
+    a.button {
+
+        &:hover {
+            background-color: $black;
+            color: $white;
+            text-decoration: none;
+        }
+    }
+
+    h1, h2, h3, h4, h4, h6, p, ul, ol {
+        max-width: 770px;
+    }
+
+    .aligncenter {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    h1 {
+        font-family: $geared_slab-extra-bold;
+        font-size: 1.6em;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+    }
+
+    h2 {
+        font-family: $akrobat-light;
+        font-size: 1.6em;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+    }
+
+    h3 {
+        font-family: $akrobat-extra-bold;
+        font-size: 1.1em;
+        letter-spacing: 0.1em;
+        line-height: 1.2em;
+        padding: 20px 0 10px;
+
+    }
+
+    h4 {
+        font-family: $akrobat-bold;
+        font-size: 1em;
+        letter-spacing: 0.1em;
+        line-height: 1.2em;
+        padding: 15px 0 10px;
+    }
+
+
+
+    p {
+        font-family: $akrobat;
+        letter-spacing: 0.08em;
+        line-height: 1.4em;
+        padding-bottom: 10px;
+
+        strong {
+            font-family: $geared_slab-bold;
+        }
+
+        em {
+            font-family: $akrobat;
+
+            strong {
+                font-family: $akrobat-semi-bold;
+            }
+        }
+    }
+
+    time {
+        font-family: $akrobat-bold;
+        font-size: 1em;
+        letter-spacing: 0.1em;
+        line-height: 1.2em;
+        padding-bottom: 10px;
+    }
+
+    li {
+        font-size: 1.15em;
+        padding-left: 5px;
+        margin-left: 20px;
+        margin-bottom: 5px;
+        margin-top: 5px;
+    }
+
+    & > ul {
+        li {
+            margin-bottom: 10px;
+
+            ul {
+                margin-bottom: 20px;
+            }
+        }
+    }
+
+    a {
+        color: $green;
+        text-decoration: none;
+
+        &:hover {
+            color: $green;
+            text-decoration: underline;
+        }
+
+        img:hover {
+            opacity: 0.8;
+        }
+    }
+
+    blockquote {
+
+        p {
+            font-family: $geared_slab-bold;
+        }
+
+        p:last-of-type {
+            padding-bottom: 0;
+        }
+    }
+
+    table {
+        font-size: 1.15em;
+        padding-bottom: 10px;
+
+        tbody {
+
+        }
+
+        tr {
+
+            td {
+                padding: 3px 0 3px 10px;
+
+                &:first-of-type {
+
+                    padding-left: 0;
+
+                }
+            }
+        }
+    }
+
+    iframe {
+        max-width: 100%;
+    }
+
+    @media only screen and (max-width: 1050px) {
+        padding: 0 20px;
+    }
+
+    @media only screen and (max-width: 640px) {
+        padding: 0 15px;
+    }
+}

@@ -1,0 +1,81 @@
+body > header {
+    background-color: $gray-light;
+    border-top: 8px solid $green;
+    height: 55px;
+
+
+
+    a.title {
+        display: inline-block;
+        font-size: 1.9em;
+        font-family: $geared_slab-extra-bold;
+        text-transform: uppercase;
+        margin: 8px 30px 0 30px;
+        padding: 6px 10px 0;
+        line-height: 1.1em;
+        vertical-align: top;
+
+    }
+
+    a {
+        text-decoration: none;
+        color: $black;
+    }
+
+    div {
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 8px;
+
+        ul {
+
+            li {
+                display: inline-block;
+                padding: 10px;
+
+                a {
+                    font-size: 0.9em;
+                    text-transform: uppercase;
+                    font-family: $geared_slab-extra-bold;
+                    letter-spacing: 0.1em;
+                }
+
+                &.current-menu-item {
+                    a {
+                        border-bottom: 2px solid $black;
+                    }
+                }
+            }
+        }
+
+        &.menu-language-container {
+            float: right;
+            position: relative;
+            display: inline-block;
+            top: auto;
+            width: auto;
+
+            ul {
+                margin-right: 30px;
+            }
+        }
+    }
+
+
+    a#burger {
+        display: none;
+    }
+
+
+    @media only screen and (min-width: 1050px) {
+
+
+        div {
+            display: block;
+            position: absolute;
+            text-align: center;
+            top: 8px;
+            width: 100%;
+        }
+    }
+}

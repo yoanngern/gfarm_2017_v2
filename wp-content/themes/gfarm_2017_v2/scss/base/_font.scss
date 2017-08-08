@@ -1,0 +1,124 @@
+@font-face {
+    font-family: 'akrobatblack';
+    src: url('fonts/akrobat-black-webfont.woff2') format('woff2'),
+    url('fonts/akrobat-black-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'akrobatbold';
+    src: url('fonts/akrobat-bold-webfont.woff2') format('woff2'),
+    url('fonts/akrobat-bold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'akrobatextrabold';
+    src: url('fonts/akrobat-extrabold-webfont.woff2') format('woff2'),
+    url('fonts/akrobat-extrabold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'akrobatextralight';
+    src: url('fonts/akrobat-extralight-webfont.woff2') format('woff2'),
+    url('fonts/akrobat-extralight-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'akrobatlight';
+    src: url('fonts/akrobat-light-webfont.woff2') format('woff2'),
+    url('fonts/akrobat-light-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'akrobatregular';
+    src: url('fonts/akrobat-regular-webfont.woff2') format('woff2'),
+    url('fonts/akrobat-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'akrobatsemibold';
+    src: url('fonts/akrobat-semibold-webfont.woff2') format('woff2'),
+    url('fonts/akrobat-semibold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'akrobatthin';
+    src: url('fonts/akrobat-thin-webfont.woff2') format('woff2'),
+    url('fonts/akrobat-thin-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'geared_slabbold';
+    src: url('fonts/gearedslab-bold-webfont.woff2') format('woff2'),
+    url('fonts/gearedslab-bold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'geared_slabextrabold';
+    src: url('fonts/gearedslab-extrabold-webfont.woff2') format('woff2'),
+    url('fonts/gearedslab-extrabold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'geared_slabthin';
+    src: url('fonts/gearedslab-light-webfont.woff2') format('woff2'),
+    url('fonts/gearedslab-light-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'geared_slabregular';
+    src: url('fonts/gearedslab-webfont.woff2') format('woff2'),
+    url('fonts/gearedslab-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+$geared_slab: "geared_slabregular", Arial, Helvetica, Verdana sans-serif;
+$geared_slab-bold: "geared_slabbold", $geared_slab;
+$geared_slab-extra-bold: "geared_slabextrabold", $geared_slab-bold;
+$geared_slab-thin: "geared_slabthin", $geared_slab;
+
+$akrobat: "akrobatregular", Arial, Helvetica, Verdana sans-serif;
+$akrobat-semi-bold: "akrobatsemibold", $akrobat;
+$akrobat-bold: "akrobatbold", $akrobat-semi-bold;
+$akrobat-extra-bold: "akrobatextrabold", $akrobat-bold;
+$akrobat-black: "akrobatblack", $akrobat-extra-bold;
+$akrobat-light: "akrobatlight", $akrobat;
+$akrobat-extra-light: "akrobatextralight", $akrobat-light;
+$akrobat-thin: "akrobatthin", $akrobat-extra-light;
+
+
+

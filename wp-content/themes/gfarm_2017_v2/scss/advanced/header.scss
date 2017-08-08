@@ -3,8 +3,6 @@ body > header {
     border-top: 8px solid $green;
     height: 55px;
 
-
-
     a.title {
         display: inline-block;
         font-size: 1.9em;
@@ -61,21 +59,26 @@ body > header {
         }
     }
 
-
     a#burger {
         display: none;
     }
 
-
     @media only screen and (min-width: 1050px) {
-
 
         div {
             display: block;
             position: absolute;
             text-align: center;
             top: 8px;
+
             width: 100%;
+        }
+    }
+
+    @media only screen and (max-width: 960px) {
+
+        [class^="menu"] {
+            display: none;
         }
     }
 }

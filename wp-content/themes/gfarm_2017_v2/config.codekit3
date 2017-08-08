@@ -5032,7 +5032,7 @@
 			}
 		},
 	"esLintSourceType": 0,
-	"externalServerAddress": "gospel-farm.ch",
+	"externalServerAddress": "dev.gospel-farm.ch",
 	"gitIgnoreBuildFolder": 1,
 	"hideConfigFile": 0,
 	"jsCheckerReservedNamesString": "",

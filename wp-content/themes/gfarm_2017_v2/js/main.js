@@ -7,14 +7,10 @@ $(document).ready(function () {
     $("body > header").on("click", "#burger", function (event) {
         event.preventDefault();
         $("body > header div[class^='menu-menu']").toggleClass("show");
+        $("body > header #burger").toggleClass("open");
     });
 
-    $("body #subnav").on("click", "#toggle", function (event) {
-        event.preventDefault();
-        $("body #subnav #toggle").toggleClass("open");
-        $("body #subnav ul").toggleClass("show");
-        $("body #subnav").toggleClass("blur");
-    });
+
 
 
     ratio();

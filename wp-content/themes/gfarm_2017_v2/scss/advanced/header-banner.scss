@@ -13,7 +13,7 @@ section#bigimage {
         top: 0;
         box-sizing: border-box;
         position: relative;
-        
+
         div.title {
             text-align: center;
             display: block;
@@ -53,6 +53,19 @@ section#bigimage {
             }
         }
 
+    }
+
+    @media only screen and (max-width: 960px) {
+        div.banner {
+            height: 270px;
+            min-height: inherit;
+        }
+    }
+
+    @media only screen and (max-width: 560px) {
+        div.banner {
+            height: 220px;
+        }
     }
 
 }

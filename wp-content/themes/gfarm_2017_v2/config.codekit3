@@ -551,6 +551,28 @@
 		"oAP": "\/images\/browserconfig.xml",
 		"oF": 0
 		},
+	"\/images\/burger.png": {
+		"ft": 32768,
+		"iS": 210,
+		"oA": 0,
+		"oAP": "\/images\/burger.png",
+		"oF": 0,
+		"oIPL": 1,
+		"opt": 1,
+		"oT": 1,
+		"q": 100
+		},
+	"\/images\/burger_close.png": {
+		"ft": 32768,
+		"iS": 851,
+		"oA": 0,
+		"oAP": "\/images\/burger_close.png",
+		"oF": 0,
+		"oIPL": 1,
+		"opt": 1,
+		"oT": 1,
+		"q": 100
+		},
 	"\/images\/burger_white.png": {
 		"ft": 32768,
 		"iS": 218,
@@ -751,24 +773,6 @@
 		"sC": 1,
 		"tS": 0
 		},
-	"\/js\/events.js": {
-		"ft": 64,
-		"mi": 1,
-		"oA": 0,
-		"oAP": "\/js\/events.min.js",
-		"oF": 0,
-		"sC": 0,
-		"tS": 0
-		},
-	"\/js\/events.min.js": {
-		"ft": 64,
-		"mi": 1,
-		"oA": 1,
-		"oAP": "\/js\/events.min.min.js",
-		"oF": 0,
-		"sC": 1,
-		"tS": 0
-		},
 	"\/js\/grayscale\/filters.svg": {
 		"ft": 2097152,
 		"miP": 0,
@@ -793,24 +797,6 @@
 		"mi": 1,
 		"oA": 0,
 		"oAP": "\/js\/grayscale\/grayscale.min.js",
-		"oF": 0,
-		"sC": 1,
-		"tS": 0
-		},
-	"\/js\/live.js": {
-		"ft": 64,
-		"mi": 1,
-		"oA": 0,
-		"oAP": "\/js\/live.min.js",
-		"oF": 0,
-		"sC": 0,
-		"tS": 0
-		},
-	"\/js\/live.min.js": {
-		"ft": 64,
-		"mi": 1,
-		"oA": 0,
-		"oAP": "\/js\/live.min.min.js",
 		"oF": 0,
 		"sC": 1,
 		"tS": 0
@@ -3604,6 +3590,16 @@
 		"oF": 2,
 		"oS": 3,
 		"uL": 1
+		},
+	"\/style.css": {
+		"aP": 0,
+		"bl": 0,
+		"ft": 16,
+		"ma": 0,
+		"oA": 2,
+		"oAP": "\/style-ck.css",
+		"oF": 0,
+		"oS": 0
 		},
 	"\/template-parts\/blog\/index.php": {
 		"ft": 8192,

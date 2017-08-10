@@ -2,6 +2,20 @@
     header {
         padding: 0 1.5%;
     }
+
+    @media only screen and (max-width: 768px) {
+
+        header {
+            padding: 0 2%;
+        }
+    }
+
+    @media only screen and (max-width: 480px) {
+
+        header {
+            padding: 0 4%;
+        }
+    }
 }
 
 section#listOfEvents {
@@ -63,6 +77,30 @@ section#listOfEvents {
             font-family: $akrobat-semi-bold;
             letter-spacing: 0.1em;
             color: $black;
+        }
+    }
+
+    @media only screen and (max-width: 1050px) {
+
+        article.content-page {
+            padding: 0;
+        }
+
+    }
+
+    @media only screen and (max-width: 768px) {
+
+        div.event {
+            width: 50%;
+
+        }
+    }
+
+    @media only screen and (max-width: 480px) {
+
+        div.event {
+            width: 100%;
+
         }
     }
 }

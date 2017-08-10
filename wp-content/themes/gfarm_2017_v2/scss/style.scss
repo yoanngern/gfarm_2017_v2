@@ -41,4 +41,16 @@ section {
             }
         }
     }
+
+    @media only screen and (max-width: 960px) {
+        .platter {
+            padding: 40px 2%;
+        }
+    }
+
+    @media only screen and (max-width: 768px) {
+        .platter {
+            padding: 20px 2%;
+        }
+    }
 }

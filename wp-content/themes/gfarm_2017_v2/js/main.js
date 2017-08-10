@@ -6,7 +6,7 @@ $(document).ready(function () {
 
     $("body > header").on("click", "#burger", function (event) {
         event.preventDefault();
-        $("body > header ul").toggleClass("show");
+        $("body > header div[class^='menu-menu']").toggleClass("show");
     });
 
     $("body #subnav").on("click", "#toggle", function (event) {
@@ -16,29 +16,6 @@ $(document).ready(function () {
         $("body #subnav").toggleClass("blur");
     });
 
-    $("#content.events header select").change(function (event) {
-        event.preventDefault();
-
-        $("#content.events header option:selected").each(function () {
-
-
-            var url = $(this).parent().parent().data("url");
-            var tax = $(this).parent().parent().data("tax");
-            var path = $(this).parent().parent().data("path");
-            var slug = this.value;
-
-            if (slug != 0) {
-
-                window.location.href = url + tax + "/" + slug;
-            } else {
-
-                window.location.href = url + path;
-            }
-
-
-        });
-
-    });
 
     ratio();
 

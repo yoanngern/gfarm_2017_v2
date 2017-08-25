@@ -6,11 +6,7 @@
     <div class="platter">
 
 
-        <header>
 
-            <h1><?php pll_e( 'Prochains événements' ); ?></h1>
-
-        </header>
 
 
 		<?php
@@ -19,6 +15,12 @@
 
 
 		if ( have_posts() ) : ?>
+
+            <header>
+
+                <h1><?php pll_e( 'Prochains événements' ); ?></h1>
+
+            </header>
 
 
             <section id="listOfEvents" class="small" data-nb="3">
@@ -46,19 +48,11 @@
 
 			<?php
 
-		else :
-
-			get_template_part( 'template-parts/event/none' );
-
 		endif;
 		?>
 
 
-        <header>
 
-            <h1><?php pll_e( 'Brunch' ); ?></h1>
-
-        </header>
 
 
 	    <?php
@@ -67,6 +61,12 @@
 
 
 	    if ( have_posts() ) : ?>
+
+            <header>
+
+                <h1><?php pll_e( 'Brunch' ); ?></h1>
+
+            </header>
 
 
             <section id="listOfEvents" class="small" data-nb="3">
@@ -93,10 +93,6 @@
             </nav>
 
 		    <?php
-
-	    else :
-
-		    get_template_part( 'template-parts/event/none' );
 
 	    endif;
 	    ?>

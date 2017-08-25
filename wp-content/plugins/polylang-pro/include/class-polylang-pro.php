@@ -14,6 +14,8 @@ class Polylang_Pro {
 	 * Initialization
 	 *
 	 * @since 1.9
+	 *
+	 * @param object $polylang
 	 */
 	public function init( &$polylang ) {
 		if ( ! $polylang instanceof PLL_Frontend ) {
@@ -55,7 +57,7 @@ class Polylang_Pro {
 	 *
 	 * @since 2.1.1
 	 *
-	 * @param array  $value
+	 * @param array $value
 	 * @return array
 	 */
 	public function pre_set_site_transient_update_plugins( $value ) {
@@ -97,9 +99,15 @@ class Polylang_Pro {
 
 				// Share term slugs
 				// The unique key for term slug has been removed in WP 4.1
-				$polylang->share_term_slug = $polylang instanceof PLL_Frontend ?
-					new PLL_Frontend_Share_Term_Slug( $polylang ) :
-					new PLL_Admin_Share_Term_Slug( $polylang );
+				if ( $polylang instanceof PLL_Frontend ) {
+					// FIXME backward compatibility with WP < 4.8
+					$polylang->share_term_slug = version_compare( $GLOBALS['wp_version'], '4.8', '<' ) ?
+						new PLL_Frontend_Share_Term_Slug( $polylang ) :
+						new PLL_Share_Term_Slug( $polylang );
+
+				} else {
+					$polylang->share_term_slug = new PLL_Admin_Share_Term_Slug( $polylang );
+				};
 			}
 		}
 
@@ -122,15 +130,20 @@ class Polylang_Pro {
 			switch ( $polylang->options['force_lang'] ) {
 				case 2:
 					$polylang->xdata = new PLL_Xdata_Subdomain( $polylang );
-				break;
+					break;
 				case 3:
 					$polylang->xdata = new PLL_Xdata_Domain( $polylang );
-				break;
+					break;
 			}
 		}
+
+		// REST API
+		$polylang->rest_api = new PLL_REST_API( $polylang->model );
 	}
 
 	/**
+	 * Enqueue scripts and css
+	 *
 	 * @since 2.1
 	 */
 	public function admin_enqueue_scripts() {
@@ -142,6 +155,9 @@ class Polylang_Pro {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_enqueue_script( 'pll_advanced_post', plugins_url( '/js/advanced-post' . $suffix . '.js', POLYLANG_FILE ), array( 'jquery' ), POLYLANG_VERSION, true );
 		wp_enqueue_style( 'pll_advanced_admin', plugins_url( '/css/advanced-admin' . $suffix . '.css', POLYLANG_FILE ), array(), POLYLANG_VERSION );
+
+		$confirm = __( 'You are about to overwrite an existing translation. Are you sure?', 'polylang-pro' );
+		wp_localize_script( 'pll_advanced_post', 'confirm_text', $confirm );
 	}
 }
 

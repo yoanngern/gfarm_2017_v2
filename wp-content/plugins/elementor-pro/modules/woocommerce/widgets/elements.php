@@ -3,7 +3,7 @@ namespace ElementorPro\Modules\Woocommerce\Widgets;
 
 use Elementor\Controls_Manager;
 use Elementor\Widget_Base;
-use ElementorPro\Modules\PanelPostsControl\Module as PPCModule;
+use ElementorPro\Modules\QueryControl\Module as QueryModule;
 use ElementorPro\Modules\Woocommerce\Module;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -60,7 +60,7 @@ class Elements extends Widget_Base {
 			'product_id',
 			[
 				'label' => __( 'Product', 'elementor-pro' ),
-				'type' => PPCModule::QUERY_CONTROL_ID,
+				'type' => QueryModule::QUERY_CONTROL_ID,
 				'post_type' => '',
 				'options' => [],
 				'label_block' => true,

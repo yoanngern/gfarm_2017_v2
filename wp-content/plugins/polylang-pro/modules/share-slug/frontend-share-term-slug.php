@@ -2,6 +2,7 @@
 
 /**
  * Manages shared slugs for taxonomy terms on frontend side
+ * Used for backward compatibility with WP < 4.8
  *
  * @since 1.9
  */
@@ -24,7 +25,7 @@ class PLL_Frontend_Share_Term_Slug extends PLL_Share_Term_Slug {
 	}
 
 	/**
-	 * Get a term by slug in the current language
+	 * Get a term by slug (or name) in the current language
 	 *
 	 * @since 1.9
 	 *
@@ -46,17 +47,21 @@ class PLL_Frontend_Share_Term_Slug extends PLL_Share_Term_Slug {
 				$n++; // Since WP 4.7 get_term_by calls get_terms
 			}
 
-			// The filter get_term is the same in get_term and get_term_by, moreover we need to know if we get_term_by slug
-			if ( isset( $traces[ $n ]['function'], $traces[ $n ]['args'][0] ) && 'get_term_by' === $traces[ $n ]['function'] && 'slug' === $traces[ $n ]['args'][0] ) {
-				$join = "INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id" . $this->model->term->join_clause();
-				$where = $wpdb->prepare( 'WHERE tt.taxonomy = %s AND t.slug = %s', $taxonomy, $term->slug ) . $this->model->term->where_clause( $this->curlang );
-				$term = $wpdb->get_row( "SELECT t.*, tt.* FROM $wpdb->terms AS t $join $where LIMIT 1" );
+			// The filter get_term is the same in get_term and get_term_by, moreover we need to know if we get_term_by slug or name
+			if ( isset( $traces[ $n ]['function'], $traces[ $n ]['args'][0] ) && 'get_term_by' === $traces[ $n ]['function'] ) {
+				$field = $traces[ $n ]['args'][0];
 
-				if ( ! $term ) {
-					return false;
+				if ( in_array( $field , array( 'slug', 'name' ) ) ) {
+					$join = "INNER JOIN {$wpdb->term_taxonomy} AS tt ON t.term_id = tt.term_id" . $this->model->term->join_clause();
+					$where = $wpdb->prepare( "WHERE tt.taxonomy = %s AND t.{$field} = %s", $taxonomy, $term->$field ) . $this->model->term->where_clause( $this->curlang );
+					$term = $wpdb->get_row( "SELECT t.*, tt.* FROM {$wpdb->terms} AS t {$join} {$where} LIMIT 1" );
+
+					if ( ! $term ) {
+						return false;
+					}
+
+					wp_cache_add( $term->term_id, $term, $taxonomy );
 				}
-
-				wp_cache_add( $term->term_id, $term, $taxonomy );
 			}
 		}
 

@@ -12,6 +12,8 @@ class PLL_Xdata_Domain extends PLL_Xdata_Base {
 	 * Constructor
 	 *
 	 * @since 2.0
+	 *
+	 * @param object $polylang
 	 */
 	public function __construct( &$polylang ) {
 		parent::__construct( $polylang );
@@ -44,7 +46,7 @@ class PLL_Xdata_Domain extends PLL_Xdata_Base {
 		if ( ! headers_sent() && ( ! isset( $_COOKIE[ PLL_COOKIE ] ) || $_COOKIE[ PLL_COOKIE ] !== $lang ) ) {
 			/** This filter is documented in frontend/choose-lang.php */
 			$expiration = apply_filters( 'pll_cookie_expiration', YEAR_IN_SECONDS );
-			setcookie( PLL_COOKIE, $lang, time() + $expiration, COOKIEPATH, COOKIE_DOMAIN );
+			setcookie( PLL_COOKIE, $lang, time() + $expiration, COOKIEPATH, COOKIE_DOMAIN, is_ssl() );
 		}
 	}
 
@@ -112,7 +114,7 @@ class PLL_Xdata_Domain extends PLL_Xdata_Base {
 			if ( $preflang && $preflang !== $lang ) {
 				header( 'Content-Type: application/javascript' );
 				printf( 'window.location.replace("%s");', esc_url_raw( $this->model->get_language( $preflang )->home_url ) );
-				exit;
+				wp_die();
 			}
 		}
 
@@ -120,7 +122,7 @@ class PLL_Xdata_Domain extends PLL_Xdata_Base {
 
 		header( 'Content-Type: application/javascript' );
 		echo $this->maybe_get_xdomain_js( $redirect, $lang );
-		exit;
+		wp_die();
 	}
 
 	/**

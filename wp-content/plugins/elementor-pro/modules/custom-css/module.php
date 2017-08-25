@@ -52,12 +52,22 @@ class Module extends Module_Base {
 		);
 
 		$element->add_control(
+			'custom_css_title',
+			[
+				'raw' => __( 'Add your own custom CSS here', 'elementor-pro' ),
+				'type' => Controls_Manager::RAW_HTML,
+			]
+		);
+
+		$element->add_control(
 			'custom_css',
 			[
 				'type' => Controls_Manager::CODE,
-				'label' => __( 'Add your own custom CSS here', 'elementor-pro' ),
+				'label' => __( 'Custom CSS', 'elementor-pro' ),
 				'language' => 'css',
 				'render_type' => 'ui',
+				'show_label' => false,
+				'separator' => 'none',
 			]
 		);
 
@@ -137,7 +147,14 @@ class Module extends Module_Base {
 	public function remove_go_pro_custom_css( $element ) {
 		$controls_to_remove = [ 'section_custom_css_pro', 'custom_css_pro' ];
 
-		Plugin::elementor()->controls_manager->remove_control_from_stack( $element->get_name(), $controls_to_remove );
+		// Check if elementor free is higher than 1.6.0
+		if ( method_exists( $element, 'get_unique_name' ) ) {
+			$element_name = $element->get_unique_name();
+		} else {
+			$element_name = $element->get_name();
+		}
+
+		Plugin::elementor()->controls_manager->remove_control_from_stack( $element_name, $controls_to_remove );
 	}
 
 	protected function add_actions() {

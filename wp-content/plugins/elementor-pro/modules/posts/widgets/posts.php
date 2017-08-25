@@ -4,8 +4,8 @@ namespace ElementorPro\Modules\Posts\Widgets;
 use Elementor\Group_Control_Typography;
 use Elementor\Scheme_Typography;
 use Elementor\Widget_Base;
-use ElementorPro\Modules\PanelPostsControl\Controls\Group_Control_Posts;
-use ElementorPro\Modules\PanelPostsControl\Module;
+use ElementorPro\Modules\QueryControl\Controls\Group_Control_Posts;
+use ElementorPro\Modules\QueryControl\Module;
 use ElementorPro\Modules\Posts\Skins;
 use Elementor\Controls_Manager;
 
@@ -394,6 +394,10 @@ class Posts extends Widget_Base {
 	}
 
 	public function get_current_page() {
+		if ( '' === $this->get_settings( 'pagination_type' ) ) {
+			return 1;
+		}
+
 		return max( 1, get_query_var( 'paged' ), get_query_var( 'page' ) );
 	}
 

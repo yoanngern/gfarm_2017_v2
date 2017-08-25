@@ -1,4 +1,4 @@
-/*! elementor-pro - v1.5.5 - 03-07-2017 */
+/*! elementor-pro - v1.6.0 - 22-08-2017 */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var ElementorProFrontend = function( $ ) {
 	var self = this;
@@ -12,8 +12,10 @@ var ElementorProFrontend = function( $ ) {
 		countdown: require( 'modules/countdown/assets/js/frontend/frontend' ),
 		posts: require( 'modules/posts/assets/js/frontend/frontend' ),
 		slides: require( 'modules/slides/assets/js/frontend/frontend' ),
-        share_buttons: require( 'modules/share-buttons/assets/js/frontend/frontend' )
-	};
+        share_buttons: require( 'modules/share-buttons/assets/js/frontend/frontend' ),
+        nav_menu: require( 'modules/nav-menu/assets/js/frontend/frontend' ),
+        animatedText: require( 'modules/animated-headline/assets/js/frontend/frontend' )
+    };
 
 	var initModules = function() {
 		self.modules = {};
@@ -32,12 +34,313 @@ var ElementorProFrontend = function( $ ) {
 
 window.elementorProFrontend = new ElementorProFrontend( jQuery );
 
-},{"modules/countdown/assets/js/frontend/frontend":2,"modules/forms/assets/js/frontend/frontend":4,"modules/posts/assets/js/frontend/frontend":9,"modules/share-buttons/assets/js/frontend/frontend":13,"modules/slides/assets/js/frontend/frontend":15}],2:[function(require,module,exports){
+},{"modules/animated-headline/assets/js/frontend/frontend":2,"modules/countdown/assets/js/frontend/frontend":4,"modules/forms/assets/js/frontend/frontend":6,"modules/nav-menu/assets/js/frontend/frontend":11,"modules/posts/assets/js/frontend/frontend":13,"modules/share-buttons/assets/js/frontend/frontend":17,"modules/slides/assets/js/frontend/frontend":19}],2:[function(require,module,exports){
+module.exports = function() {
+    elementorFrontend.hooks.addAction( 'frontend/element_ready/animated-headline.default', require( './handlers/animated-headlines' ) );
+};
+
+},{"./handlers/animated-headlines":3}],3:[function(require,module,exports){
+var AnimatedHeadlineHandler = elementorFrontend.Module.extend( {
+	svgPaths: {
+		circle: [ 'M325,18C228.7-8.3,118.5,8.3,78,21C22.4,38.4,4.6,54.6,5.6,77.6c1.4,32.4,52.2,54,142.6,63.7 c66.2,7.1,212.2,7.5,273.5-8.3c64.4-16.6,104.3-57.6,33.8-98.2C386.7-4.9,179.4-1.4,126.3,20.7' ],
+		underline_zigzag: [ 'M9.3,127.3c49.3-3,150.7-7.6,199.7-7.4c121.9,0.4,189.9,0.4,282.3,7.2C380.1,129.6,181.2,130.6,70,139 c82.6-2.9,254.2-1,335.9,1.3c-56,1.4-137.2-0.3-197.1,9' ],
+		x: [ 'M497.4,23.9C301.6,40,155.9,80.6,4,144.4', 'M14.1,27.6c204.5,20.3,393.8,74,467.3,111.7' ],
+		strikethrough: [ 'M3,75h493.5' ],
+		curly: [ 'M3,146.1c17.1-8.8,33.5-17.8,51.4-17.8c15.6,0,17.1,18.1,30.2,18.1c22.9,0,36-18.6,53.9-18.6 c17.1,0,21.3,18.5,37.5,18.5c21.3,0,31.8-18.6,49-18.6c22.1,0,18.8,18.8,36.8,18.8c18.8,0,37.5-18.6,49-18.6c20.4,0,17.1,19,36.8,19 c22.9,0,36.8-20.6,54.7-18.6c17.7,1.4,7.1,19.5,33.5,18.8c17.1,0,47.2-6.5,61.1-15.6' ],
+		diagonal: [ 'M13.5,15.5c131,13.7,289.3,55.5,475,125.5' ],
+		'double': [ 'M8.4,143.1c14.2-8,97.6-8.8,200.6-9.2c122.3-0.4,287.5,7.2,287.5,7.2', 'M8,19.4c72.3-5.3,162-7.8,216-7.8c54,0,136.2,0,267,7.8' ],
+		double_underline: [ 'M5,125.4c30.5-3.8,137.9-7.6,177.3-7.6c117.2,0,252.2,4.7,312.7,7.6', 'M26.9,143.8c55.1-6.1,126-6.3,162.2-6.1c46.5,0.2,203.9,3.2,268.9,6.4' ],
+		underline: [ 'M7.7,145.6C109,125,299.9,116.2,401,121.3c42.1,2.2,87.6,11.8,87.3,25.7' ]
+	},
+
+	getDefaultSettings: function() {
+		var settings = {
+			animationDelay: 2500,
+			//letters effect
+			lettersDelay: 50,
+			//typing effect
+			typeLettersDelay: 150,
+			selectionDuration: 500,
+			//clip effect
+			revealDuration: 600,
+			revealAnimationDelay: 1500
+		};
+
+		settings.typeAnimationDelay = settings.selectionDuration + 800;
+
+		settings.selectors = {
+			headline: '.elementor-headline',
+			dynamicWrapper: '.elementor-headline-dynamic-wrapper'
+		};
+
+		settings.classes = {
+			dynamicText: 'elementor-headline-dynamic-text',
+			textActive: 'elementor-headline-text-active',
+			textInactive: 'elementor-headline-text-inactive',
+			letters: 'elementor-headline-letters',
+			animationIn: 'elementor-headline-animation-in',
+			typeSelected: 'elementor-headline-typing-selected'
+		};
+
+		return settings;
+	},
+
+	getDefaultElements: function() {
+		var selectors = this.getSettings( 'selectors' ),
+			classes = this.getSettings( 'classes' );
+
+		return {
+			$headline: this.$element.find( selectors.headline ),
+			$dynamicWrapper: this.$element.find( selectors.dynamicWrapper )
+		};
+	},
+
+	getNextWord: function( $word ) {
+		return $word.is( ':last-child' ) ? $word.parent().children().eq( 0 ) : $word.next();
+	},
+
+	switchWord: function( $oldWord, $newWord ) {
+		$oldWord
+			.removeClass( 'elementor-headline-text-active' )
+			.addClass( 'elementor-headline-text-inactive' );
+
+		$newWord
+			.removeClass( 'elementor-headline-text-inactive' )
+			.addClass( 'elementor-headline-text-active' );
+	},
+
+	singleLetters: function() {
+		var classes = this.getSettings( 'classes' );
+
+		this.elements.$dynamicText.each( function() {
+			var $word = jQuery( this ),
+				letters = $word.text().split( '' ),
+				isActive = $word.hasClass( classes.textActive );
+
+			$word.empty();
+
+			letters.forEach( function( letter ) {
+				var $i = jQuery( '<i>' ).text( letter );
+
+				if ( isActive ) {
+					$i.addClass( classes.animationIn );
+				}
+
+				$word.append( $i );
+			} );
+
+			$word.css( 'opacity', 1 );
+		} );
+	},
+
+	showLetter: function( $letter, $word, bool, duration ) {
+		var self = this,
+			classes = this.getSettings( 'classes' ),
+			animationType = self.getElementSettings( 'animation_type' );
+
+		$letter.addClass( classes.animationIn );
+
+		if ( ! $letter.is( ':last-child' ) ) {
+			setTimeout( function() {
+				self.showLetter( $letter.next(), $word, bool, duration );
+			}, duration );
+		} else {
+			if ( ! bool ) {
+				setTimeout( function() {
+					self.hideWord( $word );
+				}, self.getSettings( 'animationDelay' ) );
+			}
+		}
+	},
+
+	hideLetter: function( $letter, $word, bool, duration ) {
+		var self = this,
+			settings = this.getSettings();
+
+		$letter.removeClass( settings.classes.animationIn );
+
+		if ( ! $letter.is( ':last-child' ) ) {
+			setTimeout( function() {
+				self.hideLetter( $letter.next(), $word, bool, duration );
+			}, duration );
+		} else if ( bool ) {
+			setTimeout( function() {
+				self.hideWord( self.getNextWord( $word ) );
+			}, self.getSettings( 'animationDelay' ) );
+		}
+	},
+
+	showWord: function( $word, $duration ) {
+		var self = this,
+			settings = self.getSettings(),
+			animationType = self.getElementSettings( 'animation_type' );
+
+		if ( 'typing' === animationType ) {
+			self.showLetter( $word.find( 'i' ).eq( 0 ), $word, false, $duration );
+
+			$word
+				.addClass( settings.classes.textActive )
+				.removeClass( settings.classes.textInactive );
+		} else if ( 'clip' === animationType ) {
+			self.elements.$dynamicWrapper.animate( { 'width': $word.width() + 10 }, settings.revealDuration, function() {
+				setTimeout( function() {
+					self.hideWord( $word );
+				}, settings.revealAnimationDelay );
+			} );
+		}
+	},
+
+	hideWord: function( $word ) {
+		var self = this,
+			settings = self.getSettings(),
+			classes = settings.classes,
+			animationType = self.getElementSettings( 'animation_type' ),
+			nextWord = self.getNextWord( $word );
+
+		if ( 'typing' === animationType ) {
+			self.elements.$dynamicWrapper.addClass( classes.typeSelected );
+
+			setTimeout( function() {
+				self.elements.$dynamicWrapper.removeClass( classes.typeSelected );
+
+				$word
+					.addClass( settings.classes.textInactive )
+					.removeClass( classes.textActive )
+					.children( 'i' )
+					.removeClass( classes.animationIn );
+			}, settings.selectionDuration );
+			setTimeout( function() {
+				self.showWord( nextWord, settings.typeLettersDelay );
+			}, settings.typeAnimationDelay );
+
+		} else if ( self.elements.$headline.hasClass( classes.letters ) ) {
+			var bool = $word.children( 'i' ).length >= nextWord.children( 'i' ).length;
+
+			self.hideLetter( $word.find( 'i' ).eq( 0 ), $word, bool, settings.lettersDelay );
+
+			self.showLetter( nextWord.find( 'i' ).eq( 0 ), nextWord, bool, settings.lettersDelay );
+
+		} else if ( 'clip' === animationType ) {
+			self.elements.$dynamicWrapper.animate( { width: '2px' }, settings.revealDuration, function() {
+				self.switchWord( $word, nextWord );
+				self.showWord( nextWord );
+			} );
+		} else {
+			self.switchWord( $word, nextWord );
+
+			setTimeout( function() {
+				self.hideWord( nextWord );
+			}, settings.animationDelay );
+		}
+	},
+
+	animateHeadline: function() {
+		var self = this,
+			animationType = self.getElementSettings( 'animation_type' ),
+			$dynamicWrapper = self.elements.$dynamicWrapper;
+
+		if ( 'clip' === animationType ) {
+			$dynamicWrapper.width( $dynamicWrapper.width() + 10 );
+		} else if ( 'typing' !== animationType ) {
+			//assign to .elementor-headline-dynamic-wrapper the width of its longest word
+			var width = 0;
+
+			self.elements.$dynamicText.each( function() {
+				var wordWidth = jQuery( this ).width();
+
+				if ( wordWidth > width ) {
+					width = wordWidth;
+				}
+			} );
+
+			$dynamicWrapper.css( 'width', width );
+		}
+
+		//trigger animation
+		setTimeout( function() {
+			self.hideWord( self.elements.$dynamicText.eq( 0 ) );
+		}, self.getSettings( 'animationDelay' ) );
+	},
+
+	getSvgPaths: function( pathName ) {
+		var pathsInfo = this.svgPaths[ pathName ],
+			$paths = jQuery();
+
+		pathsInfo.forEach( function( pathInfo ) {
+			$paths = $paths.add( jQuery( '<path>', { d: pathInfo } ) );
+		} );
+
+		return $paths;
+	},
+
+	fillWords: function() {
+		var elementSettings = this.getElementSettings(),
+			classes = this.getSettings( 'classes' ),
+			$dynamicWrapper = this.elements.$dynamicWrapper;
+
+		if ( 'rotate' === elementSettings.headline_style ) {
+			var rotatingText = elementSettings.rotating_text.split( '\n' );
+
+			rotatingText.forEach( function( word, index ) {
+				var $dynamicText = jQuery( '<span>', { 'class': classes.dynamicText } ).text( word );
+
+				if ( ! index ) {
+					$dynamicText.addClass( classes.textActive );
+				}
+
+				$dynamicWrapper.append( $dynamicText );
+			} );
+		} else {
+			var $dynamicText = jQuery( '<span>', { 'class': classes.dynamicText + ' ' + classes.textActive } ).text( elementSettings.highlighted_text ),
+				$svg = jQuery( '<svg>', {
+					xmlns: 'http://www.w3.org/2000/svg',
+					viewBox: '0 0 500 150',
+					preserveAspectRatio: 'none'
+				} ).html( this.getSvgPaths( elementSettings.marker ) );
+
+			$dynamicWrapper.append( $dynamicText, $svg[0].outerHTML );
+		}
+
+		this.elements.$dynamicText = $dynamicWrapper.children( '.' + classes.dynamicText );
+	},
+
+	rotateHeadline: function() {
+		var settings = this.getSettings();
+
+		//insert <i> element for each letter of a changing word
+		if ( this.elements.$headline.hasClass( settings.classes.letters ) ) {
+			this.singleLetters();
+		}
+
+		//initialise headline animation
+		this.animateHeadline();
+	},
+
+	initHeadline: function() {
+		if ( 'rotate' === this.getElementSettings( 'headline_style' ) ) {
+			this.rotateHeadline();
+		}
+	},
+
+	onInit: function() {
+		elementorFrontend.Module.prototype.onInit.apply( this, arguments );
+
+		this.fillWords();
+
+		this.initHeadline();
+	}
+} );
+
+module.exports = function( $scope ) {
+	new AnimatedHeadlineHandler( { $element: $scope } );
+};
+
+},{}],4:[function(require,module,exports){
 module.exports = function() {
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/countdown.default', require( './handlers/countdown' ) );
 };
 
-},{"./handlers/countdown":3}],3:[function(require,module,exports){
+},{"./handlers/countdown":5}],5:[function(require,module,exports){
 var Countdown = function( $countdown, endTime, $ ) {
 	var timeInterval,
 		elements = {
@@ -106,7 +409,7 @@ module.exports = function( $scope, $ ) {
 	new Countdown( $element, date, $ );
 };
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function() {
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/form.default', require( './handlers/form' ) );
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/subscribe.default', require( './handlers/form' ) );
@@ -114,7 +417,7 @@ module.exports = function() {
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/form.default', require( './handlers/recaptcha' ) );
 };
 
-},{"./handlers/form":7,"./handlers/recaptcha":8}],5:[function(require,module,exports){
+},{"./handlers/form":9,"./handlers/recaptcha":10}],7:[function(require,module,exports){
 module.exports = elementorFrontend.Module.extend( {
 	getDefaultSettings: function() {
 		return {
@@ -144,7 +447,7 @@ module.exports = elementorFrontend.Module.extend( {
 	}
 } );
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = elementorFrontend.Module.extend( {
 
 	getDefaultSettings: function() {
@@ -297,7 +600,7 @@ module.exports = elementorFrontend.Module.extend( {
 	}
 } );
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var FormSender = require( './form-sender' ),
 	Form = FormSender.extend();
 
@@ -308,7 +611,7 @@ module.exports = function( $scope ) {
 	new RedirectAction( { $element: $scope } );
 };
 
-},{"./form-redirect":5,"./form-sender":6}],8:[function(require,module,exports){
+},{"./form-redirect":7,"./form-sender":8}],10:[function(require,module,exports){
 module.exports = function( $scope, $ ) {
 	var $element = $scope.find( '.elementor-g-recaptcha:last' );
 
@@ -343,7 +646,108 @@ module.exports = function( $scope, $ ) {
 	} );
 };
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+module.exports = function() {
+	if ( jQuery.fn.smartmenus ) {
+		// Override the default stupid detection
+		jQuery.SmartMenus.prototype.isCSSOn = function() {
+			return true;
+		};
+
+		if ( elementorFrontend.config.is_rtl  ) {
+			jQuery.fn.smartmenus.defaults.rightToLeftSubMenus = true;
+		}
+	}
+
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/nav-menu.default', require( './handlers/nav-menu' ) );
+};
+
+},{"./handlers/nav-menu":12}],12:[function(require,module,exports){
+var MenuHandler = elementorFrontend.Module.extend( {
+	getDefaultSettings: function() {
+		return {
+			selectors: {
+				menu: '.elementor-nav-menu',
+				menuContainer: '.elementor-nav-menu__container',
+				menuToggle: '.elementor-menu-toggle',
+				offCanvasCloseButton: '.elementor-nav-menu--close'
+			}
+		};
+	},
+
+	getDefaultElements: function() {
+		var selectors = this.getSettings( 'selectors' ),
+			elements = {};
+
+		elements.$menu = this.$element.find( selectors.menu );
+
+		elements.$menuContainer = this.$element.find( selectors.menuContainer );
+
+		elements.$menuToggle = this.$element.find( selectors.menuToggle );
+
+		elements.$offCanvasCloseButton = this.$element.find( selectors.offCanvasCloseButton );
+
+		return elements;
+	},
+
+	bindEvents: function() {
+		var self = this;
+
+		self.elements.$menuToggle.on( 'click', function() {
+			self.elements.$menuToggle.toggleClass( 'elementor-active' );
+
+			self.toggleMenu( self.elements.$menuToggle.hasClass( 'elementor-active' ) );
+		} );
+
+		self.elements.$offCanvasCloseButton.on( 'click', this.closeOffCanvas );
+	},
+
+	toggleMenu: function( show ) {
+		var elementSettings = this.getElementSettings();
+
+		if ( 'off_canvas' === elementSettings.mobile_layout || ! elementSettings.toggle  ) {
+			return;
+		}
+
+		var $menuContainer = this.elements.$menuContainer;
+
+		if ( show ) {
+			$menuContainer.hide().slideDown( 250, function() {
+				$menuContainer.css( 'display', '' );
+			} );
+		} else {
+			$menuContainer.show().slideUp( 250, function() {
+				$menuContainer.css( 'display', '' );
+			} );
+		}
+	},
+
+	closeOffCanvas: function() {
+		this.elements.$menuToggle.removeClass( 'elementor-active' );
+	},
+
+	onInit: function() {
+		elementorFrontend.Module.prototype.onInit.apply( this, arguments );
+
+		this.elements.$menu.smartmenus( {
+			subIndicatorsText: '',
+			subIndicatorsPos: 'append'
+		} );
+
+		this.toggleMenu( false );
+
+		var ESC_KEY = 27,
+			hotKeysManager = elementorFrontend.isEditMode() ? elementor.hotKeys : elementorFrontend.hotKeys;
+
+		hotKeysManager.addHotKeyHandler( ESC_KEY, 'closeOffCanvas' + this.getID(), { handle: this.closeOffCanvas } );
+	}
+} );
+
+module.exports = function( $scope ) {
+	new MenuHandler( { $element: $scope } );
+};
+
+},{}],13:[function(require,module,exports){
 module.exports = function() {
 	var PostsModule = require( './handlers/posts' ),
 		CardsModule = require( './handlers/cards' ),
@@ -366,7 +770,7 @@ module.exports = function() {
 	} );
 };
 
-},{"./handlers/cards":10,"./handlers/portfolio":11,"./handlers/posts":12}],10:[function(require,module,exports){
+},{"./handlers/cards":14,"./handlers/portfolio":15,"./handlers/posts":16}],14:[function(require,module,exports){
 var PostsHandler = require( './posts' );
 
 module.exports = PostsHandler.extend( {
@@ -375,7 +779,7 @@ module.exports = PostsHandler.extend( {
 	}
 } );
 
-},{"./posts":12}],11:[function(require,module,exports){
+},{"./posts":16}],15:[function(require,module,exports){
 var PostsHandler = require( './posts' );
 
 module.exports = PostsHandler.extend( {
@@ -416,7 +820,7 @@ module.exports = PostsHandler.extend( {
 		itemGap += itemGap / ( settings.colsCount - 1 );
 
 		return {
-			left: ( itemWidth + itemGap ) * ( itemIndex % settings.colsCount ),
+			start: ( itemWidth + itemGap ) * ( itemIndex % settings.colsCount ),
 			top: ( itemHeight + itemGap ) * Math.floor( itemIndex / settings.colsCount )
 		};
 	},
@@ -525,17 +929,21 @@ module.exports = PostsHandler.extend( {
 				currentOffset = self.getOffset( $activeOrShownItems.index( $item ), itemWidth, itemHeight ),
 				requiredOffset = self.getOffset( $shownItems.index( $item ), itemWidth, itemHeight );
 
-			if ( currentOffset.left === requiredOffset.left && currentOffset.top === requiredOffset.top ) {
+			if ( currentOffset.start === requiredOffset.start && currentOffset.top === requiredOffset.top ) {
 				return;
 			}
 
-			requiredOffset.left -= currentOffset.left;
+			requiredOffset.start -= currentOffset.start;
 
 			requiredOffset.top -= currentOffset.top;
 
+			if ( elementorFrontend.config.is_rtl ) {
+				requiredOffset.start *= -1;
+			}
+
 			$item.css( {
 				transitionDuration: '',
-				transform: 'translate3d(' + requiredOffset.left + 'px, ' + requiredOffset.top + 'px, 0)'
+				transform: 'translate3d(' + requiredOffset.start + 'px, ' + requiredOffset.top + 'px, 0)'
 			} );
 		} );
 
@@ -549,12 +957,16 @@ module.exports = PostsHandler.extend( {
 					transitionDuration: settings.transitionDuration + 'ms'
 				} );
 
-				requiredOffset.left -= currentOffset.left;
+				requiredOffset.start -= currentOffset.start;
 
 				requiredOffset.top -= currentOffset.top;
 
+				if ( elementorFrontend.config.is_rtl ) {
+					requiredOffset.start *= -1;
+				}
+
 				setTimeout( function() {
-					$item.css( 'transform', 'translate3d(' + requiredOffset.left + 'px, ' + requiredOffset.top + 'px, 0)' );
+					$item.css( 'transform', 'translate3d(' + requiredOffset.start + 'px, ' + requiredOffset.top + 'px, 0)' );
 				} );
 			} );
 		} );
@@ -634,7 +1046,7 @@ module.exports = PostsHandler.extend( {
 	}
 } );
 
-},{"./posts":12}],12:[function(require,module,exports){
+},{"./posts":16}],16:[function(require,module,exports){
 module.exports = elementorFrontend.Module.extend( {
 	getElementName: function() {
 		return 'posts';
@@ -819,14 +1231,14 @@ module.exports = elementorFrontend.Module.extend( {
 	}
 } );
 
-},{}],13:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports = function() {
 	if ( ! elementorFrontend.isEditMode() ) {
 		elementorFrontend.hooks.addAction( 'frontend/element_ready/share-buttons.default', require( './handlers/share-buttons' ) );
 	}
 };
 
-},{"./handlers/share-buttons":14}],14:[function(require,module,exports){
+},{"./handlers/share-buttons":18}],18:[function(require,module,exports){
 var HandlerModule = elementorFrontend.Module,
 	ShareButtonsHandler;
 
@@ -888,12 +1300,12 @@ module.exports = function( $scope ) {
 	new ShareButtonsHandler( { $element: $scope } );
 };
 
-},{}],15:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports = function() {
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/slides.default', require( './handlers/slides' ) );
 };
 
-},{"./handlers/slides":16}],16:[function(require,module,exports){
+},{"./handlers/slides":20}],20:[function(require,module,exports){
 module.exports = function( $scope, $ ) {
 	var $slider = $scope.find( '.elementor-slides' );
 

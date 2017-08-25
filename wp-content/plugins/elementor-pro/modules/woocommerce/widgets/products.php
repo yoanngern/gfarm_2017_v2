@@ -3,8 +3,8 @@ namespace ElementorPro\Modules\Woocommerce\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
-use ElementorPro\Modules\PanelPostsControl\Controls\Group_Control_Posts;
-use ElementorPro\Modules\PanelPostsControl\Module;
+use ElementorPro\Modules\QueryControl\Controls\Group_Control_Posts;
+use ElementorPro\Modules\QueryControl\Module;
 use ElementorPro\Modules\Woocommerce\Skins;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -118,6 +118,7 @@ class Products extends Widget_Base {
 					'popularity' => __( 'Popularity', 'elementor-pro' ),
 					'rating' => __( 'Rating', 'elementor-pro' ),
 					'rand' => __( 'Random', 'elementor-pro' ),
+					'menu_order' => __( 'Menu Order', 'elementor-pro' ),
 				],
 			]
 		);

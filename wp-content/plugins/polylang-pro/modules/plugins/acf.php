@@ -2,6 +2,7 @@
 
 /**
  * Manages compatibility with Advanced Custom Fields Pro
+ * Version tested 5.6.0
  *
  * @since 2.0
  */
@@ -12,7 +13,8 @@ class PLL_ACF {
 	 * @since 2.0
 	 */
 	public function init() {
-		if ( ! class_exists( 'acf' ) ) {
+		// The function acf_get_value() is not defined in ACF 4
+		if ( ! class_exists( 'acf' ) || ! function_exists( 'acf_get_value' ) ) {
 			return;
 		}
 
@@ -28,6 +30,11 @@ class PLL_ACF {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
 		add_action( 'wp_ajax_acf_post_lang_choice', array( $this, 'acf_post_lang_choice' ) );
+
+		add_filter( 'acf/load_value', array( $this, 'load_value' ), 10, 3 );
+		add_filter( 'acf/load_value/type=repeater', array( $this, 'load_value' ), 20, 3 );
+		add_filter( 'acf/load_value/type=flexible_content', array( $this, 'load_value' ), 20, 3 );
+		add_action( 'pll_save_term', array( $this, 'save_term' ), 20, 3 ); // After Polylang
 	}
 
 	/**
@@ -35,7 +42,7 @@ class PLL_ACF {
 	 *
 	 * @since 2.1
 	 */
-	public function remove_sync( $post_type ) {
+	public function remove_sync() {
 		foreach ( pll_languages_list() as $lang ) {
 			remove_action( "pll_before_post_translation_{$lang}", array( PLL()->sync_post->buttons[ $lang ], 'add_icon' ) );
 		}
@@ -83,7 +90,7 @@ class PLL_ACF {
 	 * @since 2.0
 	 *
 	 * @param string $post_type
-	 * @param object $post      current post object
+	 * @param object $post      Current post object
 	 */
 	public function add_meta_boxes( $post_type, $post ) {
 		if ( 'post-new.php' === $GLOBALS['pagenow'] && isset( $_GET['from_post'], $_GET['new_lang'] ) && PLL()->model->is_translated_post_type( $post_type ) ) {
@@ -100,7 +107,6 @@ class PLL_ACF {
 						acf_delete_cache( 'get_fields/ID=' . $post->ID ); // Since ACF 5.4.0
 					}
 				}
-
 			} else {
 				$this->copy_post_metas( (int) $_GET['from_post'], $post->ID, $lang->slug );
 			}
@@ -130,17 +136,27 @@ class PLL_ACF {
 	 *
 	 * @since 2.0
 	 *
-	 * @param int    $from id of the post from which we copy informations
-	 * @param int    $to   id of the post to which we paste informations
-	 * @param string $lang language slug
-	 * @param bool $sync true if it is synchronization, false if it is a copy, defaults to false
+	 * @param int    $from Id of the post from which we copy informations
+	 * @param int    $to   Id of the post to which we paste informations
+	 * @param string $lang Language slug
+	 * @param bool   $sync True if it is synchronization, false if it is a copy, defaults to false
 	 */
 	public function copy_post_metas( $from, $to, $lang, $sync = false ) {
 		if ( ( ! $sync || in_array( 'post_meta', PLL()->options['sync'] ) || PLL()->sync_post->are_synchronized( $from, $to ) ) && $fields = get_field_objects( $from ) ) {
+			if ( pll_is_translated_post_type( 'acf-field-group' ) ) {
+				$references = $this->translate_fields_references( $from, $lang );
+			}
+
 			foreach ( $fields as $field ) {
 				$translated_fields = array();
-				$this->translate_fields( $translated_fields, $field['value'], $field['name'], $field, $lang );
+				$value = acf_get_value( $from, $field );
+				$this->translate_fields( $translated_fields, $value, $field['name'], $field, $lang );
 				foreach ( $translated_fields as $key => $value ) {
+					if ( pll_is_translated_post_type( 'acf-field-group' ) && 0 === strpos( $key, '_' ) ) {
+						if ( isset( $references[ $value ] ) ) {
+							$value = $references[ $value ];
+						}
+					}
 					update_post_meta( $to, $key, $value );
 				}
 			}
@@ -153,100 +169,165 @@ class PLL_ACF {
 	 *
 	 * @since 2.0
 	 *
-	 * @param array         $r     list of translated custom fields
-	 * @param array|object  $value custom field value
-	 * @param string        $name  custom field name
-	 * @param array         $field ACF field or subfield
-	 * @param string        $lang  language slug
+	 * @param array  $r     Reference to a flat list of translated custom fields
+	 * @param mixed  $value Custom field value
+	 * @param string $name  Custom field name
+	 * @param array  $field ACF field or subfield
+	 * @param string $lang  Language slug
+	 * @param string $ret   Whether to return 'all' values or only 'translated' values
+	 * @return array Hierarchical list of custom fields values
 	 */
-	protected function translate_fields( &$r, $value, $name, $field, $lang ) {
+	protected function translate_fields( &$r, $value, $name, $field, $lang, $ret = 'translated' ) {
 		if ( empty( $value ) ) {
 			return;
 		}
+
+		$r[ '_' . $name ] = $field['key'];
+		$return = array();
 
 		switch ( $field['type'] ) {
 			case 'image':
 			case 'file':
 				if ( PLL()->options['media_support'] ) {
-					// Nothing to do if return_format is url
-					if ( 'array' === $field['return_format'] && $tr_id = pll_get_post( $value['ID'], $lang ) ) {
-						$r[ $name ] = $tr_id;
-					} elseif ( 'id' === $field['return_format'] && $tr_id = pll_get_post( $value, $lang ) ) {
-						$r[ $name ] = $tr_id;
+					if ( $tr_id = pll_get_post( $value, $lang ) ) {
+						$return = $r[ $name ] = $tr_id;
 					}
+				} else {
+					$return = $value;
 				}
-			break;
-
-			case 'post_object':
-				if ( 'object' === $field['return_format'] && $tr_id = pll_get_post( $value->ID, $lang ) ) {
-					$r[ $name ] = $tr_id;
-				} elseif ( 'id' === $field['return_format'] && $tr_id = pll_get_post( $value, $lang ) ) {
-					$r[ $name ] = $tr_id;
-				}
-			break;
+				break;
 
 			case 'gallery':
 				if ( PLL()->options['media_support'] ) {
-					$tr_ids = array();
 					foreach ( $value as $img ) {
-						if ( $tr_id = pll_get_post( $img['ID'], $lang ) ) {
-							$tr_ids[] = (string) $tr_id; // ACF stores strings instead of int
+						if ( $tr_id = pll_get_post( $img, $lang ) ) {
+							$return[] = (string) $tr_id; // ACF stores strings instead of int
 						}
 					}
-					$r[ $name ] = $tr_ids;
+					$r[ $name ] = $return;
+				} else {
+					$return = $value;
 				}
-			break;
+				break;
 
+			case 'post_object':
 			case 'relationship':
-				$tr_ids = array();
-				foreach ( $value as $p ) {
-					if ( 'object' === $field['return_format'] && $tr_id = pll_get_post( $p->ID, $lang ) ) {
-						$tr_ids[] = (string) $tr_id; // ACF stores strings instead of int
-					} elseif ( 'id' === $field['return_format'] && $tr_id = pll_get_post( $p, $lang ) ) {
-						$tr_ids[] = (string) $tr_id;
+				if ( is_numeric( $value ) && $tr_id = pll_get_post( $value, $lang ) ) {
+					$return = $tr_id;
+				} elseif ( is_array( $value ) ) {
+					foreach ( $value as $p ) {
+						if ( $tr_id = pll_get_post( $p, $lang ) ) {
+							$return[] = (string) $tr_id; // ACF stores strings instead of int
+						}
 					}
 				}
-				$r[ $name ] = $tr_ids;
-			break;
+				$r[ $name ] = $return;
+				break;
 
 			case 'page_link':
-			// FIXME need to translate the link
-			break;
-
-			case 'taxonomy':
-				$tr_ids = array();
-				foreach ( $value as $t ) {
-						if ( 'object' === $field['return_format'] && $tr_id = pll_get_term( $t->term_id, $lang ) ) {
-						$tr_ids[] = (string) $tr_id; // ACF stores strings instead of int
-					} elseif ( 'id' === $field['return_format'] && $tr_id = pll_get_term( $t, $lang ) ) {
-						$tr_ids[] = (string) $tr_id;
-					}
-				}
-				$r[ $name ] = $tr_ids;
-			break;
-
-			case 'repeater':
-				foreach ( $value as $row => $sub_fields ) {
-					foreach ( $field['sub_fields'] as $sub_field ) {
-						if ( ! empty( $sub_fields[ $sub_field['name'] ] ) ) {
-							$this->translate_fields( $r, $sub_fields[ $sub_field['name'] ], $name . '_' . $row . '_' . $sub_field['name'], $sub_field, $lang );
+				// FIXME need to translate the archive links
+				if ( is_numeric( $value ) && $tr_id = pll_get_post( $value, $lang ) ) {
+					// Unique translated post
+					$return = $tr_id;
+				} elseif ( is_array( $value ) ) {
+					// Multiple choice
+					foreach ( $value as $p ) {
+						if ( is_numeric( $p ) && $tr_id = pll_get_post( $p, $lang ) ) {
+							$return[] = (string) $tr_id; // ACF stores strings instead of int
+						} else {
+							$return[] = $p; // Archive
 						}
 					}
 				}
-			break;
+				$r[ $name ] = $return;
+				break;
 
-			case 'flexible_content':
-				foreach ( $value as $row => $sub_fields ) {
-					foreach ( $field['layouts'] as $layout ) {
-						foreach ( $layout['sub_fields'] as $sub_field ) {
-							if ( ! empty( $sub_fields[ $sub_field['name'] ] ) ) {
-								$this->translate_fields( $r, $sub_fields[ $sub_field['name'] ], $name . '_' . $row . '_' . $sub_field['name'], $sub_field, $lang );
+			case 'taxonomy':
+				if ( pll_is_translated_taxonomy( $field['taxonomy'] ) ) {
+					if ( is_numeric( $value ) && $tr_id = pll_get_term( $value, $lang ) ) {
+						$return = $tr_id;
+					} elseif ( is_array( $value ) ) {
+						foreach ( $value as $t ) {
+							if ( $tr_id = pll_get_term( $t, $lang ) ) {
+								$return[] = (string) $tr_id; // ACF stores strings instead of int
 							}
 						}
 					}
+				} else {
+					$return = $value;
 				}
-			break;
+				$r[ $name ] = $return;
+				break;
+
+			case 'group':
+				foreach ( $value as $id => $sub_value ) {
+					if ( $field = acf_get_field( $id ) ) {
+						$sub[ $id ] = $this->translate_fields( $r, $sub_value, $name . '_' . $field['name'], $field, $lang, $ret );
+					} else {
+						$sub[ $id ] = $sub_value;
+					}
+				}
+				$return[] = $sub;
+
+				if ( 'all' === $ret ) {
+					$r[ $name ] = '';
+				}
+
+				break;
+
+			case 'repeater':
+				$return = $this->translate_sub_fields( $r, $value, $name, $field, $lang, $ret );
+				if ( 'all' === $ret ) {
+					$r[ $name ] = count( $value );
+				}
+				break;
+
+			case 'flexible_content':
+				$return = $this->translate_sub_fields( $r, $value, $name, $field, $lang, $ret );
+				if ( 'all' === $ret ) {
+					$r[ $name ] = array_fill( 0, count( $value ), '' );
+				}
+				break;
+
+			default:
+				if ( 'all' === $ret ) {
+					$return = $r[ $name ] = $value;
+				}
+				break;
 		}
+
+		return empty( $return ) ? $value : $return;
+	}
+
+	/**
+	 * Translate repeater and flexible content sub fields
+	 *
+	 * @since 2.2
+	 *
+	 * @param array  $r     Reference to a flat list of translated custom fields
+	 * @param mixed  $value Custom field value
+	 * @param string $name  Custom field name
+	 * @param array  $field ACF field or subfield
+	 * @param string $lang  Language slug
+	 * @param string $ret   Whether to return 'all' values or only 'translated' values
+	 * @return array Hierarchical list of custom fields values
+	 */
+	protected function translate_sub_fields( &$r, $value, $name, $field, $lang, $ret ) {
+		$return = array();
+
+		foreach ( $value as $row => $sub_fields ) {
+			$sub = array();
+			foreach ( $sub_fields as $id => $sub_value ) {
+				if ( $field = acf_get_field( $id ) ) {
+					$sub[ $id ] = $this->translate_fields( $r, $sub_value, $name . '_' . $row . '_' . $field['name'], $field, $lang, $ret );
+				} else {
+					$sub[ $id ] = $sub_value;
+				}
+			}
+			$return[] = $sub;
+		}
+
+		return $return;
 	}
 
 	/**
@@ -254,8 +335,8 @@ class PLL_ACF {
 	 *
 	 * @since 2.0
 	 *
-	 * @param array $post_types  list of post types
-	 * @param bool  $is_settings true when displaying the list of custom post types in Polylang settings
+	 * @param array $post_types  List of post types
+	 * @param bool  $is_settings True when displaying the list of custom post types in Polylang settings
 	 * @return array
 	 */
 	public function get_post_types( $post_types, $is_settings ) {
@@ -296,5 +377,182 @@ class PLL_ACF {
 		}
 
 		$x->send();
+	}
+
+	/**
+	 * Copy and possibly translate custom fields when creating a new term translation
+	 *
+	 * @since 2.2
+	 *
+	 * @param mixed  $value   Custom field value of the source term
+	 * @param string $post_id Expects term_{$term_id} for a term
+	 * @param array  $field   Custom field
+	 * @return mixed
+	 */
+	public function load_value( $value, $post_id, $field ) {
+		if ( 'term_0' === $post_id && isset( $_GET['taxonomy'], $_GET['from_tag'], $_GET['new_lang'] ) && taxonomy_exists( $_GET['taxonomy'] ) && $lang = PLL()->model->get_language( $_GET['new_lang'] ) ) {
+
+			$tr_id = acf_get_term_post_id( $_GET['taxonomy'], (int) $_GET['from_tag'] );
+			$fields = get_field_objects( $tr_id );
+			$keys = array_keys( $fields );
+
+			/** This filter is documented in modules/sync/admin-sync.php */
+			$keys = array_unique( apply_filters( 'pll_copy_term_metas', $keys, false, (int) $_GET['from_tag'], 0, $lang->slug ) );
+
+			// Second test to load the values of subfields of accepted fields
+			if ( in_array( $field['name'], $keys ) || preg_match( '#^(' . implode( '|', $keys ) . ')_(.+)#', $field['name'] ) ) {
+				$value = acf_get_value( $tr_id, $field );
+				$empty = null; // Parameter 1 is useless in this context
+				$value = $this->translate_fields( $empty, $value, $field['name'], $field, $lang );
+
+				if ( pll_is_translated_post_type( 'acf-field-group' ) ) {
+					$references = $this->translate_fields_references( $tr_id, $lang->slug );
+					$this->translate_references_in_value( $value, $references );
+				}
+			}
+		}
+		return $value;
+	}
+
+	/**
+	 * Recursively translates the references in value for repeaters and flexible content
+	 *
+	 * @since 2.2
+	 *
+	 * @param array $value      Reference to a custom field value
+	 * @param array $references List of custom fields references with source as key and translation as value
+	 */
+	protected function translate_references_in_value( &$value, $references ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $row => $sub_fields ) {
+				if ( is_array( $sub_fields ) ) {
+					foreach ( $sub_fields as $id => $sub_value ) {
+						if ( is_array( $sub_value ) ) {
+							$this->translate_references_in_value( $sub_value, $references );
+						}
+						if ( isset( $references[ $id ] ) ) {
+							$value[ $row ][ $references[ $id ] ] = $sub_value;
+							unset( $value[ $row ][ $id ] );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Synchronizes term metas in translations
+	 *
+	 * @since 2.2
+	 *
+	 * @param int    $term_id      Term id
+	 * @param string $taxonomy     Taxonomy name of the term
+	 * @param array  $translations Translations of the term
+	 */
+	public function save_term( $term_id, $taxonomy, $translations ) {
+		// Synchronize metas in translations
+		foreach ( $translations as $lang => $tr_id ) {
+			if ( $tr_id && $tr_id !== $term_id ) {
+				$this->copy_term_metas( $term_id, $tr_id, $lang, $taxonomy );
+			}
+		}
+	}
+
+	/**
+	 * Synchronize term metas
+	 *
+	 * @since 2.2
+	 *
+	 * @param int    $from     Id of the term from which we copy informations
+	 * @param int    $to       Id of the term to which we paste informations
+	 * @param string $lang     Language slug
+	 * @param bool   $taxonomy taxonomy name
+	 */
+	public function copy_term_metas( $from, $to, $lang, $taxonomy ) {
+		$from = acf_get_term_post_id( $taxonomy, (int) $from );
+
+		if ( in_array( 'post_meta', PLL()->options['sync'] ) && $fields = get_field_objects( $from ) ) {
+			if ( pll_is_translated_post_type( 'acf-field-group' ) ) {
+				$references = $this->translate_fields_references( $from, $lang );
+			}
+
+			foreach ( $fields as $field ) {
+				$translated_fields = array();
+				$value = acf_get_value( $from, $field );
+				$this->translate_fields( $translated_fields, $value, $field['name'], $field, $lang, 'all' );
+				foreach ( $translated_fields as $key => $value ) {
+					if ( pll_is_translated_post_type( 'acf-field-group' ) && 0 === strpos( $key, '_' ) ) {
+						if ( isset( $references[ $value ] ) ) {
+							$value = $references[ $value ];
+						}
+					}
+					update_term_meta( $to, $key, $value );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Searches for fields having the same name in translated posts
+	 *
+	 * @since 2.2
+	 *
+	 * @param int|string $from Source post id
+	 * @param string     $lang Target language code
+	 * @return array
+	 */
+	protected function translate_fields_references( $from, $lang ) {
+		$fields = get_field_objects( $from );
+
+		foreach ( $fields as $field ) {
+			$tr_group = pll_get_post( $field['parent'], $lang );
+			$tr_fields = acf_get_fields( $tr_group );
+			$this->translate_field_references( $keys, $field, $tr_fields );
+		}
+
+		return $keys;
+	}
+
+	/**
+	 * Loops through sub fields in the recursive search for fields
+	 * having the same name in translated among translated fields groups
+	 *
+	 * @since 2.2
+	 *
+	 * @param array $keys
+	 * @param array $fields
+	 * @param array $tr_fields
+	 */
+	protected function translate_sub_fields_references( &$keys, $fields, $tr_fields ) {
+		foreach ( $fields as $field ) {
+			$this->translate_field_references( $keys, $field, $tr_fields );
+		}
+	}
+
+	/**
+	 * Recursively searches for fields having the same name in translated among translated fields groups
+	 *
+	 * @since 2.2
+	 *
+	 * @param array $keys
+	 * @param array $field
+	 * @param array $tr_fields
+	 */
+	protected function translate_field_references( &$keys, $field, $tr_fields ) {
+		$k = array_search( $field['name'], wp_list_pluck( $tr_fields, 'name' ) );
+		if ( false !== $k ) {
+			$keys[ $field['key'] ] = $tr_fields[ $k ]['key'];
+			if ( ! empty( $field['sub_fields'] ) ) {
+				$this->translate_sub_fields_references( $keys, $field['sub_fields'], $tr_fields[ $k ]['sub_fields'] );
+			}
+
+			if ( ! empty( $field['layouts'] ) ) {
+				foreach ( $field['layouts'] as $row => $layout ) {
+					if ( ! empty( $layout['sub_fields'] ) ) {
+						$this->translate_sub_fields_references( $keys, $layout['sub_fields'], $tr_fields[ $k ]['layouts'][ $row ]['sub_fields'] );
+					}
+				}
+			}
+		}
 	}
 }

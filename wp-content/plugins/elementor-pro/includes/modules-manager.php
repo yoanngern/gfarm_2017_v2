@@ -1,36 +1,24 @@
 <?php
 namespace ElementorPro;
 
+use ElementorPro\Base\Module_Base;
+
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 final class Manager {
-
-	private $_modules = null;
-
-	private function is_module_active( $module_id ) {
-		$module_data = $this->get_module_data( $module_id );
-		if ( $module_data['required'] ) {
-			return true;
-		}
-
-		$options = get_option( 'elementor_pro_active_modules', [] );
-		if ( ! isset( $options[ $module_id ] ) ) {
-			return $module_data['default_activation'];
-		}
-
-		return 'true' === $options[ $module_id ];
-	}
-
-	private function get_module_data( $module_id ) {
-		return isset( $this->_modules[ $module_id ] ) ? $this->_modules[ $module_id ] : false;
-	}
+	/**
+	 * @var Module_Base[]
+	 */
+	private $modules = [];
 
 	public function __construct() {
 		$modules = [
-			'panel-posts-control',
+			'query-control',
 			'posts',
 			'slides',
 			'forms',
+			'animated-headline',
+			//'nav-menu',
 			'pricing',
 			'flip-box',
 			'countdown',
@@ -41,21 +29,34 @@ final class Manager {
 			'library',
 		];
 
-		// Fetch all modules data
-		foreach ( $modules as $module ) {
-			$this->_modules[ $module ] = require ELEMENTOR_PRO_MODULES_PATH . $module . '/module.info.php';
-		}
+		foreach ( $modules as $module_name ) {
+			$class_name = str_replace( '-', ' ', $module_name );
 
-		foreach ( $this->_modules as $module_id => $module_data ) {
-			if ( ! $this->is_module_active( $module_id ) ) {
-				continue;
-			}
-
-			$class_name = str_replace( '-', ' ', $module_id );
 			$class_name = str_replace( ' ', '', ucwords( $class_name ) );
+
 			$class_name = __NAMESPACE__ . '\\Modules\\' . $class_name . '\Module';
 
-			$class_name::instance();
+			/** @var Module_Base $class_name */
+			if ( $class_name::is_active() ) {
+				$this->modules[ $module_name ] = $class_name::instance();
+			}
 		}
+	}
+
+	/**
+	 * @param string $module_name
+	 *
+	 * @return Module_Base|Module_Base[]
+	 */
+	public function get_modules( $module_name ) {
+		if ( $module_name ) {
+			if ( isset( $this->modules[ $module_name ] ) ) {
+				return $this->modules[ $module_name ];
+			}
+
+			return null;
+		}
+
+		return $this->modules;
 	}
 }

@@ -12,6 +12,8 @@ class PLL_Xdata_Subdomain extends PLL_Xdata_Base {
 	 * Constructor
 	 *
 	 * @since 2.0
+	 *
+	 * @param object $polylang
 	 */
 	public function __construct( &$polylang ) {
 		parent::__construct( $polylang );
@@ -118,7 +120,8 @@ class PLL_Xdata_Subdomain extends PLL_Xdata_Base {
 				$_COOKIE[ PLL_COOKIE ],
 				time() + $expiration,
 				COOKIEPATH,
-				parse_url( $this->links_model->home, PHP_URL_HOST )
+				parse_url( $this->links_model->home, PHP_URL_HOST ),
+				is_ssl()
 			);
 		}
 

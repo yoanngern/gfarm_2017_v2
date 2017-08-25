@@ -105,8 +105,8 @@ class PLL_Admin_Share_Term_Slug extends PLL_Share_Term_Slug {
 	 *
 	 * @since 1.9
 	 *
-	 * @param int $term_id
-	 * @param int $tt_id term taxononomy id
+	 * @param int    $term_id
+	 * @param int    $tt_id    Term taxononomy id
 	 * @param string $taxonomy
 	 */
 	public function save_term( $term_id, $tt_id, $taxonomy ) {

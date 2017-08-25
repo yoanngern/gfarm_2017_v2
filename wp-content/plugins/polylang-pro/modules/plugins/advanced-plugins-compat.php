@@ -27,6 +27,9 @@ class PLL_Advanced_Plugins_Compat {
 
 		// Custom Post Type UI
 		add_action( 'pll_init', array( $this->cptui = new PLL_CPTUI(), 'init' ) );
+
+		// The Event Calendar
+		add_action( 'pll_init', array( $this->tec = new PLL_TEC(), 'init' ) );
 	}
 
 	/**
@@ -49,8 +52,8 @@ class PLL_Advanced_Plugins_Compat {
 	 *
 	 * @since 1.9.1
 	 *
-	 * @param array $keys list of custom fields names
-	 * @param bool  $sync true if it is synchronization, false if it is a copy
+	 * @param array $metas List of custom fields names
+	 * @param bool  $sync  True if it is synchronization, false if it is a copy
 	 * @return array
 	 */
 	function fl_builder_copy_post_metas( $metas, $sync ) {
@@ -59,7 +62,7 @@ class PLL_Advanced_Plugins_Compat {
 			'_fl_builder_draft_settings',
 			'_fl_builder_data',
 			'_fl_builder_data_settings',
-			'_fl_builder_enabled'
+			'_fl_builder_enabled',
 		);
 
 		return $sync ? $metas : array_merge( $metas, $bb_metas );
@@ -70,8 +73,8 @@ class PLL_Advanced_Plugins_Compat {
 	 *
 	 * @since 2.1
 	 *
-	 * @param array $keys list of custom fields names
-	 * @param bool  $sync true if it is synchronization, false if it is a copy
+	 * @param array $metas List of custom fields names
+	 * @param bool  $sync  True if it is synchronization, false if it is a copy
 	 * @return array
 	 */
 	function divi_builder_copy_post_metas( $metas, $sync ) {

@@ -460,7 +460,6 @@ class Slides extends Widget_Base {
 				],
 				'default' => [
 					'size' => 400,
-					'unit' => 'px',
 				],
 				'size_units' => [ 'px', 'vh', 'em' ],
 				'selectors' => [
@@ -613,6 +612,12 @@ class Slides extends Widget_Base {
 				'size_units' => [ '%', 'px' ],
 				'default' => [
 					'size' => '66',
+					'unit' => '%',
+				],
+				'tablet_default' => [
+					'unit' => '%',
+				],
+				'mobile_default' => [
 					'unit' => '%',
 				],
 				'selectors' => [

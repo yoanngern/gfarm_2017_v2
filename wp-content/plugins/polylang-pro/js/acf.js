@@ -1,18 +1,18 @@
-jQuery( document ).ready(function( $ ) {
+jQuery( document ).ready( function( $ ) {
 	var fields = new Array();
-	$( '.acf-field-relationship' ).each(function(){
+	$( '.acf-field-relationship' ).each( function(){
 		var field = $( this ).attr( 'data-key' );
 		fields.push( field );
 	});
 
-	$( '.acf-field-taxonomy' ).each(function(){
+	$( '.acf-field-taxonomy' ).each( function(){
 		var field = $( this ).attr( 'data-key' );
 		fields.push( field );
 	});
 
 	if ( 0 != fields.length ) {
 		// ajax for changing the post's language in the languages metabox
-		$( '.post_lang_choice' ).change(function() {
+		$( '.post_lang_choice' ).change( function() {
 			var data = {
 				action:     'acf_post_lang_choice',
 				lang:       $( this ).val(),
@@ -25,7 +25,7 @@ jQuery( document ).ready(function( $ ) {
 				$.each( res.responses, function() {
 					$el = $( '.acf-' + this.what )
 					$el.html( this.data );
-					acf.do_action('ready_field/type=' + $el.data('type'), $el);
+					acf.do_action( 'ready_field/type=' + $el.data( 'type' ), $el );
 				});
 			});
 		});

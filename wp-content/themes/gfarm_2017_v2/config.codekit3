@@ -3655,6 +3655,19 @@
 		"oAP": "\/scss\/advanced\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/header.scssc",
 		"oF": 0
 		},
+	"\/scss\/advanced\/articles_list.scss": {
+		"aP": 0,
+		"bl": 0,
+		"dP": 10,
+		"dS": 0,
+		"ft": 4,
+		"ma": 0,
+		"oA": 1,
+		"oAP": "\/scss\/css\/articles_list.css",
+		"oF": 0,
+		"oS": 0,
+		"uL": 1
+		},
 	"\/scss\/advanced\/content.scss": {
 		"aP": 0,
 		"bl": 0,
@@ -3925,6 +3938,12 @@
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/template-parts\/people\/people_simple.php",
+		"oF": 0
+		},
+	"\/widgets\/articles_list.php": {
+		"ft": 8192,
+		"oA": 2,
+		"oAP": "\/widgets\/articles_list.php",
 		"oF": 0
 		}
 	},

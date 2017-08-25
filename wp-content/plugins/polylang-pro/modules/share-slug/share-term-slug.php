@@ -46,24 +46,27 @@ class PLL_Share_Term_Slug {
 			$the_parent = $term->parent;
 			while ( ! empty( $the_parent ) ) {
 				$parent_term = get_term( $the_parent, $term->taxonomy );
-				if ( is_wp_error( $parent_term ) || empty( $parent_term ) )
+				if ( is_wp_error( $parent_term ) || empty( $parent_term ) ) {
 					break;
+				}
 				$slug .= '-' . $parent_term->slug;
-				if ( ! $this->term_exists( $slug, $lang ) ) // calls our own term_exists
+				if ( ! $this->term_exists( $slug, $lang ) ) { // calls our own term_exists
 					return $slug;
+				}
 
-				if ( empty( $parent_term->parent ) )
+				if ( empty( $parent_term->parent ) ) {
 					break;
+				}
 				$the_parent = $parent_term->parent;
 			}
 		}
 
 		// If we didn't get a unique slug, try appending a number to make it unique.
 		if ( ! empty( $term->term_id ) ) {
-			$query = $wpdb->prepare( "SELECT slug FROM $wpdb->terms WHERE slug = %s AND term_id != %d", $slug, $term->term_id );
+			$query = $wpdb->prepare( "SELECT slug FROM {$wpdb->terms} WHERE slug = %s AND term_id != %d", $slug, $term->term_id );
 		}
 		else {
-			$query = $wpdb->prepare( "SELECT slug FROM $wpdb->terms WHERE slug = %s", $slug );
+			$query = $wpdb->prepare( "SELECT slug FROM {$wpdb->terms} WHERE slug = %s", $slug );
 		}
 
 		if ( $wpdb->get_var( $query ) ) {
@@ -71,7 +74,7 @@ class PLL_Share_Term_Slug {
 			do {
 				$alt_slug = $slug . "-$num";
 				$num++;
-				$slug_check = $wpdb->get_var( $wpdb->prepare( "SELECT slug FROM $wpdb->terms WHERE slug = %s", $alt_slug ) );
+				$slug_check = $wpdb->get_var( $wpdb->prepare( "SELECT slug FROM {$wpdb->terms} WHERE slug = %s", $alt_slug ) );
 			} while ( $slug_check );
 			$slug = $alt_slug;
 		}
@@ -93,8 +96,8 @@ class PLL_Share_Term_Slug {
 	protected function term_exists( $slug, $language, $taxonomy = '', $parent = 0 ) {
 		global $wpdb;
 
-		$select = "SELECT t.term_id FROM $wpdb->terms AS t";
-		$join = " INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id";
+		$select = "SELECT t.term_id FROM {$wpdb->terms} AS t";
+		$join = " INNER JOIN {$wpdb->term_taxonomy} AS tt ON t.term_id = tt.term_id";
 		$join .= $this->model->term->join_clause();
 		$where = $wpdb->prepare( ' WHERE t.slug = %s', $slug );
 		$where .= $this->model->term->where_clause( $this->model->get_language( $language ) );

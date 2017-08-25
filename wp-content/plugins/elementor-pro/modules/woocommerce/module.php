@@ -7,6 +7,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 class Module extends Module_Base {
 
+	public static function is_active() {
+		return function_exists( 'WC' );
+	}
+
 	public function get_name() {
 		return 'woocommerce';
 	}

@@ -64,7 +64,14 @@ class Honeypot_Handler {
 	public function update_controls( Widget_Base $widget ) {
 		$elementor = Plugin::elementor();
 
-		$control_data = $elementor->controls_manager->get_control_from_stack( $widget->get_name(), 'form_fields' );
+		// Check if elementor free is higher than 1.6.0
+		if ( method_exists( $widget, 'get_unique_name' ) ) {
+			$widget_name = $widget->get_unique_name();
+		} else {
+			$widget_name = $widget->get_name();
+		}
+
+		$control_data = $elementor->controls_manager->get_control_from_stack( $widget_name, 'form_fields' );
 
 		if ( is_wp_error( $control_data ) ) {
 			return;
@@ -81,7 +88,7 @@ class Honeypot_Handler {
 			}
 		}
 
-		$elementor->controls_manager->add_control_to_stack( $widget, 'form_fields', $control_data, true );
+		$elementor->controls_manager->update_control_in_stack( $widget, 'form_fields', $control_data );
 	}
 
 	public function __construct() {

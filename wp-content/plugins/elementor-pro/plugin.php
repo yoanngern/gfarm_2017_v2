@@ -18,7 +18,13 @@ class Plugin {
 	/**
 	 * @var Manager
 	 */
-	private $_modules_manager;
+	public $modules_manager;
+
+	private $classes_aliases = [
+		'ElementorPro\Modules\PanelPostsControl\Module' => 'ElementorPro\Modules\QueryControl\Module',
+		'ElementorPro\Modules\PanelPostsControl\Controls\Group_Control_Posts' => 'ElementorPro\Modules\QueryControl\Controls\Group_Control_Posts',
+		'ElementorPro\Modules\PanelPostsControl\Controls\Query' => 'ElementorPro\Modules\QueryControl\Controls\Query',
+	];
 
 	/**
 	 * @deprecated
@@ -87,17 +93,33 @@ class Plugin {
 			return;
 		}
 
-		$filename = strtolower(
-			preg_replace(
-				[ '/^' . __NAMESPACE__ . '\\\/', '/([a-z])([A-Z])/', '/_/', '/\\\/' ],
-				[ '', '$1-$2', '-', DIRECTORY_SEPARATOR ],
-				$class
-			)
-		);
-		$filename = ELEMENTOR_PRO_PATH . $filename . '.php';
+		$has_class_alias = isset( $this->classes_aliases[ $class ] );
 
-		if ( is_readable( $filename ) ) {
-			include( $filename );
+		// Backward Compatibility: Save old class name for set an alias after the new class is loaded
+		if ( $has_class_alias ) {
+			$class_alias_name = $this->classes_aliases[ $class ];
+			$class_to_load = $class_alias_name;
+		} else {
+			$class_to_load = $class;
+		}
+
+		if ( ! class_exists( $class_to_load ) ) {
+			$filename = strtolower(
+				preg_replace(
+					[ '/^' . __NAMESPACE__ . '\\\/', '/([a-z])([A-Z])/', '/_/', '/\\\/' ],
+					[ '', '$1-$2', '-', DIRECTORY_SEPARATOR ],
+					$class_to_load
+				)
+			);
+			$filename = ELEMENTOR_PRO_PATH . $filename . '.php';
+
+			if ( is_readable( $filename ) ) {
+				include( $filename );
+			}
+		}
+
+		if ( $has_class_alias ) {
+			class_alias( $class_alias_name, $class );
 		}
 	}
 
@@ -186,6 +208,16 @@ class Plugin {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		wp_register_script(
+			'smartmenus',
+			ELEMENTOR_PRO_URL . 'assets/lib/smartmenus/jquery.smartmenus' . $suffix . '.js',
+			[
+				'jquery',
+			],
+			'1.0.1',
+			true
+		);
+
+		wp_register_script(
 			'social-share',
 			ELEMENTOR_PRO_URL . 'assets/lib/social-share/social-share' . $suffix . '.js',
 			[
@@ -210,7 +242,7 @@ class Plugin {
 	}
 
 	public function elementor_init() {
-		$this->_modules_manager = new Manager();
+		$this->modules_manager = new Manager();
 
 		$elementor = \Elementor\Plugin::$instance;
 

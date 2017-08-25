@@ -56,7 +56,11 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 	 */
 	protected function toggle_option( $post_type, $active ) {
 		$duplicate_options = get_user_meta( get_current_user_id(), 'pll_duplicate_content', true );
-		$duplicate_options[ $post_type ] = $active;
+		if ( empty( $duplicate_options ) ) {
+			$duplicate_options = array( $post_type => $active );
+		} else {
+			$duplicate_options[ $post_type ] = $active;
+		}
 		return update_user_meta( get_current_user_id(), 'pll_duplicate_content', $duplicate_options );
 	}
 
@@ -112,8 +116,8 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 		}
 
 		$post->post_title = $from_post->post_title;
-		$post->post_excerpt = $this->translate( $from_post->post_excerpt );
-		$post->post_content = $this->translate( $from_post->post_content );
+		$post->post_excerpt = $this->translate_content( $from_post->post_excerpt );
+		$post->post_content = $this->translate_content( $from_post->post_content );
 
 		// Get the shorcodes back
 		$shortcode_tags = $backup;
@@ -128,8 +132,8 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 	 *
 	 * @since 1.9
 	 *
-	 * @param int media id
-	 * @return int translated media id
+	 * @param int $id Media id
+	 * @return int Translated media id
 	 */
 	public function translate_media( $id ) {
 		global $wpdb;
@@ -173,7 +177,7 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 				}
 				$v = implode( ',', $tr_ids );
 			}
-			$out[] = $k . '="' . $v .'"';
+			$out[] = $k . '="' . $v . '"';
 		}
 
 		return '[' . $tag . ' ' . implode( ' ', $out ) . ']';
@@ -199,7 +203,7 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 				$tr_id = $idarr[1] = $this->translate_media( $id );
 				$v = implode( '_', $idarr );
 			}
-			$out[] = $k . '="' . $v .'"';
+			$out[] = $k . '="' . $v . '"';
 		}
 
 		// Translate the caption content
@@ -220,7 +224,7 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 	 * @param string $content text to translate
 	 * @return string translated text
 	 */
-	public function translate( $content ) {
+	public function translate_content( $content ) {
 		$content = do_shortcode( $content ); // translate shorcodes
 
 		$textarr = wp_html_split( $content ); // Since 4.2.3

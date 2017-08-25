@@ -1,8 +1,39 @@
 # Elementor Pro - by Elementor.com
 
+#### 2017-08-22 v1.6.0
+* New! - Added Animated Headline widget
+* New! - Added Hidden filed for Forms widget
+* Tweak! - Added notice to update Elementor to v1.6.5 or higher
+* Fix! - CSS Animations names no longer minified, in order to prevent unexpected conflicts
+
+#### 2017-08-16 v1.5.9
+* Tweak! - Added compatibility for the future release of Elementor v1.7
+* Fix! - Portfolio compatibility for GeneratePress theme
+* Fix! - Portfolio filter compatibility for RTL
+* Fix! - Pagination apply for all posts widget in the page
+* Fix! - Global form widget with MailChimp integration not saving
+
+#### 2017-07-25 v1.5.8
+* Tweak! - Added compatibility for the future release of Elementor v1.6
+* Fix! - Improved backward compatibility for query control rename
+
+#### 2017-07-24 v1.5.7
+* Tweak! - Moved JS render of reCAPTCHA to a separate file
+* Tweak! - Display the label in the reCAPTCHA field for better experience
+* Tweak! - Rename `panel-posts-control` to `query-control` and added fallback support
+* Tweak! - Added compatibility for the future release of Elementor with history feature
+* Fix! - reCAPTCHA preview on the editor
+* Fix! - Manual selection (query control) has stopped working after saving ([#2000](https://github.com/pojome/elementor/issues/1963))
+* Fix! - Added condition for icon size control in Share Buttons widget
+
+#### 2017-07-12 v1.5.6
+* Fix! - Query Control correction for taxonomies ([#1963](https://github.com/pojome/elementor/issues/1963))
+* Fix! – Custom CSS override scheme color in the editor
+* Fix! - Added order by Menu Order for Query Control in WC widget
+* Fix! - Glitch with Flip Box background overlay
+
 #### 2017-07-03 v1.5.5
 * Tweak! - Moved reCAPTCHA render to handler & load only if a form is exist
-* Fix! - Custom CSS override scheme color in the editor
 * Fix! - MailChimp integration: Default number of items returned by API increased to 999
 * Fix! - MailChimp integration: Refresh the groups list if API is changed
 * Fix! - Sorted items in filter bar by A-Z

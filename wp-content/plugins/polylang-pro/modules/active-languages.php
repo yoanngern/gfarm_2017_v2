@@ -33,6 +33,7 @@ class PLL_Active_Languages {
 		// Frontend
 		if ( $polylang instanceof PLL_Frontend ) {
 			add_action( 'wp', array( $this, 'init' ) );
+			add_action( 'rest_api_init', array( $this, 'init' ) );
 			add_filter( 'pll_languages_for_browser_preferences', array( $this, 'remove_inactive_languages' ) );
 		}
 	}
@@ -82,18 +83,22 @@ class PLL_Active_Languages {
 		}
 
 		$active_action = isset( $language->active ) && false === $language->active ?
-			array( 'enable' => sprintf(
-				'<a title="%s" href="%s">%s</a>',
-				esc_attr__( 'Activate this language', 'polylang-pro' ),
-				wp_nonce_url( '?page=mlang&amp;pll_action=enable&amp;noheader=true&amp;lang=' . $language->term_id, 'enable-lang' ),
-				esc_html__( 'Activate', 'polylang' )
-			) ) :
-			array( 'disable' => sprintf(
-				'<a title="%s" href="%s">%s</a>',
-				esc_attr__( 'Deactivate this language', 'polylang-pro' ),
-				wp_nonce_url( '?page=mlang&amp;pll_action=disable&amp;noheader=true&amp;lang=' . $language->term_id, 'disable-lang' ),
-				esc_html__( 'Deactivate', 'polylang' )
-			) );
+			array(
+				'enable' => sprintf(
+					'<a title="%s" href="%s">%s</a>',
+					esc_attr__( 'Activate this language', 'polylang-pro' ),
+					wp_nonce_url( '?page=mlang&amp;pll_action=enable&amp;noheader=true&amp;lang=' . $language->term_id, 'enable-lang' ),
+					esc_html__( 'Activate', 'polylang' )
+				),
+			) :
+			array(
+				'disable' => sprintf(
+					'<a title="%s" href="%s">%s</a>',
+					esc_attr__( 'Deactivate this language', 'polylang-pro' ),
+					wp_nonce_url( '?page=mlang&amp;pll_action=disable&amp;noheader=true&amp;lang=' . $language->term_id, 'disable-lang' ),
+					esc_html__( 'Deactivate', 'polylang' )
+				),
+			);
 
 		return array_merge( $active_action, $actions );
 	}
@@ -153,7 +158,8 @@ class PLL_Active_Languages {
 	 *
 	 * @since 1.9
 	 */
-	public function print_css() { ?>
+	public function print_css() {
+		?>
 		<style type="text/css">
 			#the-list .name {
 				padding-left: 14px;
@@ -167,7 +173,8 @@ class PLL_Active_Languages {
 			#the-list .inactive {
 				background-color: #fef7f1;
 			}
-		</style><?php
+		</style>
+		<?php
 	}
 
 	/**
@@ -188,7 +195,7 @@ class PLL_Active_Languages {
 	 *
 	 * @since 1.9.3
 	 *
-	 * @param array $langages array of PLL_Language objects
+	 * @param array $languages Array of PLL_Language objects
 	 * @return array
 	 */
 	public function remove_inactive_languages( $languages ) {

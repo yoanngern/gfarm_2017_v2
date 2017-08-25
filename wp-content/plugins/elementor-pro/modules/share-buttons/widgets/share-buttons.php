@@ -337,9 +337,18 @@ class Share_Buttons extends Widget_Base {
 				'default' => [
 					'unit' => 'em',
 				],
+				'tablet_default' => [
+					'unit' => 'em',
+				],
+				'mobile_default' => [
+					'unit' => 'em',
+				],
 				'size_units' => [ 'em', 'px' ],
 				'selectors' => [
 					'{{WRAPPER}} .elementor-share-btn__icon i' => 'font-size: {{SIZE}}{{UNIT}};',
+				],
+				'condition' => [
+					'view!' => 'text',
 				],
 			]
 		);
@@ -361,6 +370,12 @@ class Share_Buttons extends Widget_Base {
 					],
 				],
 				'default' => [
+					'unit' => 'em',
+				],
+				'tablet_default' => [
+					'unit' => 'em',
+				],
+				'mobile_default' => [
 					'unit' => 'em',
 				],
 				'size_units' => [ 'em', 'px' ],

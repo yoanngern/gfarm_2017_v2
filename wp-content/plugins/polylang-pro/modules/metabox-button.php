@@ -23,7 +23,6 @@ abstract class PLL_Metabox_Button {
 	 *
 	 * @param string $id id used for css class
 	 * @param array  $args
-	 *
 	 */
 	public function __construct( $id, $args ) {
 		$this->id = $id;

@@ -107,24 +107,27 @@ class PLL_Frontend_Share_Post_Slug extends PLL_Share_Post_Slug {
 			if ( $page->post_name == $revparts[0] ) {
 				$count = 0;
 				$p = $page;
-				while ( $p->post_parent != 0 && isset( $pages[ $p->post_parent ] ) ) {
+				while ( 0 != $p->post_parent && isset( $pages[ $p->post_parent ] ) ) {
 					$count++;
 					$parent = $pages[ $p->post_parent ];
-					if ( ! isset( $revparts[ $count ] ) || $parent->post_name != $revparts[ $count ] )
+					if ( ! isset( $revparts[ $count ] ) || $parent->post_name != $revparts[ $count ] ) {
 						break;
+					}
 					$p = $parent;
 				}
 
-				if ( $p->post_parent == 0 && $count+1 == count( $revparts ) && $p->post_name == $revparts[ $count ] ) {
+				if ( 0 == $p->post_parent && count( $revparts ) == $count + 1 && $p->post_name == $revparts[ $count ] ) {
 					$foundid = $page->ID;
-					if ( $page->post_type == $post_type )
+					if ( $page->post_type == $post_type ) {
 						break;
+					}
 				}
 			}
 		}
 
-		if ( $foundid )
+		if ( $foundid ) {
 			return get_post( $foundid, $output );
+		}
 
 		return null;
 	}

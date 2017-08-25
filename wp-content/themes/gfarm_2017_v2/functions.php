@@ -12,6 +12,15 @@ add_action( 'wp_enqueue_scripts', 'themeslug_enqueue_style' );
 add_action( 'wp_enqueue_scripts', 'themeslug_enqueue_script' );
 
 
+add_action( 'elementor/widgets/widgets_registered', function () {
+
+	require( 'widgets/articles_list.php' );
+	\Elementor\Plugin::instance()->widgets_manager->register_widget_type( new ArticlesListWidget() );
+
+} );
+
+
+
 /**
  * Event
  */
@@ -118,6 +127,9 @@ add_image_size( 'avatar', 200, 200, true );
 add_image_size( 'ad', 360, 200, true );
 add_image_size( 'ad_title', 267, 74, true );
 add_image_size( 'full_hd', 1920, 1080, true );
+
+
+
 
 
 /**

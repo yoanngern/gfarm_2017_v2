@@ -14,6 +14,8 @@ abstract class PLL_Xdata_Base {
 	 * Constructor
 	 *
 	 * @since 2.0
+	 *
+	 * @param object $polylang
 	 */
 	public function __construct( &$polylang ) {
 		$this->options = &$polylang->options;
@@ -118,7 +120,8 @@ abstract class PLL_Xdata_Base {
 	/**
 	 * Stores data to transfer in a user session
 	 *
-	 * @param
+	 * @param string $redirect Url to redirect to
+	 * @param bool   $nologin  True if we shoul not attempt to login
 	 * @return string session key
 	 */
 	protected function create_data_session( $redirect, $nologin ) {
@@ -226,7 +229,7 @@ abstract class PLL_Xdata_Base {
 		$session_manager = new $session_manager_class;
 		$data = $session_manager->get( wp_unslash( $_GET['key'] ) );
 
-		if ( ! empty( $data['user_id'] ) && ! empty( $data['token'] )  && time() < $data['time'] + 2 * MINUTE_IN_SECONDS ) {
+		if ( ! empty( $data['user_id'] ) && ! empty( $data['token'] ) && time() < $data['time'] + 2 * MINUTE_IN_SECONDS ) {
 			$manager = WP_Session_Tokens::get_instance( $data['user_id'] );
 			// FIXME Use auth_cookie_expiration to sync the expiration time?
 			wp_set_auth_cookie( $data['user_id'], false, '', $data['token'] ); // WP 4.3+

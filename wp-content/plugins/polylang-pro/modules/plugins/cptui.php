@@ -2,7 +2,7 @@
 
 /**
  * Manages compatibility with Custom Post Type UI
- * Version tested: 1.4.3
+ * Version tested: 1.5.4
  *
  * @since 2.1
  */
@@ -18,13 +18,12 @@ class PLL_CPTUI {
 			return;
 		}
 
+		add_filter( 'cptui_pre_register_post_type', array( $this, 'translate_strings' ) );
+		add_filter( 'cptui_pre_register_taxonomy', array( $this, 'translate_strings' ) );
+
 		if ( PLL() instanceof PLL_Frontend ) {
-			if ( PLL()->options['force_lang'] ) {
-				// Translate strings
-				add_filter( 'option_cptui_post_types', array( $this, 'translate_strings' ) );
-				add_filter( 'option_cptui_taxonomies', array( $this, 'translate_strings' ) );
-			} else {
-				// Special case when the language is set from the content
+			if ( ! PLL()->options['force_lang'] ) {
+				// Special case when the language is set from the content as CPT and taxonomies are registered before the language is defined
 				add_action( 'pll_language_defined', array( $this, 'pll_language_defined' ) );
 			}
 		} else {
@@ -46,20 +45,17 @@ class PLL_CPTUI {
 	 *
 	 * @since 2.1
 	 *
-	 * @param array $objects Array of CPT UI post types or taxonomies
+	 * @param array $args Array of post types or taxonomies arguments
 	 * @return array
 	 */
-	public function translate_strings( $objects ) {
-		foreach ( $objects as $name => $obj ) {
-			$objects[ $name ]['label'] = pll__( $obj['label'] );
-			$objects[ $name ]['singular_label'] = pll__( $obj['singular_label'] );
-			$objects[ $name ]['description'] = pll__( $obj['description'] );
+	public function translate_strings( $args ) {
+		$args['description'] = pll__( $args['description'] );
 
-			foreach ( $obj['labels'] as $key => $label ) {
-				$objects[ $name ]['labels'][ $key ] = pll__( $label );
-			}
+		foreach ( $args['labels'] as $key => $label ) {
+			$args['labels'][ $key ] = pll__( $label );
 		}
-		return $objects;
+
+		return $args;
 	}
 
 	/**
@@ -73,6 +69,8 @@ class PLL_CPTUI {
 	public function translate_registered_types( $types, $cptui_types ) {
 		foreach ( $types as $name => $type ) {
 			if ( in_array( $name, $cptui_types ) ) {
+				$type->label = pll__( $type->labels );
+				$type->description = pll__( $type->description );
 				foreach ( $type->labels as $key => $label ) {
 					$type->labels->$key = pll__( $type->labels->$key );
 				}
@@ -86,8 +84,8 @@ class PLL_CPTUI {
 	 * @since 2.1
 	 */
 	public function pll_language_defined() {
-		$this->translate_registered_types( $GLOBALS['wp_post_types'], array_keys( get_option( 'cptui_post_types' ) ) );
-		$this->translate_registered_types( $GLOBALS['wp_taxonomies'], array_keys( get_option( 'cptui_taxonomies' ) ) );
+		$this->translate_registered_types( $GLOBALS['wp_post_types'], array_keys( get_option( 'cptui_post_types', array() ) ) );
+		$this->translate_registered_types( $GLOBALS['wp_taxonomies'], array_keys( get_option( 'cptui_taxonomies', array() ) ) );
 	}
 
 	/**

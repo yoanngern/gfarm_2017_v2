@@ -14,6 +14,7 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 	 * @since 1.9
 	 *
 	 * @param object $slugs_model
+	 * @param object $curlang     Current language
 	 */
 	public function __construct( &$slugs_model, &$curlang ) {
 		parent::__construct( $slugs_model );
@@ -184,7 +185,7 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 		}
 
 		if ( isset( $this->slugs_model->translated_slugs['paged'] ) ) {
-			$wp_rewrite->pagination_base = $this->slugs_model->translated_slugs['paged']['translations'][ $this->curlang->slug ];
+			$wp_rewrite->pagination_base = $this->slugs_model->get_translated_slug( 'paged', $this->curlang->slug );
 		}
 	}
 
@@ -223,7 +224,7 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 	 */
 	public function add_paged_to_link( $_url, $url, $page ) {
 		if ( isset( $this->slugs_model->translated_slugs['paged'] ) ) {
-			$slug = $this->slugs_model->translated_slugs['paged']['translations'][ $this->curlang->slug ];
+			$slug = $this->slugs_model->get_translated_slug( 'paged', $this->curlang->slug );
 			return user_trailingslashit( trailingslashit( $url ) . $slug . '/' . $page, 'paged' );
 		}
 		return $_url;

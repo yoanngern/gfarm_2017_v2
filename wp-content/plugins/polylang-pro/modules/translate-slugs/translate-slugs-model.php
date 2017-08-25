@@ -12,6 +12,8 @@ class PLL_Translate_Slugs_Model {
 	 * Constructor
 	 *
 	 * @since 1.9
+	 *
+	 * @param object $polylang
 	 */
 	public function __construct( &$polylang ) {
 		$this->model = &$polylang->model;
@@ -88,9 +90,9 @@ class PLL_Translate_Slugs_Model {
 	 */
 	public function translate_slug( $link, $lang, $type ) {
 		if ( ! empty( $lang ) && isset( $this->translated_slugs[ $type ] ) ) {
-			$link = str_replace(
-				'/' . $this->translated_slugs[ $type ]['slug'] . '/',
-				'/' . $this->translated_slugs[ $type ]['translations'][ $lang->slug ] . '/',
+			$link = preg_replace(
+				'#\/' . $this->translated_slugs[ $type ]['slug'] . '(\/|$)#',
+				'/' . $this->get_translated_slug( $type, $lang->slug ) . '$1',
 				$link
 			);
 		}
@@ -113,8 +115,8 @@ class PLL_Translate_Slugs_Model {
 			$slugs[] = $this->translated_slugs[ $type ]['slug'];
 
 			$link = preg_replace(
-				'#\/(' . implode( '|', array_unique( $slugs ) ) . ')\/#',
-				'/' . $this->translated_slugs[ $type ]['translations'][ $lang->slug ] . '/',
+				'#\/(' . implode( '|', array_unique( $slugs ) ) . ')(\/|$)#',
+				'/' . $this->translated_slugs[ $type ]['translations'][ $lang->slug ] . '$2',
 				$link
 			);
 		}
@@ -264,15 +266,21 @@ class PLL_Translate_Slugs_Model {
 	/**
 	 * Returns the rewrite rule pattern for the new slug
 	 *
-	 * @ince 1.8
+	 * @since 1.9
+	 * @since 2.2 Add the $capture parameter
 	 *
-	 * @param string $type type of slug
+	 * @param string $type    type of slug
+	 * @param bool   $capture whether the slugs must be captured, defaults to false
 	 * @return string the pattern
 	 */
-	protected function get_translated_slugs_pattern( $type ) {
-		$slugs = $this->translated_slugs[ $type ]['translations'];
+	protected function get_translated_slugs_pattern( $type, $capture = false ) {
 		$slugs[] = $this->translated_slugs[ $type ]['slug'];
-		return '(' . implode( '|', array_unique( $slugs ) ) . ')/';
+
+		foreach ( array_keys( $this->translated_slugs[ $type ]['translations'] ) as $lang ) {
+			$slugs[] = $this->get_translated_slug( $type, $lang );
+		}
+
+		return ( $capture ? '(' : '(?:' ) . implode( '|', array_unique( $slugs ) ) . ')/';
 	}
 
 	/**
@@ -294,12 +302,8 @@ class PLL_Translate_Slugs_Model {
 
 		foreach ( $rules as $key => $rule ) {
 			if ( false !== $found = strpos( $key, $old ) ) {
-				$new_key = 0 === $found ?  str_replace( $old, $new, $key ) : str_replace( '/' . $old, '/' . $new, $key );
-				$newrules[ $new_key ] = str_replace(
-					array( '[8]', '[7]', '[6]', '[5]', '[4]', '[3]', '[2]', '[1]' ),
-					array( '[9]', '[8]', '[7]', '[6]', '[5]', '[4]', '[3]', '[2]' ),
-					$rule
-				); // Hopefully it is sufficient!
+				$new_key = 0 === $found ? str_replace( $old, $new, $key ) : str_replace( '/' . $old, '/' . $new, $key );
+				$newrules[ $new_key ] = $rule;
 			} else {
 				$newrules[ $key ] = $rule;
 			}
@@ -322,7 +326,7 @@ class PLL_Translate_Slugs_Model {
 		if ( isset( $formats[0] ) && is_array( $formats[0] ) ) {
 			foreach ( $formats[0] as $format ) {
 				if ( isset( $this->translated_slugs[ 'post-format-' . $format ] ) ) {
-					$new_slug = '/' . $this->get_translated_slugs_pattern( 'post-format-' . $format );
+					$new_slug = '/' . $this->get_translated_slugs_pattern( 'post-format-' . $format, true );
 					foreach ( $rules as $key => $rule ) {
 						$newrules[ str_replace( '/([^/]+)/', $new_slug, $key ) ] = str_replace( '$matches[1]', $format, $rule );
 					}
@@ -348,33 +352,12 @@ class PLL_Translate_Slugs_Model {
 		foreach ( $rules as $key => $rule ) {
 			if ( $cpts && preg_match( $cpts, $rule, $matches ) && ! strpos( $rule, 'name=' ) && ( $post_type = $matches[1] ) && isset( $this->translated_slugs[ 'archive_' . $post_type ] ) ) {
 				$new_slug = $this->get_translated_slugs_pattern( 'archive_' . $post_type );
-
-				$newrules[ str_replace( $this->translated_slugs[ 'archive_' . $post_type ]['slug'] . '/', $new_slug, $key ) ] = str_replace(
-					array( '[8]', '[7]', '[6]', '[5]', '[4]', '[3]', '[2]', '[1]' ),
-					array( '[9]', '[8]', '[7]', '[6]', '[5]', '[4]', '[3]', '[2]' ),
-					$rule
-				); // Hopefully it is sufficient!
+				$newrules[ str_replace( $this->translated_slugs[ 'archive_' . $post_type ]['slug'] . '/', $new_slug, $key ) ] = $rule;
 			} else {
 				$newrules[ $key ] = $rule;
 			}
 		}
 		return $newrules;
-	}
-
-	/**
-	 * Generates a reverse array of [$i]
-	 *
-	 * @since 1.9
-	 *
-	 * @param int $start
-	 * @param int $end
-	 * @return array
-	 */
-	protected function range( $start, $end ) {
-		foreach ( range( $start, $end ) as $i ) {
-			$arr[] = "[$i]";
-		}
-		return array_reverse( $arr );
 	}
 
 	/**
@@ -397,18 +380,10 @@ class PLL_Translate_Slugs_Model {
 
 		foreach ( $rules as $key => $rule ) {
 			if ( strpos( $key, '/page/' ) && $count = preg_match_all( '#\[\d\]|\$\d#', $rule ) ) {
-				$newrules[ str_replace( '/' . $old, '/' . $new, $key ) ] = str_replace(
-					$this->range( $count, 8 ),
-					$this->range( $count + 1, 9 ),
-					$rule
-				); // Hopefully it is sufficient!
+				$newrules[ str_replace( '/' . $old, '/' . $new, $key ) ] = $rule;
 			} elseif ( 0 === strpos( $key, 'page/' ) && $count = preg_match_all( '#\[\d\]|\$\d#', $rule ) ) {
 				// Special case for root
-				$newrules[ str_replace( $old, $new, $key ) ] = str_replace(
-					$this->range( $count, 8 ),
-					$this->range( $count + 1, 9 ),
-					$rule
-				);
+				$newrules[ str_replace( $old, $new, $key ) ] = $rule;
 			} else {
 				$newrules[ $key ] = $rule;
 			}
@@ -472,7 +447,7 @@ class PLL_Translate_Slugs_Model {
 	public function sanitize_string_translation( $translation, $name, $context ) {
 		if ( 0 === strpos( $name, 'slug_' ) ) {
 			// Inspired by category base sanitization
-			$translation = preg_replace('#/+#', '/', str_replace( '#', '', $translation ) );
+			$translation = preg_replace( '#/+#', '/', str_replace( '#', '', $translation ) );
 			$translation = trim( $translation, '/' );
 			$translation = esc_url_raw( $translation );
 			$translation = str_replace( 'http://', '', $translation );
@@ -487,6 +462,26 @@ class PLL_Translate_Slugs_Model {
 	 */
 	public function clean_cache() {
 		delete_transient( 'pll_translated_slugs' );
+	}
+
+	/**
+	 * Get the translated slug.
+	 *
+	 * Encoding the paged slug is necessary to prevent the WordPress redirect_canonical
+	 * function to wrongly redirect to a 404 page
+	 *
+	 * @since 2.2
+	 *
+	 * @param string $type Type of slug to translate
+	 * @param string $lang Language slug
+	 * @return string
+	 */
+	public function get_translated_slug( $type, $lang ) {
+		$translation = $this->translated_slugs[ $type ]['translations'][ $lang ];
+		if ( 'paged' === $type && false === strpos( $translation, '%' ) ) {
+			$translation = implode( '/', array_map( 'rawurlencode', explode( '/', $translation ) ) );
+		}
+		return $translation;
 	}
 }
 

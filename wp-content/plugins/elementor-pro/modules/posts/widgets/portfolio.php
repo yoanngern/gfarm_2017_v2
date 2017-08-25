@@ -6,8 +6,8 @@ use Elementor\Group_Control_Typography;
 use Elementor\Scheme_Color;
 use Elementor\Scheme_Typography;
 use Elementor\Widget_Base;
-use ElementorPro\Modules\PanelPostsControl\Controls\Group_Control_Posts;
-use ElementorPro\Modules\PanelPostsControl\Module;
+use ElementorPro\Modules\QueryControl\Controls\Group_Control_Posts;
+use ElementorPro\Modules\QueryControl\Module;
 use Elementor\Controls_Manager;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -172,15 +172,15 @@ class Portfolio extends Widget_Base {
 				'label' => __( 'Title HTML Tag', 'elementor-pro' ),
 				'type' => Controls_Manager::SELECT,
 				'options' => [
-					'h1' => __( 'H1', 'elementor-pro' ),
-					'h2' => __( 'H2', 'elementor-pro' ),
-					'h3' => __( 'H3', 'elementor-pro' ),
-					'h4' => __( 'H4', 'elementor-pro' ),
-					'h5' => __( 'H5', 'elementor-pro' ),
-					'h6' => __( 'H6', 'elementor-pro' ),
-					'div' => __( 'div', 'elementor-pro' ),
-					'span' => __( 'span', 'elementor-pro' ),
-					'p' => __( 'p', 'elementor-pro' ),
+					'h1' => 'H1',
+					'h2' => 'H2',
+					'h3' => 'H3',
+					'h4' => 'H4',
+					'h5' => 'H5',
+					'h6' => 'H6',
+					'div' => 'div',
+					'span' => 'span',
+					'p' => 'p',
 				],
 				'default' => 'h3',
 				'condition' => [

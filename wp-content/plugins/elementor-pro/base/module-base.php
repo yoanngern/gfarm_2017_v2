@@ -44,6 +44,10 @@ abstract class Module_Base {
 		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'elementor-pro' ), '1.0.0' );
 	}
 
+	public static function is_active() {
+		return true;
+	}
+
 	public static function class_name() {
 		return get_called_class();
 	}

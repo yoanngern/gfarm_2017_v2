@@ -101,6 +101,19 @@ class Recaptcha_Handler {
 		register_setting( Settings::PAGE_ID, $field_id );
 	}
 
+	public function localize_settings( $settings ) {
+		$settings = array_replace_recursive( $settings, [
+			'forms' => [
+				'recaptcha' => [
+					'enabled' => self::is_enabled(),
+					'site_key' => self::get_site_key(),
+					'setup_message' => self::get_setup_message(),
+				]
+			],
+		] );
+		return $settings;
+	}
+
 	public function register_scripts() {
 		wp_register_script( 'elementor-recaptcha-api', 'https://www.google.com/recaptcha/api.js?render=explicit' );
 	}
@@ -221,14 +234,25 @@ class Recaptcha_Handler {
 		return $field_types;
 	}
 
+	public function filter_field_item( $item ) {
+		if ( 'recaptcha' === $item['field_type'] ) {
+			$item['field_label'] = false;
+		}
+
+		return $item;
+	}
+
 	public function __construct() {
 		$this->register_scripts();
 
 		add_filter( 'elementor_pro/forms/field_types', [ $this, 'add_field_type' ] );
 		add_action( 'elementor_pro/forms/render_field/recaptcha', [ $this, 'render_field' ], 10, 3 );
+		add_filter( 'elementor_pro/forms/render/item', [ $this, 'filter_field_item' ] );
+		add_filter( 'elementor_pro/editor/localize_settings', [ $this, 'localize_settings' ] );
 
 		if ( self::is_enabled() ) {
 			add_action( 'elementor_pro/forms/validation', [ $this, 'validation' ], 10, 2 );
+			add_action( 'elementor/preview/enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		}
 
 		if ( is_admin() ) {

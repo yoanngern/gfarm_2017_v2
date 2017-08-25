@@ -13,6 +13,9 @@ class PLL_Sync_Post_Button extends PLL_Metabox_Button {
 	 * Constructor
 	 *
 	 * @since 2.1
+	 *
+	 * @param object $polylang
+	 * @param object $language
 	 */
 	public function __construct( &$polylang, $language ) {
 		$args = array(
@@ -21,7 +24,7 @@ class PLL_Sync_Post_Button extends PLL_Metabox_Button {
 			'deactivate' => __( "Don't synchronize this post", 'polylang-pro' ),
 			'class'      => 'dashicons-before dashicons-controls-repeat',
 			'before'     => '<td class="pll-sync-column pll-column-icon">',
-			'after'      => '</td>'
+			'after'      => '</td>',
 		);
 
 		parent::__construct( "pll_sync_post[{$language->slug}]", $args );

@@ -41,7 +41,7 @@ class Form extends Form_Base {
 			'url' => __( 'URL', 'elementor-pro' ),
 			'checkbox' => __( 'Checkbox', 'elementor-pro' ),
 			'radio' => __( 'Radio', 'elementor-pro' ),
-			'recaptcha' => __( 'reCAPTCHA', 'elementor-pro' ),
+			'hidden' => __( 'Hidden', 'elementor-pro' ),
 		];
 
 		$field_types = apply_filters( 'elementor_pro/forms/field_types', $field_types );
@@ -68,17 +68,18 @@ class Form extends Form_Base {
 				'label' => __( 'Label', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXT,
 				'default' => '',
-				'conditions' => [
-					'terms' => [
-						[
-							'name' => 'field_type',
-							'operator' => '!in',
-							'value' => [
-								'recaptcha',
-							],
-						],
-					],
-				],
+			]
+		);
+
+		$repeater->add_control(
+			'field_value',
+			[
+				'label' => __( 'Value', 'elementor-pro' ),
+				'type' => Controls_Manager::TEXT,
+				'default' => '',
+				'condition' => [
+					'field_type' => 'hidden',
+				]
 			]
 		);
 
@@ -124,6 +125,7 @@ class Form extends Form_Base {
 							'value' => [
 								'checkbox',
 								'recaptcha',
+								'hidden',
 							],
 						],
 					],
@@ -203,6 +205,7 @@ class Form extends Form_Base {
 							'name' => 'field_type',
 							'operator' => '!in',
 							'value' => [
+								'hidden',
 								'recaptcha',
 							],
 						],
@@ -1115,6 +1118,11 @@ class Form extends Form_Base {
 					$this->form_fields_render_attributes( $item_index, $instance, $item );
 
 					$item = apply_filters( 'elementor_pro/forms/render/item', $item, $item_index, $this );
+
+					if ( 'hidden' === $item['field_type'] ) {
+						$item['field_label'] = false;
+						$this->add_render_attribute( 'input' . $item_index, 'value', $item['field_value'] );
+					}
 				?>
 				<div <?php echo $this->get_render_attribute_string( 'field-group' . $item_index ); ?>>
 					<?php
@@ -1140,6 +1148,7 @@ class Form extends Form_Base {
 						case 'url':
 						case 'password':
 						case 'tel':
+						case 'hidden':
 						case 'number':
 						case 'search':
 							$this->add_render_attribute( 'input' . $item_index, 'class', 'elementor-field-textual' );
@@ -1250,15 +1259,6 @@ class Form extends Form_Base {
 								}
 								break;
 
-								case 'recaptcha':
-									inputField += '<div class="elementor-field">';
-									<?php if ( Recaptcha_Handler::is_enabled() ) { ?>
-										inputField += '<div class="elementor-g-recaptcha' + itemClasses + '" data-sitekey="<?php echo Recaptcha_Handler::get_site_key() ?>" data-theme="' + item.recaptcha_style + '" data-size="' + item.recaptcha_size + '"></div>';
-									<?php } else { ?>
-										inputField += '<div class="elementor-alert"><?php echo esc_attr( Recaptcha_Handler::get_setup_message() ); ?></div>';
-									<?php } ?>
-									inputField += '</div>';
-								break;
 							case 'text':
 							case 'email':
 							case 'url':

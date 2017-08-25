@@ -1,4 +1,4 @@
-/*! elementor-pro - v1.5.5 - 03-07-2017 */
+/*! elementor-pro - v1.6.0 - 22-08-2017 */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var EditorModule = function() {
 	var self = this;
@@ -39,7 +39,7 @@ var ElementorPro = Marionette.Application.extend( {
 	modules: {},
 
 	initModules: function() {
-		var PanelPostsControl = require( 'modules/panel-posts-control/assets/js/editor' ),
+		var QueryControl = require( 'modules/query-control/assets/js/editor' ),
 			Forms = require( 'modules/forms/assets/js/editor' ),
 			Library = require( 'modules/library/assets/js/editor' ),
 			CustomCSS = require( 'modules/custom-css/assets/js/editor' ),
@@ -49,7 +49,7 @@ var ElementorPro = Marionette.Application.extend( {
 			ShareButtons = require( 'modules/share-buttons/assets/js/editor/editor' );
 
 		this.modules = {
-			panelPostsControl: new PanelPostsControl(),
+			queryControl: new QueryControl(),
 			forms: new Forms(),
 			library: new Library(),
 			customCSS: new CustomCSS(),
@@ -105,7 +105,7 @@ window.elementorPro = new ElementorPro();
 
 elementorPro.start();
 
-},{"modules/custom-css/assets/js/editor":4,"modules/flip-box/assets/js/editor/editor":6,"modules/forms/assets/js/editor":7,"modules/global-widget/assets/js/editor/editor":12,"modules/library/assets/js/editor":18,"modules/panel-posts-control/assets/js/editor":20,"modules/share-buttons/assets/js/editor/editor":22,"modules/slides/assets/js/editor":23}],3:[function(require,module,exports){
+},{"modules/custom-css/assets/js/editor":4,"modules/flip-box/assets/js/editor/editor":6,"modules/forms/assets/js/editor":7,"modules/global-widget/assets/js/editor/editor":13,"modules/library/assets/js/editor":19,"modules/query-control/assets/js/editor":21,"modules/share-buttons/assets/js/editor/editor":23,"modules/slides/assets/js/editor":24}],3:[function(require,module,exports){
 var Module = require( 'elementor-utils/module' );
 
 module.exports = Module.extend( {
@@ -157,7 +157,7 @@ module.exports = Module.extend( {
 		var self = this;
 
 		elementor.channels.editor.on( 'section:activated', function( sectionName, editor ) {
-			var model = editor.getOption( 'editedElementView' ).model,
+			var model = editor.getOption( 'editedElementView' ).getEditModel(),
 				currentElementType = model.get( 'elType' ),
 				_arguments = arguments;
 
@@ -174,7 +174,7 @@ module.exports = Module.extend( {
 	}
 } );
 
-},{"elementor-utils/module":25}],4:[function(require,module,exports){
+},{"elementor-utils/module":26}],4:[function(require,module,exports){
 var EditorModule = require( 'elementor-pro/editor/editor-module' );
 
 module.exports = EditorModule.extend( {
@@ -207,7 +207,7 @@ module.exports = function() {
 			customCSS = model.get( 'settings' ).get( 'custom_css' );
 
 		if ( customCSS ) {
-			css += customCSS.replace( /selector/g, '.elementor-element .elementor-element-' + view.model.id );
+			css += customCSS.replace( /selector/g, '.elementor-element.elementor-element-' + view.model.id );
 		}
 
 		return css;
@@ -256,17 +256,19 @@ module.exports = EditorModule.extend( {
 	onElementorInit: function() {
 		var ReplyToField = require( './editor/reply-to-field' ),
 			Mailchimp = require( './editor/mailchimp' ),
+			Recaptcha = require( './editor/recaptcha' ),
 			Shortcode = require( './editor/shortcode' );
 
 		this.replyToField = new ReplyToField();
 		this.mailchimp = new Mailchimp( 'form' );
 		this.shortcode = new Shortcode( 'form' );
+		this.recaptcha = new Recaptcha( 'form' );
 
 		elementor.addControlView( 'Fields_map', require( './editor/fields-map-control' ) );
 	}
 } );
 
-},{"./editor/fields-map-control":8,"./editor/mailchimp":9,"./editor/reply-to-field":10,"./editor/shortcode":11,"elementor-pro/editor/editor-module":1}],8:[function(require,module,exports){
+},{"./editor/fields-map-control":8,"./editor/mailchimp":9,"./editor/recaptcha":10,"./editor/reply-to-field":11,"./editor/shortcode":12,"elementor-pro/editor/editor-module":1}],8:[function(require,module,exports){
 module.exports = elementor.modules.controls.Repeater.extend( {
 	onBeforeRender: function() {
 		 this.$el.hide();
@@ -450,6 +452,41 @@ module.exports = ElementEditorModule.extend( {
 } );
 
 },{"elementor-pro/editor/element-editor-module":3}],10:[function(require,module,exports){
+var ElementEditorModule = require( 'elementor-pro/editor/element-editor-module' );
+
+module.exports = ElementEditorModule.extend( {
+
+	renderField: function( inputField, item ) {
+		var config = elementorPro.config.forms.recaptcha;
+		inputField += '<div class="elementor-field">';
+
+		if ( config.enabled ) {
+			inputField += '<div class="elementor-g-recaptcha' + _.escape( item.css_classes ) + '" data-sitekey="' + config.site_key + '" data-theme="' + item.recaptcha_style + '" data-size="' + item.recaptcha_size + '"></div>';
+		} else {
+			inputField += '<div class="elementor-alert">' + config.setup_message + '</div>';
+		}
+
+		inputField += '</div>';
+
+		return inputField;
+
+	},
+
+	filterItem: function( item ) {
+		if ( 'recaptcha' === item.field_type ) {
+			item.field_label = false;
+		}
+
+		return item;
+	},
+
+	onInit: function() {
+		elementor.hooks.addFilter( 'elementor_pro/forms/content_template/item', this.filterItem );
+		elementor.hooks.addFilter( 'elementor_pro/forms/content_template/field/recaptcha', this.renderField, 10, 2 );
+	}
+} );
+
+},{"elementor-pro/editor/element-editor-module":3}],11:[function(require,module,exports){
 module.exports = function() {
 	var editor,
 		editedModel,
@@ -536,7 +573,7 @@ module.exports = function() {
 	init();
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var ElementEditorModule = require( 'elementor-pro/editor/element-editor-module' );
 
 module.exports = ElementEditorModule.extend( {
@@ -609,7 +646,7 @@ module.exports = ElementEditorModule.extend( {
 	}
 } );
 
-},{"elementor-pro/editor/element-editor-module":3}],12:[function(require,module,exports){
+},{"elementor-pro/editor/element-editor-module":3}],13:[function(require,module,exports){
 var EditorModule = require( 'elementor-pro/editor/editor-module' );
 
 module.exports =  EditorModule.extend( {
@@ -659,6 +696,10 @@ module.exports =  EditorModule.extend( {
 	},
 
 	registerTemplateType: function() {
+		elementor.config.widgets.global = {
+			title: elementor.translate( 'global' )
+		};
+
 		elementor.templates.registerTemplateType( 'widget', {
 			showInLibrary: false,
 			saveDialog: {
@@ -766,12 +807,21 @@ module.exports =  EditorModule.extend( {
 				var settings = data[0].settings,
 					settingsModel = globalModel.get( 'settings' );
 
+				// Don't track it in History
+				if ( elementor.history ) {
+					elementor.history.history.setActive( false );
+				}
+
 				settingsModel.handleRepeaterData( settings );
 
 				settingsModel.set( settings );
 
 				if ( callback ) {
 					callback( globalModel );
+				}
+
+				if ( elementor.history ) {
+					elementor.history.history.setActive( true );
 				}
 			}
 		} );
@@ -797,6 +847,13 @@ module.exports =  EditorModule.extend( {
 	},
 
 	onWidgetTemplateSaved: function( data ) {
+		if ( elementor.history ) {
+			elementor.history.history.startItem( {
+				title: elementor.config.widgets[ data.widgetType ].title,
+				type: elementorPro.translate( 'linked_to_global' )
+			} );
+		}
+
 		var widgetModel = elementor.templates.getLayout().modalContent.currentView.model,
 			widgetModelIndex = widgetModel.collection.indexOf( widgetModel );
 
@@ -822,10 +879,14 @@ module.exports =  EditorModule.extend( {
 		panel.setPage( 'elements' );
 
 		panel.getCurrentPageView().activateTab( 'global' );
+
+		if ( elementor.history ) {
+			elementor.history.history.endItem();
+		}
 	}
 } );
 
-},{"./global-templates-view":13,"./panel-page":15,"./widget-model":16,"./widget-view":17,"elementor-pro/editor/editor-module":1}],13:[function(require,module,exports){
+},{"./global-templates-view":14,"./panel-page":16,"./widget-model":17,"./widget-view":18,"elementor-pro/editor/editor-module":1}],14:[function(require,module,exports){
 module.exports = elementor.modules.templateLibrary.ElementsCollectionView.extend( {
 	id: 'elementor-global-templates',
 
@@ -840,7 +901,7 @@ module.exports = elementor.modules.templateLibrary.ElementsCollectionView.extend
 	onFilterEmpty: function() {}
 } );
 
-},{"./no-templates":14}],14:[function(require,module,exports){
+},{"./no-templates":15}],15:[function(require,module,exports){
 module.exports = Marionette.ItemView.extend( {
 	template: '#tmpl-elementor-panel-global-widget-no-templates',
 
@@ -857,7 +918,7 @@ module.exports = Marionette.ItemView.extend( {
 	}
 } );
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 
 module.exports = Marionette.ItemView.extend( {
 	id: 'elementor-panel-global-widget',
@@ -943,7 +1004,7 @@ module.exports = Marionette.ItemView.extend( {
 	}
 } );
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports = elementor.modules.element.Model.extend( {
 	initialize: function() {
 		this.set( { widgetType: 'global' }, { silent: true } );
@@ -970,7 +1031,7 @@ module.exports = elementor.modules.element.Model.extend( {
 	}
 } );
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var WidgetView = elementor.modules.WidgetView,
 	GlobalWidgetView;
 
@@ -1050,7 +1111,7 @@ GlobalWidgetView = WidgetView.extend( {
 
 module.exports = GlobalWidgetView;
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var EditorModule = require( 'elementor-pro/editor/editor-module' );
 
 module.exports = EditorModule.extend( {
@@ -1060,7 +1121,7 @@ module.exports = EditorModule.extend( {
 	}
 } );
 
-},{"./editor/edit-button":19,"elementor-pro/editor/editor-module":1}],19:[function(require,module,exports){
+},{"./editor/edit-button":20,"elementor-pro/editor/editor-module":1}],20:[function(require,module,exports){
 module.exports = function() {
 	var self = this;
 
@@ -1111,7 +1172,7 @@ module.exports = function() {
 	self.init();
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var EditorModule = require( 'elementor-pro/editor/editor-module' );
 
 module.exports = EditorModule.extend( {
@@ -1120,7 +1181,7 @@ module.exports = EditorModule.extend( {
 	}
 } );
 
-},{"./editor/query-control":21,"elementor-pro/editor/editor-module":1}],21:[function(require,module,exports){
+},{"./editor/query-control":22,"elementor-pro/editor/editor-module":1}],22:[function(require,module,exports){
 module.exports = elementor.modules.controls.Select2.extend( {
 	isTitlesReceived: false,
 
@@ -1173,6 +1234,8 @@ module.exports = elementor.modules.controls.Select2.extend( {
 			value: value
 		};
 
+		this.addControlSpinner();
+
 		var request = elementorPro.ajax.send( 'panel_posts_control_value_titles', { data: data });
 
 		request.then( function( response ) {
@@ -1182,13 +1245,13 @@ module.exports = elementor.modules.controls.Select2.extend( {
 
 			self.render();
 
-			self.ui.select.select2( {
-				// Allow delete the value
-				allowClear: true,
-				// The placeholder is needed for the `allowClear`. @see http://select2.github.io/select2/#documentation
-				placeholder: self.ui.select.children( 'option:first' ).text()
-			} );
+			self.ui.select.select2( self.getSelect2Options() );
 		});
+	},
+
+	addControlSpinner: function( name ) {
+		this.ui.select.prop( 'disabled', true );
+		this.$el.find( '.elementor-control-title' ).after( '<span class="elementor-control-spinner">&nbsp;<i class="fa fa-spinner fa-spin"></i>&nbsp;</span>' );
 	},
 
 	onReady: function() {
@@ -1200,7 +1263,7 @@ module.exports = elementor.modules.controls.Select2.extend( {
 	}
 } );
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var EditorModule = require( 'elementor-pro/editor/editor-module' );
 
 module.exports = EditorModule.extend( {
@@ -1225,7 +1288,7 @@ module.exports = EditorModule.extend( {
 	}
 } );
 
-},{"elementor-pro/editor/editor-module":1}],23:[function(require,module,exports){
+},{"elementor-pro/editor/editor-module":1}],24:[function(require,module,exports){
 var EditorModule = require( 'elementor-pro/editor/editor-module' );
 
 module.exports = EditorModule.extend( {
@@ -1235,7 +1298,7 @@ module.exports = EditorModule.extend( {
 	}
 } );
 
-},{"./editor/stop-slider":24,"elementor-pro/editor/editor-module":1}],24:[function(require,module,exports){
+},{"./editor/stop-slider":25,"elementor-pro/editor/editor-module":1}],25:[function(require,module,exports){
 module.exports = function() {
 	var self = this;
 
@@ -1258,7 +1321,7 @@ module.exports = function() {
 	self.init();
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var Module = function() {
 	var $ = jQuery,
 		instanceParams = arguments,
@@ -1348,6 +1411,12 @@ var Module = function() {
 		}
 
 		return self.setSettings( keyStack.join( '.' ), value, settingsContainer[ currentKey ] );
+	};
+
+	this.forceMethodImplementation = function( methodArguments ) {
+		var functionName = methodArguments.callee.name;
+
+		throw new ReferenceError( 'The method ' + functionName + ' must to be implemented in the inheritor child.' );
 	};
 
 	this.on = function( eventName, callback ) {

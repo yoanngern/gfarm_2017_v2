@@ -7,11 +7,14 @@
  */
 class PLL_Sync_Post {
 	public $model, $sync, $duplicate, $filters_post, $buttons;
+	protected $temp_synchronized;
 
 	/**
 	 * Constructor
 	 *
 	 * @since 2.1
+	 *
+	 * @param object $polylang
 	 */
 	public function __construct( &$polylang ) {
 		$this->model = &$polylang->model;
@@ -21,7 +24,7 @@ class PLL_Sync_Post {
 
 		add_filter( 'pll_copy_taxonomies', array( $this, 'copy_taxonomies' ), 5, 4 );
 		add_filter( 'pll_copy_post_metas', array( $this, 'copy_post_metas' ), 5, 4 );
-		add_action( 'pll_save_post', array( $this, 'sync_post' ), 5, 3 ); // Before PLL_Admin_Sync, Before PLL_ACF, Before PLLWC
+		add_action( 'pll_save_post', array( $this, 'sync_posts' ), 5, 2 ); // Before PLL_Admin_Sync, Before PLL_ACF, Before PLLWC
 
 		// Create buttons
 		foreach ( $this->model->get_languages_list() as $language ) {
@@ -46,11 +49,14 @@ class PLL_Sync_Post {
 	 *
 	 * @since 2.1
 	 *
-	 * @param array $taxonomies list of taxonomy names
+	 * @param array $taxonomies List of taxonomy names
+	 * @param bool  $sync
+	 * @param int   $from       Source post id
+	 * @param int   $to         Target post id
 	 * @return array
 	 */
 	public function copy_taxonomies( $taxonomies, $sync, $from, $to ) {
-		if ( ! empty( $from ) &&  ! empty( $to ) && $this->are_synchronized( $from, $to ) ) {
+		if ( ! empty( $from ) && ! empty( $to ) && $this->are_synchronized( $from, $to ) ) {
 			$taxonomies = array_diff( get_post_taxonomies( $from ), get_taxonomies( array( '_pll' => true ) ) );
 		}
 		return $taxonomies;
@@ -61,14 +67,14 @@ class PLL_Sync_Post {
 	 *
 	 * @since 2.1
 	 *
-	 * @param array  $keys list of custom fields names
-	 * @param bool   $sync true if it is synchronization, false if it is a copy
-	 * @param int    $from id of the post from which we copy informations
-	 * @param int    $to   id of the post to which we paste informations
+	 * @param array $keys list of custom fields names
+	 * @param bool  $sync true if it is synchronization, false if it is a copy
+	 * @param int   $from id of the post from which we copy informations
+	 * @param int   $to   id of the post to which we paste informations
 	 * @return array
 	 */
 	public function copy_post_metas( $keys, $sync, $from, $to ) {
-		if ( ! empty( $from ) &&  ! empty( $to ) && $this->are_synchronized( $from, $to ) ) {
+		if ( ! empty( $from ) && ! empty( $to ) && $this->are_synchronized( $from, $to ) ) {
 			$from_keys = array_keys( get_post_custom( $from ) ); // *All* custom fields
 			$to_keys = array_keys( get_post_custom( $to ) ); // Adding custom fields of the destination allow to synchronize deleted custom fields
 			$keys = array_merge( $from_keys, $to_keys );
@@ -84,16 +90,94 @@ class PLL_Sync_Post {
 	}
 
 	/**
+	 * Duplicates the post to one language and optionally saves the synchronization group
+	 *
+	 * @since 2.2
+	 *
+	 * @param int    $post_id    Post id of the source post
+	 * @param string $lang       Target language
+	 * @param bool   $save_group True to update the synchronization group, false otherwise
+	 * @return int Post id of the target post
+	 */
+	public function copy_post( $post_id, $lang, $save_group = true ) {
+		global $wpdb;
+
+		$tr_id = $this->model->post->get( $post_id, $this->model->get_language( $lang ) );
+		$tr_post = $post = get_post( $post_id );
+		$languages = array_keys( $this->get( $post_id ) );
+
+		// If it does not exist, create it
+		if ( ! $tr_id ) {
+			$tr_post->ID = null;
+			$tr_id = wp_insert_post( $tr_post );
+			$this->model->post->set_language( $tr_id, $lang ); // Necessary to do it now to share slug
+
+			$translations = $this->model->post->get_translations( $post_id );
+			$translations[ $lang ] = $tr_id;
+			$this->model->post->save_translations( $post_id, $translations ); // Saves translations in case we created a post
+
+			$languages[] = $lang;
+
+			// Temporarily sync group, even if false === $save_group as we need synchronized posts to copy *all* taxonomies and post metas
+			$this->temp_synchronized[ $post_id ][ $tr_id ] = true;
+
+			$_POST['post_tr_lang'][ $lang ] = $tr_id; // Hack to avoid creating multiple posts if the original post is saved several times (ex WooCommerce 2.7+)
+
+			/** This action is documented in admin/admin-filters-post.php */
+			do_action( 'pll_save_post', $post_id, $post, $translations ); // Fire again as we just updated $translations
+
+			unset( $this->temp_synchronized[ $post_id ][ $tr_id ] );
+		}
+
+		if ( $save_group ) {
+			$this->save_group( $post_id, $languages );
+		}
+
+		$tr_post->post_parent = $this->model->post->get( $post->post_parent, $lang ); // Translates post parent
+		$tr_post = $this->duplicate->copy_content( $post, $tr_post, $lang );
+
+		// The columns to copy in DB
+		$columns = array(
+			'post_author',
+			'post_date',
+			'post_date_gmt',
+			'post_content',
+			'post_title',
+			'post_excerpt',
+			'comment_status',
+			'ping_status',
+			'post_name',
+			'post_modified',
+			'post_modified_gmt',
+			'post_parent',
+			'menu_order',
+			'post_mime_type',
+		);
+
+		// Don't synchronize when trashing / restoring in bulk as it causes an error fired by WP.
+		if ( ! $this->doing_bulk_trash( $tr_id ) ) {
+			$columns[] = 'post_status';
+		}
+
+		$tr_post = array_intersect_key( (array) $tr_post, array_flip( $columns ) );
+		$wpdb->update( $wpdb->posts, $tr_post, array( 'ID' => $tr_id ) ); // Don't use wp_update_post to avoid conflict (reverse sync)
+		clean_post_cache( $tr_id );
+
+		// Keep this here as teh 'save_post' action is fired before the sticky status is updated in DB
+		isset( $_REQUEST['sticky'] ) && 'sticky' === $_REQUEST['sticky'] ? stick_post( $tr_id ) : unstick_post( $tr_id );
+
+		return $tr_id; // May be useful when the method is used by a 3rd party.
+	}
+
+	/**
 	 * Duplicates the post and saves the synchronization group
 	 *
 	 * @since 2.1
 	 *
 	 * @param int    $post_id      post id
 	 * @param object $post         post object
-	 * @param array  $translations post translations
 	 */
-	public function sync_post( $post_id, $post, $translations ) {
-		global $wpdb;
+	public function sync_posts( $post_id, $post ) {
 		static $avoid_recursion = false;
 
 		if ( $avoid_recursion ) {
@@ -106,68 +190,20 @@ class PLL_Sync_Post {
 				$sync_post = array_intersect( $_POST['pll_sync_post'], array( 'true' ) );
 			}
 
-			if( empty( $sync_post ) ) {
+			if ( empty( $sync_post ) ) {
 				$this->save_group( $post_id, array() );
 				return;
 			}
 		} else {
 			// Quick edit or bulk edit or any place where the Languages metabox is not displayed
-			$sync_post = array_diff( $this->get( $post_id ), array( $post_id ) ); // Just remove this post form the list
+			$sync_post = array_diff( $this->get( $post_id ), array( $post_id ) ); // Just remove this post from the list
 		}
 
 		$avoid_recursion = true;
 		$languages = array_keys( $sync_post );
 
 		foreach ( $languages as $lang ) {
-			$tr_id = $this->model->post->get( $post_id, $this->model->get_language( $lang ) );
-
-			$tr_post = $post;
-
-			// If it does not exist, create it
-			if ( ! $tr_id ) {
-				$tr_post->ID = null;
-				$tr_id = wp_insert_post( $tr_post );
-				$this->model->post->set_language( $tr_id, $lang ); // Necessary to do it now to share slug
-				$translations[ $lang ] = $tr_id;
-				$this->model->post->save_translations( $post_id, $translations ); // Saves translations in case we created a post
-				$this->save_group( $post_id, $languages ); // Save synchronization group
-				$_POST['post_tr_lang'][ $lang ] = $tr_id; // Hack to avoid creating multiple posts if the original post is saved several times (ex WooCommerce 2.7+)
-
-				/** This action is documented in admin/admin-filters-post.php */
-				do_action( 'pll_save_post', $post_id, $post, $translations ); // Fire again as we just updated $translations
-			}
-
-			$tr_post->post_parent = $this->model->post->get( $post->post_parent, $lang ); // Translates post parent
-			$tr_post = $this->duplicate->copy_content( $post, $tr_post, $lang );
-
-			// The columns to copy in DB
-			$columns = array(
-				'post_author',
-				'post_date',
-				'post_date_gmt',
-				'post_content',
-				'post_title',
-				'post_excerpt',
-				'comment_status',
-				'ping_status',
-				'post_name',
-				'post_modified',
-				'post_modified_gmt',
-				'post_parent',
-				'menu_order',
-				'post_mime_type',
-			);
-
-			// Don't synchronize when trashing / restoring in bulk as it causes an error fired by WP.
-			if ( ! $this->doing_bulk_trash( $tr_id ) ) {
-				$columns[] = 'post_status';
-			}
-
-			$tr_post = array_intersect_key( (array) $tr_post, array_flip( $columns ) );
-			$wpdb->update( $wpdb->posts, $tr_post, array( 'ID' => $tr_id ) ); // Don't use wp_update_post to avoid conflict (reverse sync)
-			clean_post_cache( $tr_id );
-
-			isset( $_REQUEST['sticky'] ) && 'sticky' === $_REQUEST['sticky'] ? stick_post( $tr_id ) : unstick_post( $tr_id );
+			$this->copy_post( $post_id, $lang, false ); // Don't save the group inside the loop
 		}
 
 		// Save group if the languages metabox is displayed
@@ -242,6 +278,6 @@ class PLL_Sync_Post {
 	 * @return bool
 	 */
 	public function are_synchronized( $post_id, $other_id ) {
-		return in_array( $other_id, $this->get( $post_id ) );
+		return isset( $this->temp_synchronized[ $post_id ][ $other_id ] ) || in_array( $other_id, $this->get( $post_id ) );
 	}
 }

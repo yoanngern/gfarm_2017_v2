@@ -1,7 +1,9 @@
 <?php
 namespace Elementor;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 class DB {
 
@@ -24,8 +26,8 @@ class DB {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $post_id
-	 * @param array $posted
+	 * @param int    $post_id
+	 * @param array  $posted
 	 * @param string $status
 	 *
 	 * @return void
@@ -45,13 +47,11 @@ class DB {
 			// Don't use `update_post_meta` that can't handle `revision` post type
 			$is_meta_updated = update_metadata( 'post', $post_id, '_elementor_data', $json_value );
 
-			if ( $is_meta_updated ) {
-				Revisions_Manager::handle_revision();
-			}
+			do_action( 'elementor/db/before_save', $status, $is_meta_updated );
 
 			$this->_save_plain_text( $post_id );
 		} elseif ( self::STATUS_AUTOSAVE === $status ) {
-			Revisions_Manager::handle_revision();
+			do_action( 'elementor/db/before_save', $status, true );
 
 			$old_autosave = wp_get_post_autosave( $post_id, get_current_user_id() );
 
@@ -86,7 +86,7 @@ class DB {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $post_id
+	 * @param int    $post_id
 	 * @param string $status
 	 *
 	 * @return array
@@ -181,9 +181,8 @@ class DB {
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param int $post_id
+	 * @param int  $post_id
 	 * @param bool $is_elementor
-	 *
 	 */
 	public function set_is_elementor_page( $post_id, $is_elementor = true ) {
 		if ( $is_elementor ) {
@@ -249,7 +248,7 @@ class DB {
 	 *
 	 * @param array $data
 	 *
-	 * @param bool $with_html_content
+	 * @param bool  $with_html_content
 	 *
 	 * @return array
 	 */
@@ -302,6 +301,8 @@ class DB {
 				// The elementor JSON needs slashes before saving
 				if ( '_elementor_data' === $meta_key ) {
 					$value = wp_slash( $value );
+				} else {
+					$value = maybe_unserialize( $value );
 				}
 
 				// Don't use `update_post_meta` that can't handle `revision` post type
@@ -330,7 +331,7 @@ class DB {
 
 		$this->switched_post_data[] = [
 			'switched_id' => $post_id,
-			'original_id' => get_the_ID(),// Note, it can be false if the global isn't set
+			'original_id' => get_the_ID(), // Note, it can be false if the global isn't set
 		];
 
 		$GLOBALS['post'] = get_post( $post_id );

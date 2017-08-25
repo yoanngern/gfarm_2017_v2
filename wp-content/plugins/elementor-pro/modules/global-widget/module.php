@@ -73,9 +73,11 @@ class Module extends Module_Base {
 				'unlink' => __( 'Unlink', 'elementor-pro' ),
 				'cancel' => __( 'Cancel', 'elementor-pro' ),
 				'unlink_widget' => __( 'Unlink Widget', 'elementor-pro' ),
+				'global' => __( 'Global', 'elementor-pro' ),
 				'dialog_confirm_unlink' => __( 'This will make the widget stop being global. It\'ll be reverted into being just a regular widget.', 'elementor-pro' ),
 				'global_widget_save_title' => __( 'Save your widget as a global widget', 'elementor-pro' ),
 				'global_widget_save_description' => __( 'You\'ll be able to add this global widget to multiple areas on your site, and edit it from one single place.', 'elementor-pro' ),
+				'linked_to_global' => __( 'Linked to Global', 'elementor-pro' ),
 			],
 		] );
 

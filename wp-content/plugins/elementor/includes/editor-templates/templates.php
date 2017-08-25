@@ -1,7 +1,9 @@
 <?php
 namespace Elementor;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 ?>
 <script type="text/template" id="tmpl-elementor-template-library-header">
 	<div id="elementor-template-library-header-logo-area"></div>
@@ -45,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			<div class="elementor-loader-box"></div>
 			<div class="elementor-loader-box"></div>
 		</div>
-		<div class="elementor-loading-title"><?php _e( 'Loading', 'elementor' ) ?></div>
+		<div class="elementor-loading-title"><?php _e( 'Loading', 'elementor' ); ?></div>
 	</div>
 </script>
 
@@ -77,7 +79,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 </script>
 
 <script type="text/template" id="tmpl-elementor-template-library-get-pro-button">
-	<a href="https://go.elementor.com/pro-library/" target="_blank">
+	<a href="<?php echo Utils::get_pro_link( 'https://elementor.com/pro/?utm_source=panel-library&utm_campaign=gopro&utm_medium=wp-dash' ); ?>" target="_blank">
 		<button class="elementor-template-library-template-action elementor-button elementor-button-go-pro">
 			<i class="fa fa-external-link-square"></i><span class="elementor-button-title"><?php _e( 'Go Pro', 'elementor' ); ?></span>
 		</button>
@@ -86,7 +88,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 <script type="text/template" id="tmpl-elementor-template-library-template-local">
 	<div class="elementor-template-library-template-icon">
-		<i class="fa fa-{{ 'section' === type ? 'columns' : 'file-text-o' }}"></i>
+		<i class="eicon-{{ 'section' === type ? 'section' : 'document-file' }}"></i>
 	</div>
 	<div class="elementor-template-library-template-name">{{{ title }}}</div>
 	<div class="elementor-template-library-template-type">{{{ elementor.translate( type ) }}}</div>

@@ -215,6 +215,12 @@ class Countdown extends Widget_Base {
 					'unit' => '%',
 					'size' => 100,
 				],
+				'tablet_default' => [
+					'unit' => '%',
+				],
+				'mobile_default' => [
+					'unit' => '%',
+				],
 				'range' => [
 					'px' => [
 						'min' => 0,

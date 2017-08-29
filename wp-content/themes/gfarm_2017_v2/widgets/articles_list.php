@@ -51,23 +51,39 @@ class ArticlesListWidget extends \Elementor\Widget_Base {
 		);
 
 
-				$this->add_group_control(
-					Group_Control_Posts::get_type(),
-					[
-						'name'  => 'posts',
-						'label' => __( 'Posts', 'elementor-pro' ),
-					]
-				);
-
+		$this->add_group_control(
+			Group_Control_Posts::get_type(),
+			[
+				'name'  => 'posts',
+				'label' => __( 'Posts', 'elementor-pro' ),
+			]
+		);
 
 
 		$this->end_controls_section();
 	}
 
 	public function query_posts() {
+
+
+		$today = date( 'Ymd' );
+
 		$query_args = Module::get_query_args( 'posts', $this->get_settings() );
 
 		$query_args['posts_per_page'] = $this->get_settings( 'posts_per_page' );
+
+		$query_args['meta_key'] = 'end_date';
+		$query_args['orderby']  = 'meta_value';
+		$query_args['order']    = 'ASC';
+
+
+		$query_args['meta_query'] = array(
+			array(
+				'key'     => 'end_date',
+				'value'   => $today,
+				'compare' => '>=',
+			),
+		);
 
 		$this->_query = new \WP_Query( $query_args );
 	}
@@ -121,7 +137,7 @@ class ArticlesListWidget extends \Elementor\Widget_Base {
 
 		echo '
 		
-		<a id="' . $id . '" href="' . $link . '" class="article" style=" background-image: url(' . $image['sizes']['full_hd'] . ') ">
+		<a id="' . $id . '" href="' . $link . '" class="article" style=" background-image: url(' . $image['sizes']['hd'] . ') ">
 		
 		<div class="content"> 
 		<div class="text">

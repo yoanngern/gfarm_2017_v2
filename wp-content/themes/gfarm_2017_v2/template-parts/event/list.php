@@ -6,12 +6,9 @@
     <div class="platter">
 
 
-
-
-
 		<?php
 
-		query_posts( 'gfarm_eventcategory=evenement' );
+		get_gfarm_events_by_cat('evenement');
 
 
 		if ( have_posts() ) : ?>
@@ -55,12 +52,12 @@
 
 
 
-	    <?php
+		<?php
 
-	    query_posts( 'gfarm_eventcategory=brunch' );
+		get_gfarm_events_by_cat('brunch');
 
 
-	    if ( have_posts() ) : ?>
+		if ( have_posts() ) : ?>
 
             <header>
 
@@ -73,15 +70,15 @@
                 <article class="content-page">
 
 
-				    <?php
+					<?php
 
-				    /* Start the Loop */
-				    while ( have_posts() ) :
-					    the_post();
+					/* Start the Loop */
+					while ( have_posts() ) :
+						the_post();
 
-					    get_template_part( 'template-parts/event/item' );
+						get_template_part( 'template-parts/event/item' );
 
-				    endwhile; ?>
+					endwhile; ?>
 
                 </article>
             </section>
@@ -92,10 +89,10 @@
                 <div class="nav-next alignright"><?php next_posts_link( 'Next' ); ?></div>
             </nav>
 
-		    <?php
+			<?php
 
-	    endif;
-	    ?>
+		endif;
+		?>
 
     </div>
 

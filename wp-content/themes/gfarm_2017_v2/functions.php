@@ -20,7 +20,6 @@ add_action( 'elementor/widgets/widgets_registered', function () {
 } );
 
 
-
 /**
  * Event
  */
@@ -70,7 +69,6 @@ function create_events() {
 add_action( 'init', 'create_events' );
 
 
-
 function create_eventcategory_taxonomy() {
 
 	$labels = array(
@@ -103,7 +101,6 @@ function create_eventcategory_taxonomy() {
 add_action( 'init', 'create_eventcategory_taxonomy', 0 );
 
 
-
 function register_my_menu() {
 	register_nav_menu( 'principal', __( 'Menu principal', 'gfarm_2017_v2' ) );
 	register_nav_menu( 'language-menu', __( 'Menu language', 'gfarm_2017_v2' ) );
@@ -126,10 +123,8 @@ add_image_size( 'title_image', 350, 180, false );
 add_image_size( 'avatar', 200, 200, true );
 add_image_size( 'ad', 360, 200, true );
 add_image_size( 'ad_title', 267, 74, true );
+add_image_size( 'hd', 1280, 720, true );
 add_image_size( 'full_hd', 1920, 1080, true );
-
-
-
 
 
 /**
@@ -405,10 +400,10 @@ function get_related_posts( $post, $nb = 3 ) {
 function time_trans( $date ) {
 	if ( get_locale() == "fr_FR" ) :
 
-		$time = date_i18n('H:i', strtotime( $date->format('H:i') ));
+		$time = date_i18n( 'H:i', strtotime( $date->format( 'H:i' ) ) );
 
 	else:
-		$time = date_i18n('g:i a', strtotime( $date->format('H:i') ));
+		$time = date_i18n( 'g:i a', strtotime( $date->format( 'H:i' ) ) );
 	endif;
 
 	return $time;
@@ -476,6 +471,30 @@ function complex_date( $start, $end ) {
 
 }
 
+
+function get_gfarm_events_by_cat( $category ) {
+
+
+	$today = date( 'Ymd' );
+
+	query_posts( array(
+		'post_type'           => 'gfarm_event',
+		'gfarm_eventcategory' => $category,
+		'meta_key'            => 'end_date',
+		'orderby'             => 'meta_value',
+		'order'               => 'ASC',
+		'meta_query'          => array(
+			array(
+				'key'     => 'end_date',
+				'value'   => $today,
+				'compare' => '>=',
+			),
+		),
+	) );
+
+
+}
+
 function gfarm_order_events( $query ) {
 
 
@@ -514,12 +533,14 @@ function gfarm_order_events( $query ) {
 	// only modify queries for 'gfarm_event' post type
 	if ( ! is_single() && isset( $query->query_vars['post_type'] ) && $query->query_vars['post_type'] == 'gfarm_event' ) {
 
+
 		$query->set( 'orderby', 'meta_value' );
 		$query->set( 'meta_key', 'start_date' );
 		$query->set( 'meta_key', 'end_date' );
 		$query->set( 'order', 'asc' );
 
 		$today = date( 'Ymd' );
+
 
 		$query->set( 'meta_query', array(
 			array(
@@ -528,7 +549,6 @@ function gfarm_order_events( $query ) {
 				'value'   => $today,
 			)
 		) );
-
 
 		/*
 		$query->set( 'meta_query', array(

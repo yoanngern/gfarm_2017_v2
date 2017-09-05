@@ -19,6 +19,16 @@
             <div class="content">
 
 				<?php the_content(); ?>
+
+
+				<?php if ( get_field( 'register' ) ): ?>
+
+                    <a class="button"
+                       href="mailto:<?php echo get_field( 'register_email' ) ?>?subject=Inscription - <?php echo get_the_title() ?>">Je
+                        m'inscris</a>
+
+				<?php endif; ?>
+
             </div>
 
 

@@ -24,7 +24,7 @@
 				<?php if ( get_field( 'register' ) ): ?>
 
                     <a class="button"
-                       href="mailto:<?php echo get_field( 'register_email' ) ?>?subject=Inscription - <?php echo get_the_title() ?>">Je
+                       href="mailto:<?php echo get_field( 'register_email' ) ?>?subject=Inscription - <?php echo get_the_title() ?> - <?php echo complex_date( get_field( 'start_date' ), get_field( 'end_date' ) ); ?>">Je
                         m'inscris</a>
 
 				<?php endif; ?>

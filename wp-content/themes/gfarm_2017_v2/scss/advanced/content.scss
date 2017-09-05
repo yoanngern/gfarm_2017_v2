@@ -7,6 +7,8 @@ article.content-page {
         color: $beige;
         letter-spacing: 0.1em;
         font-size: 1.1em;
+        margin: 10px 0;
+        display: inline-block;
 
         &:hover {
             background-color: $beige;
@@ -104,11 +106,11 @@ article.content-page {
     }
 
     a {
-        color: $green;
+        color: $beige;
         text-decoration: none;
 
         &:hover {
-            color: $green;
+            color: $beige;
             text-decoration: underline;
         }
 

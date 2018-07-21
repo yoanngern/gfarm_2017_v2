@@ -1,12 +1,12 @@
 <?php
 namespace ElementorPro\Modules\Woocommerce\Widgets;
 
-use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
+use ElementorPro\Base\Base_Widget;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Categories extends Widget_Base {
+class Categories extends Base_Widget {
 
 	protected $_has_template_content = false;
 
@@ -20,10 +20,6 @@ class Categories extends Widget_Base {
 
 	public function get_icon() {
 		return 'eicon-woocommerce';
-	}
-
-	public function get_categories() {
-		return [ 'pro-elements' ];
 	}
 
 	protected function _register_controls() {
@@ -74,7 +70,7 @@ class Categories extends Widget_Base {
 		$this->add_control(
 			'source',
 			[
-				'label' => _x( 'Source', 'Posts Query Control', 'elementor-pro' ),
+				'label' => __( 'Source', 'elementor-pro' ),
 				'type' => Controls_Manager::SELECT,
 				'options' => [
 					'' => __( 'Show All', 'elementor-pro' ),
@@ -129,14 +125,13 @@ class Categories extends Widget_Base {
 				'default' => '',
 				'label_on' => 'Hide',
 				'label_off' => 'Show',
-				'return_value' => 'yes',
 			]
 		);
 
 		$this->add_control(
 			'orderby',
 			[
-				'label' => __( 'Order by', 'elementor-pro' ),
+				'label' => __( 'Order By', 'elementor-pro' ),
 				'type' => Controls_Manager::SELECT,
 				'default' => 'name',
 				'options' => [

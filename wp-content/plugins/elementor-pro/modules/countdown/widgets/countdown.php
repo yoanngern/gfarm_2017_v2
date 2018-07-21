@@ -7,11 +7,11 @@ use Elementor\Group_Control_Typography;
 use Elementor\Scheme_Color;
 use Elementor\Scheme_Typography;
 use Elementor\Utils;
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Countdown extends Widget_Base {
+class Countdown extends Base_Widget {
 
 	public function get_name() {
 		return 'countdown';
@@ -23,10 +23,6 @@ class Countdown extends Widget_Base {
 
 	public function get_icon() {
 		return 'eicon-countdown';
-	}
-
-	public function get_categories() {
-		return [ 'pro-elements' ];
 	}
 
 	protected function _register_controls() {
@@ -43,6 +39,7 @@ class Countdown extends Widget_Base {
 				'label' => __( 'Due Date', 'elementor-pro' ),
 				'type' => Controls_Manager::DATE_TIME,
 				'default' => date( 'Y-m-d H:i', strtotime( '+1 month' ) + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ),
+				/* translators: %s: Time zone. */
 				'description' => sprintf( __( 'Date set according to your timezone: %s.', 'elementor-pro' ), Utils::get_timezone_string() ),
 			]
 		);
@@ -68,7 +65,6 @@ class Countdown extends Widget_Base {
 				'type' => Controls_Manager::SWITCHER,
 				'label_on' => __( 'Show', 'elementor-pro' ),
 				'label_off' => __( 'Hide', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 			]
 		);
@@ -80,7 +76,6 @@ class Countdown extends Widget_Base {
 				'type' => Controls_Manager::SWITCHER,
 				'label_on' => __( 'Show', 'elementor-pro' ),
 				'label_off' => __( 'Hide', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 			]
 		);
@@ -92,7 +87,6 @@ class Countdown extends Widget_Base {
 				'type' => Controls_Manager::SWITCHER,
 				'label_on' => __( 'Show', 'elementor-pro' ),
 				'label_off' => __( 'Hide', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 			]
 		);
@@ -104,7 +98,6 @@ class Countdown extends Widget_Base {
 				'type' => Controls_Manager::SWITCHER,
 				'label_on' => __( 'Show', 'elementor-pro' ),
 				'label_off' => __( 'Hide', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 			]
 		);
@@ -116,7 +109,6 @@ class Countdown extends Widget_Base {
 				'type' => Controls_Manager::SWITCHER,
 				'label_on' => __( 'Show', 'elementor-pro' ),
 				'label_off' => __( 'Hide', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 				'separator' => 'before',
 			]
@@ -127,9 +119,6 @@ class Countdown extends Widget_Base {
 			[
 				'label' => __( 'Custom Label', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'condition' => [
 					'show_labels!' => '',
 				],
@@ -257,7 +246,6 @@ class Countdown extends Widget_Base {
 			Group_Control_Border::get_type(),
 			[
 				'name' => 'box_border',
-				'label' => __( 'Border', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-countdown-item',
 				'separator' => 'before',
 			]
@@ -439,7 +427,8 @@ class Countdown extends Widget_Base {
 		$string    = $this->get_strftime( $instance );
 
 		// Handle timezone ( we need to set GMT time )
-		$due_date = strtotime( $due_date ) - ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS );
+		$gmt = get_gmt_from_date( $due_date . ':00' );
+		$due_date = strtotime( $gmt );
 		?>
 		<div class="elementor-countdown-wrapper" data-date="<?php echo $due_date; ?>">
 			<?php echo $string; ?>

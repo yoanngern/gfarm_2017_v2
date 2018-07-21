@@ -9,6 +9,13 @@ class Mailchimp_Handler {
 	private $api_key = '';
 	private $api_request_args = [];
 
+	/**
+	 * Mailchimp_Handler constructor.
+	 *
+	 * @param $api_key
+	 *
+	 * @throws \Exception
+	 */
 	public function __construct( $api_key ) {
 		if ( empty( $api_key ) ) {
 			throw new \Exception( 'Invalid API key' );
@@ -24,7 +31,7 @@ class Mailchimp_Handler {
 		$this->api_base_url = 'https://' . $key_parts[1] . '.api.mailchimp.com/3.0/';
 		$this->api_request_args = [
 			'headers' => [
-				'Authorization' => 'Basic ' . base64_encode( 'user' . ':' . $this->api_key ),
+				'Authorization' => 'Basic ' . base64_encode( 'user:' . $this->api_key ),
 			],
 		];
 	}

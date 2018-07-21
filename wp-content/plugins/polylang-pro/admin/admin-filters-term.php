@@ -9,6 +9,7 @@ class PLL_Admin_Filters_Term {
 	public $links, $model, $options, $curlang, $filter_lang, $pref_lang;
 	protected $pre_term_name; // Used to store the term name before creating a slug if needed
 	protected $post_id; // Used to store the current post_id when bulk editing posts
+	private $tax_query_lang;
 
 	/**
 	 * Constructor: setups filters and actions
@@ -31,7 +32,7 @@ class PLL_Admin_Filters_Term {
 			add_action( $tax . '_edit_form_fields', array( $this, 'edit_term_form' ) );
 
 			// Adds action related to languages when deleting categories and post tags
-			add_action( 'delete_' . $tax, array( $this, 'delete_term' ) );
+			add_action( 'pre_delete_term', array( $this, 'delete_term' ) );
 		}
 
 		// Adds actions related to languages when creating or saving categories and post tags
@@ -51,6 +52,8 @@ class PLL_Admin_Filters_Term {
 
 		// Filters categories and post tags by language
 		add_filter( 'terms_clauses', array( $this, 'terms_clauses' ), 10, 3 );
+		add_action( 'pre_get_posts', array( $this, 'set_tax_query_lang' ), 999 );
+		add_action( 'posts_selection', array( $this, 'unset_tax_query_lang' ), 0 );
 
 		// Allows to get the default categories in all languages
 		add_filter( 'option_default_category', array( $this, 'option_default_category' ) );
@@ -142,7 +145,7 @@ class PLL_Admin_Filters_Term {
 					<p class="description">%s</p>
 				</td>
 			</tr>',
-			wp_nonce_field( 'pll_language', '_pll_nonce', true , false ),
+			wp_nonce_field( 'pll_language', '_pll_nonce', true, false ),
 			esc_html__( 'Language', 'polylang' ),
 			$dropdown->walk( $this->model->get_languages_list(), array(
 				'name'     => 'term_lang_choice',
@@ -345,7 +348,7 @@ class PLL_Admin_Filters_Term {
 	 * @since 0.1
 	 *
 	 * @param int    $term_id
-	 * @param int    $tt_id    term taxononomy id
+	 * @param int    $tt_id    term taxonomy id
 	 * @param string $taxonomy
 	 */
 	public function save_term( $term_id, $tt_id, $taxonomy ) {
@@ -571,6 +574,10 @@ class PLL_Admin_Filters_Term {
 			return false;
 		}
 
+		if ( isset( $this->tax_query_lang ) ) {
+			$args['lang'] = $this->tax_query_lang;
+		}
+
 		// If get_terms is queried with a 'lang' parameter
 		if ( isset( $args['lang'] ) ) {
 			return $args['lang'];
@@ -601,6 +608,7 @@ class PLL_Admin_Filters_Term {
 		}
 
 		if ( $lang = $this->get_queried_language( $taxonomies, $args ) ) {
+			$lang = is_string( $lang ) && strpos( $lang, ',' ) ? explode( ',', $lang ) : $lang;
 			$key = '_' . ( is_array( $lang ) ? implode( ',', $lang ) : $this->model->get_language( $lang )->slug );
 			$args['cache_domain'] = empty( $args['cache_domain'] ) ? 'pll' . $key : $args['cache_domain'] . $key;
 		}
@@ -620,6 +628,28 @@ class PLL_Admin_Filters_Term {
 	public function terms_clauses( $clauses, $taxonomies, $args ) {
 		$lang = $this->get_queried_language( $taxonomies, $args );
 		return ! empty( $lang ) ? $this->model->terms_clauses( $clauses, $lang ) : $clauses; // adds our clauses to filter by current language
+	}
+
+	/**
+	 * Sets the WP_Term_Query language when doing a WP_Query
+	 * Needed since WP 4.9
+	 *
+	 * @since 2.3.2
+	 *
+	 * @param object $query WP_Query object
+	 */
+	public function set_tax_query_lang( $query ) {
+		$this->tax_query_lang = isset( $query->query_vars['lang'] ) ? $query->query_vars['lang'] : '';
+	}
+
+	/**
+	 * Removes the WP_Term_Query language filter for WP_Query
+	 * Needed since WP 4.9
+	 *
+	 * @since 2.3.2
+	 */
+	public function unset_tax_query_lang() {
+		unset( $this->tax_query_lang );
 	}
 
 	/**

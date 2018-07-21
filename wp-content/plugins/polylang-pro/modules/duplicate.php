@@ -50,13 +50,13 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 	 *
 	 * @since 2.1
 	 *
-	 * @param string $post_type current post type
-	 * @param bool   $active    new requested button state
-	 * @return bool whether the new button state is accepted or not
+	 * @param string $post_type Current post type
+	 * @param bool   $active    New requested button state
+	 * @return bool Whether the new button state is accepted or not
 	 */
 	protected function toggle_option( $post_type, $active ) {
 		$duplicate_options = get_user_meta( get_current_user_id(), 'pll_duplicate_content', true );
-		if ( empty( $duplicate_options ) ) {
+		if ( ! is_array( $duplicate_options ) ) {
 			$duplicate_options = array( $post_type => $active );
 		} else {
 			$duplicate_options[ $post_type ] = $active;
@@ -81,6 +81,14 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 		if ( $this->active && 'post-new.php' === $GLOBALS['pagenow'] && isset( $_GET['from_post'], $_GET['new_lang'] ) ) {
 			// Capability check already done in post-new.php
 			$this->copy_content( get_post( (int) $_GET['from_post'] ), $post, $_GET['new_lang'] );
+
+			// Maybe duplicates the featured image
+			if ( $this->options['media_support'] ) {
+				add_filter( 'pll_translate_post_meta', array( $this, 'duplicate_thumbnail' ), 10, 3 );
+			}
+
+			// Maybe duplicate terms
+			add_filter( 'pll_maybe_translate_term', array( $this, 'duplicate_term' ), 10, 3 );
 		}
 	}
 
@@ -89,9 +97,9 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 	 *
 	 * @since 1.9
 	 *
-	 * @param object        $from_post the post to copy from
-	 * @param object        $post      the post to copy to
-	 * @param object|string $language  the language of the post to copy to
+	 * @param object        $from_post The post to copy from
+	 * @param object        $post      The post to copy to
+	 * @param object|string $language  The language of the post to copy to
 	 */
 	public function copy_content( $from_post, $post, $language ) {
 		global $shortcode_tags;
@@ -150,7 +158,7 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 		// Attach to the translated post
 		if ( ! wp_get_post_parent_id( $tr_id ) ) {
 			// Query inspired by wp_media_attach_action()
-			$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_parent = %d WHERE post_type = 'attachment' AND ID = %d", $this->post_id , $tr_id ) );
+			$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_parent = %d WHERE post_type = 'attachment' AND ID = %d", $this->post_id, $tr_id ) );
 			clean_attachment_cache( $tr_id );
 		}
 
@@ -162,10 +170,10 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 	 *
 	 * @since 1.9
 	 *
-	 * @param array  $attr shortcode attribute
+	 * @param array  $attr Shortcode attribute
 	 * @param null   $null
-	 * @param string $tag  shortcode tag (either 'gallery' or 'playlist')
-	 * @return string translated shortcode
+	 * @param string $tag  Shortcode tag (either 'gallery' or 'playlist')
+	 * @return string Translated shortcode
 	 */
 	function ids_list_shortcode( $attr, $null, $tag ) {
 		foreach ( $attr as $k => $v ) {
@@ -189,10 +197,10 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 	 *
 	 * @since 1.9
 	 *
-	 * @param array  $attr    shortcode attrbute
-	 * @param string $content shortcode content
-	 * @param string $tag     shortcode tag (either 'caption' or 'wp-caption')
-	 * @return string translated shortcode
+	 * @param array  $attr    Shortcode attrbute
+	 * @param string $content Shortcode content
+	 * @param string $tag     Shortcode tag (either 'caption' or 'wp-caption')
+	 * @return string Translated shortcode
 	 */
 	function caption_shortcode( $attr, $content, $tag ) {
 		// Translate the caption id
@@ -221,11 +229,11 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 	 *
 	 * @since 1.9
 	 *
-	 * @param string $content text to translate
-	 * @return string translated text
+	 * @param string $content Text to translate
+	 * @return string Translated text
 	 */
 	public function translate_content( $content ) {
-		$content = do_shortcode( $content ); // translate shorcodes
+		$content = do_shortcode( $content ); // Translate shorcodes
 
 		$textarr = wp_html_split( $content ); // Since 4.2.3
 
@@ -246,8 +254,8 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 	 *
 	 * @since 1.9
 	 *
-	 * @param string $text img attributes
-	 * @return string translated attributes
+	 * @param string $text Img attributes
+	 * @return string Translated attributes
 	 */
 	public function translate_img( $text ) {
 		$attributes = wp_kses_attr_parse( $text ); // since WP 4.2.3
@@ -272,5 +280,69 @@ class PLL_Duplicate extends PLL_Metabox_Button {
 		}
 
 		return implode( $attributes );
+	}
+
+	/**
+	 * Duplicates the feature image if the translation does not exist yet
+	 *
+	 * @since 2.3
+	 *
+	 * @param int    $id   Thumbnail id
+	 * @param string $key  Meta key
+	 * @param string $lang Language code
+	 * @return int
+	 */
+	public function duplicate_thumbnail( $id, $key, $lang ) {
+		if ( '_thumbnail_id' === $key && ! $tr_id = $this->model->post->get( $id, $lang ) ) {
+			$tr_id = $this->filters_media->create_media_translation( $id, $lang );
+		}
+		return empty( $tr_id ) ? $id : $tr_id;
+	}
+
+	/**
+	 * Duplicates a term if the translation does not exist yet
+	 *
+	 * @since 2.3
+	 *
+	 * @param int    $tr_term Translated term id
+	 * @param int    $term    Source term id
+	 * @param string $lang    Language slug
+	 * @return int
+	 */
+	public function duplicate_term( $tr_term, $term, $lang ) {
+		if ( empty( $tr_term ) ) {
+			$term = get_term( $term );
+			$args = array(
+				'description' => $term->description,
+				'parent' => $this->model->term->get_translation( $term->parent, $lang ),
+			);
+
+			// Share slugs
+			if ( $this->options['force_lang'] ) {
+				$args['slug'] = $term->slug . '___' . $lang;
+			}
+
+			$t = wp_insert_term( $term->name, $term->taxonomy, $args );
+
+			if ( is_array( $t ) && isset( $t['term_id'] ) ) {
+				$tr_term = $t['term_id'];
+				$this->model->term->set_language( $tr_term, $lang );
+				$translations = $this->model->term->get_translations( $term->term_id );
+				$translations[ $lang ] = $tr_term;
+				$this->model->term->save_translations( $term->term_id, $translations );
+
+				/**
+				 * Fires after a term translation is automatically created when duplicating a post
+				 *
+				 * @since 2.3.8
+				 *
+				 * @param int    $from Term id of the source term
+				 * @param int    $to   Term id of the new term translation
+				 * @param string $lang Language code of the new translation
+				 */
+				do_action( 'pll_duplicate_term', $term->term_id, $tr_term, $lang );
+			}
+		}
+		return $tr_term;
 	}
 }

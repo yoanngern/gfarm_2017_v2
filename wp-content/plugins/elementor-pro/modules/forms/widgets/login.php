@@ -6,12 +6,12 @@ use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Typography;
 use Elementor\Scheme_Color;
 use Elementor\Scheme_Typography;
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 use ElementorPro\Plugin;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Login extends Widget_Base {
+class Login extends Base_Widget {
 
 	public function get_name() {
 		return 'login';
@@ -23,10 +23,6 @@ class Login extends Widget_Base {
 
 	public function get_icon() {
 		return 'eicon-lock-user';
-	}
-
-	public function get_categories() {
-		return [ 'pro-elements' ];
 	}
 
 	protected function _register_controls() {
@@ -153,7 +149,7 @@ class Login extends Widget_Base {
 				'show_label' => false,
 				'show_external' => false,
 				'separator' => false,
-				'placeholder' => 'http://your-link.com/',
+				'placeholder' => __( 'https://your-link.com', 'elementor-pro' ),
 				'description' => __( 'Note: Because of security reasons, you can ONLY use your current domain here.', 'elementor-pro' ),
 				'condition' => [
 					'redirect_after_login' => 'yes',
@@ -212,8 +208,6 @@ class Login extends Widget_Base {
 			[
 				'label' => __( 'Custom Label', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'label_on' => __( 'Yes', 'elementor-pro' ),
 				'condition' => [
 					'show_labels' => 'yes',
 				],
@@ -515,7 +509,6 @@ class Login extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'button_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'selector' => '{{WRAPPER}} .elementor-button',
 			]
@@ -539,7 +532,6 @@ class Login extends Widget_Base {
 		$this->add_group_control(
 			Group_Control_Border::get_type(), [
 				'name' => 'button_border',
-				'label' => __( 'Border', 'elementor-pro' ),
 				'placeholder' => '1px',
 				'default' => '1px',
 				'selector' => '{{WRAPPER}} .elementor-button',
@@ -725,7 +717,7 @@ class Login extends Widget_Base {
 		$current_url = remove_query_arg( 'fake_arg' );
 
 		if ( 'yes' === $settings['redirect_after_login'] && ! empty( $settings['redirect_url']['url'] ) ) {
-			$redirect_url  = $settings['redirect_url']['url'];
+			$redirect_url = $settings['redirect_url']['url'];
 		} else {
 			$redirect_url = $current_url;
 		}
@@ -744,8 +736,8 @@ class Login extends Widget_Base {
 
 		$this->form_fields_render_attributes();
 		?>
-		<form class="elementor-login elementor-form" method="post" action="<?php echo wp_login_url(); ?>">
-			<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url );?>">
+		<form class="elementor-login elementor-form" method="post" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>">
+			<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url ); ?>">
 			<div <?php echo $this->get_render_attribute_string( 'wrapper' ); ?>>
 				<div <?php echo $this->get_render_attribute_string( 'field-group' ); ?>>
 					<?php

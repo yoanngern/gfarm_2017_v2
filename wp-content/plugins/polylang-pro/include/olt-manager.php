@@ -27,7 +27,7 @@ class PLL_OLT_Manager {
 
 		// Overriding load text domain only on front since WP 4.7
 		// FIXME test get_user_locale for backward compatibility with WP < 4.7
-		if ( is_admin() && ! Polylang::is_ajax_on_front() && function_exists( 'get_user_locale' ) ) {
+		if ( is_admin() && function_exists( 'get_user_locale' ) ) {
 			return;
 		}
 
@@ -39,9 +39,11 @@ class PLL_OLT_Manager {
 		add_filter( 'gettext', array( $this, 'gettext' ), 10, 3 );
 		add_filter( 'gettext_with_context', array( $this, 'gettext_with_context' ), 10, 4 );
 
-		// Loads text domains
-		add_action( 'pll_language_defined', array( $this, 'load_textdomains' ), 2 ); // After PLL_Frontend::pll_language_defined
-		add_action( 'pll_no_language_defined', array( $this, 'load_textdomains' ) );
+		if ( ! Polylang::is_ajax_on_front() ) {
+			// Loads text domains
+			add_action( 'pll_language_defined', array( $this, 'load_textdomains' ), 2 ); // After PLL_Frontend::pll_language_defined
+			add_action( 'pll_no_language_defined', array( $this, 'load_textdomains' ) );
+		}
 	}
 
 	/**
@@ -72,11 +74,11 @@ class PLL_OLT_Manager {
 		$new_locale = get_locale();
 
 		// Don't try to save time for en_US as some users have theme written in another language
-		// Now we can load all overriden text domains with the right language
+		// Now we can load all overridden text domains with the right language
 		if ( ! empty( $this->list_textdomains ) ) {
 
 			// Since WP 4.7 we need to reset the internal cache of _get_path_to_translation when switching from any locale to en_US
-			// See WP_Locale_Switcher::changle_locale()
+			// See WP_Locale_Switcher::change_locale()
 			// FIXME test _get_path_to_translation for backward compatibility with WP < 4.7
 			if ( function_exists( '_get_path_to_translation' ) ) {
 				_get_path_to_translation( null, true );
@@ -160,7 +162,12 @@ class PLL_OLT_Manager {
 	 * @return bool
 	 */
 	public function load_textdomain_mofile( $mofile, $domain ) {
-		$this->list_textdomains[] = array( 'mo' => $mofile, 'domain' => $domain );
+		// On multisite, 2 files are sharing the same domain so we need to distinguish them
+		if ( 'default' === $domain && false !== strpos( $mofile, '/ms-' ) ) {
+			$this->list_textdomains['ms-default'] = array( 'mo' => $mofile, 'domain' => $domain );
+		} else {
+			$this->list_textdomains[ $domain ] = array( 'mo' => $mofile, 'domain' => $domain );
+		}
 		return ''; // Hack to prevent WP loading text domains as we will load them all later
 	}
 

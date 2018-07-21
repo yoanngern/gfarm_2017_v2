@@ -164,9 +164,9 @@ abstract class PLL_Xdata_Base {
 	 *
 	 * @since 2.0
 	 *
-	 * @param string $redirect redirect url
-	 * @param string $lang     new language slug
-	 * @return string javascript code
+	 * @param string $redirect Redirect url
+	 * @param string $lang     New language slug
+	 * @return string Javascript code
 	 */
 	protected function maybe_get_xdomain_js( $redirect, $lang ) {
 		if ( ! empty( $_COOKIE[ PLL_COOKIE ] ) && $_COOKIE[ PLL_COOKIE ] !== $lang ) {
@@ -240,7 +240,7 @@ abstract class PLL_Xdata_Base {
 		 *
 		 * @since 2.0
 		 *
-		 * @param array $data data transferred from one domain to the other
+		 * @param array $data Data transferred from one domain to the other
 		 */
 		do_action( 'pll_set_xdata', $data );
 		wp_redirect( $data['redirect'] );
@@ -318,7 +318,7 @@ abstract class PLL_Xdata_Base {
 	 *
 	 * @since 2.0
 	 *
-	 * @param array $urls list of allowed urls
+	 * @param array $urls List of allowed urls
 	 * @return array
 	 */
 	public function customize_allowed_urls( $urls ) {
@@ -333,7 +333,7 @@ abstract class PLL_Xdata_Base {
 	 *
 	 * @since 2.0
 	 *
-	 * @param array $origins list of allowed urls
+	 * @param array $origins List of allowed urls
 	 * @return array
 	 */
 	public function allowed_http_origins( $origins ) {

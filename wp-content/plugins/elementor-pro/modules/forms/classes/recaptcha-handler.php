@@ -4,10 +4,10 @@ namespace ElementorPro\Modules\Forms\Classes;
 use Elementor\Settings;
 use Elementor\Widget_Base;
 use ElementorPro\Classes\Utils;
-use ElementorPro\Modules\Forms\Module;
-use ElementorPro\Plugin;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Integration with Google reCAPTCHA
@@ -30,13 +30,13 @@ class Recaptcha_Handler {
 	}
 
 	public static function get_setup_message() {
-		return __( 'To use reCAPTCHA, you need to add the API key and complete the setup process in Dashboard > Elementor > Settings > reCAPTCHA.', 'elementor-pro' );
+		return __( 'To use reCAPTCHA, you need to add the API Key and complete the setup process in Dashboard > Elementor > Settings > Integrations > reCAPTCHA.', 'elementor-pro' );
 	}
 
 	public function register_admin_fields( Settings $settings ) {
 		$settings->add_section( Settings::TAB_INTEGRATIONS, 'recaptcha', [
 			'label' => __( 'reCAPTCHA', 'elementor-pro' ),
-			'callback' => function () {
+			'callback' => function() {
 				echo __( '<a target="_blank" href="https://www.google.com/recaptcha/">reCAPTCHA</a> is a free service by Google that protects your website from spam and abuse. It does this while letting your valid users pass through with ease.', 'elementor-pro' );
 			},
 			'fields' => [
@@ -56,51 +56,6 @@ class Recaptcha_Handler {
 		] );
 	}
 
-	public function register_admin_fields_bc() {
-		// reCAPTCHA settings
-		$recaptcha_editor_section = 'elementor_recaptcha_editor_section';
-		$controls_class_name = 'Elementor\Settings_Controls';
-
-		add_settings_section(
-			$recaptcha_editor_section,
-			__( 'reCAPTCHA', 'elementor-pro' ),
-			function () {
-				echo __( '<a target="_blank" href="https://www.google.com/recaptcha/">reCAPTCHA</a> is a free service by Google that protects your website from spam and abuse. It does this while letting your valid users pass through with ease.', 'elementor-pro' );
-			},
-			Settings::PAGE_ID
-		);
-
-		$field_id = 'elementor_pro_recaptcha_site_key';
-		add_settings_field(
-			$field_id,
-			__( 'Site Key', 'elementor-pro' ),
-			[ $controls_class_name, 'render' ],
-			Settings::PAGE_ID,
-			$recaptcha_editor_section,
-			[
-				'id' => $field_id,
-				'type' => 'text',
-			]
-		);
-
-		register_setting( Settings::PAGE_ID, $field_id );
-
-		$field_id = 'elementor_pro_recaptcha_secret_key';
-		add_settings_field(
-			$field_id,
-			__( 'Secret Key', 'elementor-pro' ),
-			[ $controls_class_name, 'render' ],
-			Settings::PAGE_ID,
-			$recaptcha_editor_section,
-			[
-				'id' => $field_id,
-				'type' => 'text',
-			]
-		);
-
-		register_setting( Settings::PAGE_ID, $field_id );
-	}
-
 	public function localize_settings( $settings ) {
 		$settings = array_replace_recursive( $settings, [
 			'forms' => [
@@ -108,7 +63,7 @@ class Recaptcha_Handler {
 					'enabled' => self::is_enabled(),
 					'site_key' => self::get_site_key(),
 					'setup_message' => self::get_setup_message(),
-				]
+				],
 			],
 		] );
 		return $settings;
@@ -166,6 +121,7 @@ class Recaptcha_Handler {
 		$response_code = wp_remote_retrieve_response_code( $response );
 
 		if ( 200 !== (int) $response_code ) {
+			/* translators: %d: Response code. */
 			$ajax_handler->add_error( $field['id'], sprintf( __( 'Can not connect to the reCAPTCHA server (%d).', 'elementor-pro' ), $response_code ) );
 			return;
 		}
@@ -196,8 +152,6 @@ class Recaptcha_Handler {
 	 * @param $item
 	 * @param $item_index
 	 * @param $widget Widget_Base
-	 *
-	 * @return string
 	 */
 	public function render_field( $item, $item_index, $widget ) {
 		$recaptcha_html = '<div class="elementor-field" id="form-field-' . $item['_id'] . '">';
@@ -229,7 +183,7 @@ class Recaptcha_Handler {
 	}
 
 	public function add_field_type( $field_types ) {
-		$field_types['recaptcha'] = __( 'Recaptcha', 'elementor-pro' );
+		$field_types['recaptcha'] = __( 'reCAPTCHA', 'elementor-pro' );
 
 		return $field_types;
 	}
@@ -256,11 +210,7 @@ class Recaptcha_Handler {
 		}
 
 		if ( is_admin() ) {
-			if ( method_exists( Plugin::elementor()->settings, 'add_section' ) ) {
-				add_action( 'elementor/admin/after_create_settings/' . Settings::PAGE_ID, [ $this, 'register_admin_fields' ] );
-			} else {
-				add_action( 'admin_init', [ $this, 'register_admin_fields_bc' ], 21 ); // After the base settings
-			}
+			add_action( 'elementor/admin/after_create_settings/' . Settings::PAGE_ID, [ $this, 'register_admin_fields' ] );
 		}
 	}
 }

@@ -18,6 +18,9 @@ class PLL_Share_Term_Slug {
 		$this->options = &$polylang->options;
 		$this->model = &$polylang->model;
 		$this->links_model = &$polylang->links_model;
+
+		add_action( 'create_term', array( $this, 'save_term' ), 1, 3 );
+		add_action( 'edit_term', array( $this, 'save_term' ), 1, 3 );
 	}
 
 	/**
@@ -88,10 +91,10 @@ class PLL_Share_Term_Slug {
 	 * @since 1.9
 	 *
 	 * @param string        $slug
-	 * @param string|object $language the language slug or object
-	 * @param string        $taxonomy optional taxonomy name
-	 * @param int           $parent   optional parent term id
-	 * @return null|int the term_id of the found term
+	 * @param string|object $language The language slug or object
+	 * @param string        $taxonomy Optional taxonomy name
+	 * @param int           $parent   Optional parent term id
+	 * @return null|int The term_id of the found term
 	 */
 	protected function term_exists( $slug, $language, $taxonomy = '', $parent = 0 ) {
 		global $wpdb;
@@ -111,5 +114,37 @@ class PLL_Share_Term_Slug {
 		}
 
 		return $wpdb->get_var( $select . $join . $where );
+	}
+
+	/**
+	 * Ugly hack to enable the same slug in several languages
+	 *
+	 * @since 1.9
+	 *
+	 * @param int    $term_id
+	 * @param int    $tt_id    Term taxononomy id
+	 * @param string $taxonomy
+	 */
+	public function save_term( $term_id, $tt_id, $taxonomy ) {
+		global $wpdb;
+
+		// Does nothing except on taxonomies which are filterable
+		if ( ! $this->model->is_translated_taxonomy( $taxonomy ) || 0 === $this->options['force_lang'] ) {
+			return;
+		}
+
+		wp_cache_delete( $term_id, 'terms' ); // Forces deleting the get_term cache
+		$term = get_term( $term_id, $taxonomy );
+
+		if ( false === ( $pos = strpos( $term->slug, '___' ) ) ) {
+			return;
+		}
+
+		$slug = substr( $term->slug, 0, $pos );
+		$lang = substr( $term->slug, $pos + 3 );
+
+		// Need to check for unique slug as we tricked wp_unique_term_slug from WP
+		$slug = $this->unique_term_slug( $slug, $lang, (object) $term );
+		$wpdb->update( $wpdb->terms, compact( 'slug' ), compact( 'term_id' ) );
 	}
 }

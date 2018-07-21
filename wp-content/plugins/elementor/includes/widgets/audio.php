@@ -1,29 +1,94 @@
 <?php
 namespace Elementor;
 
+use Elementor\Modules\DynamicTags\Module as TagsModule;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+/**
+ * Elementor audio widget.
+ *
+ * Elementor widget that displays an audio player.
+ *
+ * @since 1.0.0
+ */
 class Widget_Audio extends Widget_Base {
+
+	/**
+	 * Current instance.
+	 *
+	 * @access protected
+	 *
+	 * @var array
+	 */
 	protected $_current_instance = [];
 
+	/**
+	 * Get widget name.
+	 *
+	 * Retrieve audio widget name.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return string Widget name.
+	 */
 	public function get_name() {
 		return 'audio';
 	}
 
+	/**
+	 * Get widget title.
+	 *
+	 * Retrieve audio widget title.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return string Widget title.
+	 */
 	public function get_title() {
 		return __( 'SoundCloud', 'elementor' );
 	}
 
+	/**
+	 * Get widget icon.
+	 *
+	 * Retrieve audio widget icon.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return string Widget icon.
+	 */
 	public function get_icon() {
 		return 'eicon-headphones';
 	}
 
-	public function get_categories() {
-		return [ 'general-elements' ];
+	/**
+	 * Get widget keywords.
+	 *
+	 * Retrieve the list of keywords the widget belongs to.
+	 *
+	 * @since 2.1.0
+	 * @access public
+	 *
+	 * @return array Widget keywords.
+	 */
+	public function get_keywords() {
+		return [ 'audio', 'player', 'soundcloud', 'embed' ];
 	}
 
+	/**
+	 * Register audio widget controls.
+	 *
+	 * Adds different input fields to allow the user to change and customize the widget settings.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 */
 	protected function _register_controls() {
 		$this->start_controls_section(
 			'section_audio',
@@ -37,6 +102,13 @@ class Widget_Audio extends Widget_Base {
 			[
 				'label' => __( 'Link', 'elementor' ),
 				'type' => Controls_Manager::URL,
+				'dynamic' => [
+					'active' => true,
+					'categories' => [
+						TagsModule::POST_META_CATEGORY,
+						TagsModule::URL_CATEGORY,
+					],
+				],
 				'default' => [
 					'url' => 'https://soundcloud.com/shchxango/john-coltrane-1963-my-favorite',
 				],
@@ -108,6 +180,20 @@ class Widget_Audio extends Widget_Base {
 		);
 
 		$this->add_control(
+			'sc_show_artwork',
+			[
+				'label' => __( 'Artwork', 'elementor' ),
+				'type' => Controls_Manager::SWITCHER,
+				'label_off' => __( 'Hide', 'elementor' ),
+				'label_on' => __( 'Show', 'elementor' ),
+				'default' => 'yes',
+				'condition' => [
+					'visual' => 'no',
+				],
+			]
+		);
+
+		$this->add_control(
 			'sc_sharing',
 			[
 				'label' => __( 'Share Button', 'elementor' ),
@@ -172,8 +258,16 @@ class Widget_Audio extends Widget_Base {
 
 	}
 
+	/**
+	 * Render audio widget output on the frontend.
+	 *
+	 * Written in PHP and used to generate the final HTML.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 */
 	protected function render() {
-		$settings = $this->get_settings();
+		$settings = $this->get_settings_for_display();
 
 		if ( empty( $settings['link'] ) ) {
 			return;
@@ -193,6 +287,18 @@ class Widget_Audio extends Widget_Base {
 		endif;
 	}
 
+	/**
+	 * Filter audio widget oEmbed results.
+	 *
+	 * Written in PHP and used to generate the final HTML.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param string $html The HTML returned by the oEmbed provider.
+	 *
+	 * @return string Filtered audio widget oEmbed HTML.
+	 */
 	public function filter_oembed_result( $html ) {
 		$param_keys = [
 			'auto_play',
@@ -203,6 +309,7 @@ class Widget_Audio extends Widget_Base {
 			'show_comments',
 			'show_playcount',
 			'show_user',
+			'show_artwork',
 		];
 
 		$params = [];
@@ -228,5 +335,13 @@ class Widget_Audio extends Widget_Base {
 		return $html;
 	}
 
+	/**
+	 * Render audio widget output in the editor.
+	 *
+	 * Written as a Backbone JavaScript template and used to generate the live preview.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 */
 	protected function _content_template() {}
 }

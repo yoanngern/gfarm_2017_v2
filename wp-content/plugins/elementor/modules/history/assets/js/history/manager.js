@@ -15,7 +15,8 @@ var	Manager = function() {
 		remove: elementor.translate( 'removed' ),
 		change: elementor.translate( 'edited' ),
 		move: elementor.translate( 'moved' ),
-		duplicate: elementor.translate( 'duplicated' )
+		paste_style: elementor.translate( 'style_pasted' ),
+		reset_style: elementor.translate( 'style_reset' )
 	};
 
 	var addBehaviors = function( behaviors ) {
@@ -84,17 +85,17 @@ var	Manager = function() {
 	};
 
 	var onPanelSave = function() {
-		// Check if it's a save after made changes, `items.length - 1` is the `Editing Started Item
-		var firstEditItem = items.at( items.length - 2 );
-		editorSaved = ( 'not_applied' === firstEditItem.get( 'status' ) );
+		if ( items.length >= 2 ) {
+			// Check if it's a save after made changes, `items.length - 1` is the `Editing Started Item
+			var firstEditItem = items.at( items.length - 2 );
+			editorSaved = ( 'not_applied' === firstEditItem.get( 'status' ) );
+		}
 	};
 
 	var init = function() {
 		addHotKeys();
 
 		elementor.hooks.addFilter( 'elements/base/behaviors', addBehaviors );
-		elementor.hooks.addFilter( 'elements/column/behaviors', addBehaviors );
-		elementor.hooks.addFilter( 'elements/section/behaviors', addBehaviors );
 		elementor.hooks.addFilter( 'elements/base-section-container/behaviors', addCollectionBehavior );
 
 		elementor.channels.data
@@ -107,8 +108,11 @@ var	Manager = function() {
 			.on( 'element:before:remove', self.startRemoveElement )
 			.on( 'element:after:remove', self.endItem )
 
-			.on( 'element:before:duplicate', self.startDuplicateElement )
-			.on( 'element:after:duplicate', self.endItem )
+			.on( 'element:before:paste:style', self.startPasteStyle )
+			.on( 'element:after:paste:style', self.endItem )
+
+			.on( 'element:before:reset:style', self.startResetStyle )
+			.on( 'element:after:reset:style', self.endItem )
 
 			.on( 'section:before:drop', self.startDropElement )
 			.on( 'section:after:drop', self.endItem )
@@ -185,12 +189,12 @@ var	Manager = function() {
 
 		var position = 0;
 
-		// Temp fix. insert the `remove` subItem before the section changes subItem,
-		// in a multi columns section - the structure has been changed
-		// in a one column section - it's filled with an empty column
-		// the order is important for the `redoItem`, that needed to change thr section first
-		// and only after - to remove the column.
-		if ( 'column' === itemData.elementType && 'remove' === itemData.type ) {
+		// Temp fix. On move a column - insert the `remove` subItem before the section changes subItem.
+		// In a multi columns section - the structure has been changed,
+		// In a one column section - it's filled with an empty column,
+		// The order is important for the `redoItem`, that needed to change the section first
+		// and only after that - to remove the column.
+		if ( 'column' === itemData.elementType && 'remove' === itemData.type && 'column' === currentItem.get( 'elementType' ) ) {
 			position = 1;
 		}
 
@@ -208,7 +212,7 @@ var	Manager = function() {
 	};
 
 	this.doItem = function( index ) {
-		// Don't track while restore the item
+		// Don't track while restoring the item
 		this.setActive( false );
 
 		var item = items.at( index );
@@ -253,7 +257,7 @@ var	Manager = function() {
 
 		if ( item.get( 'editing_started' ) ) {
 			if ( ! editorSaved ) {
-				elementor.setFlagEditorChange( false );
+				elementor.saver.setFlagEditorChange( false );
 			}
 		}
 	};
@@ -311,7 +315,7 @@ var	Manager = function() {
 			founded = false;
 
 		if ( ! views ) {
-			views = elementor.sections.currentView.children;
+			views = elementor.getPreviewView().children;
 		}
 
 		_.each( views._views, function( view ) {
@@ -335,7 +339,7 @@ var	Manager = function() {
 		elementor.history.history.startItem( {
 			type: 'move',
 			title: self.getModelLabel( model ),
-			elementType: model.get( 'elType' )
+			elementType: model.elType || model.get( 'elType' )
 		} );
 	};
 
@@ -365,9 +369,17 @@ var	Manager = function() {
 		} );
 	};
 
-	this.startDuplicateElement = function( model ) {
+	this.startPasteStyle = function( model ) {
 		elementor.history.history.startItem( {
-			type: 'duplicate',
+			type: 'paste_style',
+			title: self.getModelLabel( model ),
+			elementType: model.get( 'elType' )
+		} );
+	};
+
+	this.startResetStyle = function( model ) {
+		elementor.history.history.startItem( {
+			type: 'reset_style',
 			title: self.getModelLabel( model ),
 			elementType: model.get( 'elType' )
 		} );

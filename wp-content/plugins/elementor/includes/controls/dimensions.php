@@ -6,30 +6,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * A group of Dimensions settings (Top, Right, Bottom, Left) With the option to link them together
+ * Elementor dimension control.
  *
- * @param array  $default {
- *      @type integer       $top                     Default empty
- *      @type integer       $right                   Default empty
- *      @type integer       $bottom                  Default empty
- *      @type integer       $left                    Default empty
- *      @type string        $unit                    The selected CSS Unit. 'px', '%', 'em'
- *                                                   Default 'px'
- *      @type bool          $isLinked                Whether to link them together ( prevent set different values )
- *                                                   Default true
- * }
+ * A base control for creating dimension control. Displays input fields for top,
+ * right, bottom, left and the option to link them together.
  *
- * @param array|string $allowed_dimensions      Which fields to show, 'all' | 'horizontal' | 'vertical' | [ 'top', 'left' ... ]
- *                                              Default 'all'
- *
- * @since                         1.0.0
+ * @since 1.0.0
  */
 class Control_Dimensions extends Control_Base_Units {
 
+	/**
+	 * Get dimensions control type.
+	 *
+	 * Retrieve the control type, in this case `dimensions`.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return string Control type.
+	 */
 	public function get_type() {
 		return 'dimensions';
 	}
 
+	/**
+	 * Get dimensions control default values.
+	 *
+	 * Retrieve the default value of the dimensions control. Used to return the
+	 * default values while initializing the dimensions control.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return array Control default value.
+	 */
 	public function get_default_value() {
 		return array_merge(
 			parent::get_default_value(), [
@@ -42,6 +52,17 @@ class Control_Dimensions extends Control_Base_Units {
 		);
 	}
 
+	/**
+	 * Get dimensions control default settings.
+	 *
+	 * Retrieve the default settings of the dimensions control. Used to return the
+	 * default settings while initializing the dimensions control.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 *
+	 * @return array Control default settings.
+	 */
 	protected function get_default_settings() {
 		return array_merge(
 			parent::get_default_settings(), [
@@ -52,6 +73,16 @@ class Control_Dimensions extends Control_Base_Units {
 		);
 	}
 
+	/**
+	 * Render dimensions control output in the editor.
+	 *
+	 * Used to generate the control HTML in the editor using Underscore JS
+	 * template. The variables for the class are available using `data` JS
+	 * object.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 */
 	public function content_template() {
 		$dimensions = [
 			'top' => __( 'Top', 'elementor' ),
@@ -83,13 +114,19 @@ class Control_Dimensions extends Control_Base_Units {
 								disabled
 								<# } #>
 									/>
-							<label for="<?php echo $control_uid; ?>" class="elementor-control-dimension-label"><?php echo $dimension_title; ?></label>
+							<label for="<?php echo esc_attr( $control_uid ); ?>" class="elementor-control-dimension-label"><?php echo $dimension_title; ?></label>
 						</li>
 					<?php endforeach; ?>
 					<li>
-						<button class="elementor-link-dimensions tooltip-target" data-tooltip="<?php _e( 'Link values together', 'elementor' ); ?>">
-							<span class="elementor-linked"><i class="fa fa-link"></i></span>
-							<span class="elementor-unlinked"><i class="fa fa-chain-broken"></i></span>
+						<button class="elementor-link-dimensions tooltip-target" data-tooltip="<?php echo esc_attr__( 'Link values together', 'elementor' ); ?>">
+							<span class="elementor-linked">
+								<i class="fa fa-link" aria-hidden="true"></i>
+								<span class="elementor-screen-only"><?php echo __( 'Link values together', 'elementor' ); ?></span>
+							</span>
+							<span class="elementor-unlinked">
+								<i class="fa fa-chain-broken" aria-hidden="true"></i>
+								<span class="elementor-screen-only"><?php echo __( 'Unlinked values', 'elementor' ); ?></span>
+							</span>
 						</button>
 					</li>
 				</ul>

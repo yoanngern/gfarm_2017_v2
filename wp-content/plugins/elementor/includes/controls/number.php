@@ -6,33 +6,59 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * A simple number input control
+ * Elementor number control.
  *
- * @param integer $default  The default value
- *                          Default empty
- * @param integer $min      The minimum number (Only affects the spinners, the user can still type a lower value)
- *                          Default empty
- * @param integer $max      The maximum number (Only affects the spinners, the user can still type a higher value)
- *                          Default empty
- * @param integer $step     The intervals value that will be incremented or decremented when using the controls' spinners
- *                          Default empty (The value will be incremented by 1)
+ * A base control for creating a number control. Displays a simple number input.
  *
  * @since 1.0.0
  */
 class Control_Number extends Base_Data_Control {
 
+	/**
+	 * Get number control type.
+	 *
+	 * Retrieve the control type, in this case `number`.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return string Control type.
+	 */
 	public function get_type() {
 		return 'number';
 	}
 
-	public function get_default_settings() {
+	/**
+	 * Get number control default settings.
+	 *
+	 * Retrieve the default settings of the number control. Used to return the
+	 * default settings while initializing the number control.
+	 *
+	 * @since 1.5.0
+	 * @access protected
+	 *
+	 * @return array Control default settings.
+	 */
+	protected function get_default_settings() {
 		return [
 			'min' => '',
 			'max' => '',
 			'step' => '',
+			'placeholder' => '',
+			'title' => '',
 		];
 	}
 
+	/**
+	 * Render number control output in the editor.
+	 *
+	 * Used to generate the control HTML in the editor using Underscore JS
+	 * template. The variables for the class are available using `data` JS
+	 * object.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 */
 	public function content_template() {
 		$control_uid = $this->get_control_uid();
 		?>

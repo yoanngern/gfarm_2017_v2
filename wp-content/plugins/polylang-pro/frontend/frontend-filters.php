@@ -6,6 +6,7 @@
  * @since 1.2
  */
 class PLL_Frontend_Filters extends PLL_Filters {
+	private $tax_query_lang;
 
 	/**
 	 * Constructor: setups filters and actions
@@ -28,23 +29,19 @@ class PLL_Frontend_Filters extends PLL_Filters {
 
 		// Filters categories and post tags by language
 		add_filter( 'terms_clauses', array( $this, 'terms_clauses' ), 10, 3 );
+		add_action( 'pre_get_posts', array( $this, 'set_tax_query_lang' ), 999 );
+		add_action( 'posts_selection', array( $this, 'unset_tax_query_lang' ), 0 );
 
-		// Rewrites archives, next and previous post links to filter them by language
+		// Rewrites archives links to filter them by language
 		add_filter( 'getarchives_join', array( $this, 'getarchives_join' ), 10, 2 );
 		add_filter( 'getarchives_where', array( $this, 'getarchives_where' ), 10, 2 );
-		add_filter( 'get_previous_post_join', array( $this, 'posts_join' ), 10, 5 );
-		add_filter( 'get_next_post_join', array( $this, 'posts_join' ), 10, 5 );
-		add_filter( 'get_previous_post_where', array( $this, 'posts_where' ), 10, 5 );
-		add_filter( 'get_next_post_where', array( $this, 'posts_where' ), 10, 5 );
 
 		// Filters the widgets according to the current language
 		add_filter( 'widget_display_callback', array( $this, 'widget_display_callback' ), 10, 2 );
 		add_filter( 'sidebars_widgets', array( $this, 'sidebars_widgets' ) );
 
 		if ( $this->options['media_support'] ) {
-			foreach ( array( 'audio', 'image', 'video' ) as $media ) {
-				add_filter( "widget_media_{$media}_instance", array( $this, 'widget_media_instance' ), 1 ); // Since WP 4.8
-			}
+			add_filter( 'widget_media_image_instance', array( $this, 'widget_media_instance' ), 1 ); // Since WP 4.8
 		}
 
 		// Strings translation ( must be applied before WordPress applies its default formatting filters )
@@ -69,6 +66,11 @@ class PLL_Frontend_Filters extends PLL_Filters {
 		if ( isset( $_POST['wp_customize'], $_POST['customized'] ) ) {
 			add_filter( 'pre_option_blogname', 'pll__', 20 );
 			add_filter( 'pre_option_blogdescription', 'pll__', 20 );
+		}
+
+		// FIXME test get_user_locale for backward compatibility with WP < 4.7
+		if ( Polylang::is_ajax_on_front() && function_exists( 'get_user_locale' ) ) {
+			add_filter( 'load_textdomain_mofile', array( $this, 'load_textdomain_mofile' ) );
 		}
 	}
 
@@ -130,7 +132,14 @@ class PLL_Frontend_Filters extends PLL_Filters {
 	 * @return array
 	 */
 	public function get_terms_args( $args ) {
-		$lang = isset( $args['lang'] ) ? $args['lang'] : $this->curlang->slug;
+		if ( isset( $args['lang'] ) ) {
+			$lang = $args['lang'];
+		} elseif ( isset( $this->tax_query_lang ) ) {
+			$lang = $args['lang'] = empty( $this->tax_query_lang ) && ! empty( $args['slug'] ) ? $this->curlang->slug : $this->tax_query_lang;
+		} else {
+			$lang = $this->curlang->slug;
+		}
+
 		$key = '_' . ( is_array( $lang ) ? implode( ',', $lang ) : $lang );
 		$args['cache_domain'] = empty( $args['cache_domain'] ) ? 'pll' . $key : $args['cache_domain'] . $key;
 		return $args;
@@ -158,6 +167,28 @@ class PLL_Frontend_Filters extends PLL_Filters {
 	}
 
 	/**
+	 * Sets the WP_Term_Query language when doing a WP_Query
+	 * Needed since WP 4.9
+	 *
+	 * @since 2.3.2
+	 *
+	 * @param object $query WP_Query object
+	 */
+	public function set_tax_query_lang( $query ) {
+		$this->tax_query_lang = isset( $query->query_vars['lang'] ) ? $query->query_vars['lang'] : '';
+	}
+
+	/**
+	 * Removes the WP_Term_Query language filter for WP_Query
+	 * Needed since WP 4.9
+	 *
+	 * @since 2.3.2
+	 */
+	public function unset_tax_query_lang() {
+		unset( $this->tax_query_lang );
+	}
+
+	/**
 	 * Modifies the sql request for wp_get_archives to filter by the current language
 	 *
 	 * @since 1.9
@@ -181,38 +212,6 @@ class PLL_Frontend_Filters extends PLL_Filters {
 	 */
 	public function getarchives_where( $sql, $r ) {
 		return ! empty( $r['post_type'] ) && $this->model->is_translated_post_type( $r['post_type'] ) ? $sql . $this->model->post->where_clause( $this->curlang ) : $sql;
-	}
-
-	/**
-	 * Modifies the sql request for get_adjacent_post to filter by the current language
-	 *
-	 * @since 0.1
-	 *
-	 * @param string  $sql            The JOIN clause in the SQL.
-	 * @param bool    $in_same_term   Whether post should be in a same taxonomy term.
-	 * @param array   $excluded_terms Array of excluded term IDs.
-	 * @param string  $taxonomy       Taxonomy. Used to identify the term used when `$in_same_term` is true.
-	 * @param WP_Post $post           WP_Post object.
-	 * @return string modified JOIN clause
-	 */
-	public function posts_join( $sql, $in_same_term, $excluded_terms, $taxonomy = '', $post = null ) {
-		return $this->model->is_translated_post_type( $post->post_type ) ? $sql . $this->model->post->join_clause( 'p' ) : $sql;
-	}
-
-	/**
-	 * Modifies the sql request for wp_get_archives and get_adjacent_post to filter by the current language
-	 *
-	 * @since 0.1
-	 *
-	 * @param string  $sql            The WHERE clause in the SQL.
-	 * @param bool    $in_same_term   Whether post should be in a same taxonomy term.
-	 * @param array   $excluded_terms Array of excluded term IDs.
-	 * @param string  $taxonomy       Taxonomy. Used to identify the term used when `$in_same_term` is true.
-	 * @param WP_Post $post           WP_Post object.
-	 * @return string modified WHERE clause
-	 */
-	public function posts_where( $sql, $in_same_term, $excluded_terms, $taxonomy = '', $post = null ) {
-		return $this->model->is_translated_post_type( $post->post_type ) ? $sql . $this->model->post->where_clause( $this->curlang ) : $sql;
 	}
 
 	/**
@@ -365,5 +364,19 @@ class PLL_Frontend_Filters extends PLL_Filters {
 				$this->model->term->set_language( $term_id, $this->curlang );
 			}
 		}
+	}
+
+	/**
+	 * Filters the translation files to load when doing ajax on front
+	 * This is needed because WP the language files associated to the user locale when a user is logged in
+	 *
+	 * @since 2.2.6
+	 *
+	 * @param string $mofile Translation file name
+	 * @return string
+	 */
+	public function load_textdomain_mofile( $mofile ) {
+		$user_locale = get_user_locale();
+		return str_replace( "{$user_locale}.mo", "{$this->curlang->locale}.mo", $mofile );
 	}
 }

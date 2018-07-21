@@ -64,18 +64,12 @@ class Honeypot_Handler {
 	public function update_controls( Widget_Base $widget ) {
 		$elementor = Plugin::elementor();
 
-		// Check if elementor free is higher than 1.6.0
-		if ( method_exists( $widget, 'get_unique_name' ) ) {
-			$widget_name = $widget->get_unique_name();
-		} else {
-			$widget_name = $widget->get_name();
-		}
-
-		$control_data = $elementor->controls_manager->get_control_from_stack( $widget_name, 'form_fields' );
+		$control_data = $elementor->controls_manager->get_control_from_stack( $widget->get_unique_name(), 'form_fields' );
 
 		if ( is_wp_error( $control_data ) ) {
 			return;
 		}
+
 		foreach ( $control_data['fields'] as $index => $field ) {
 			if ( 'required' === $field['name'] || 'width' === $field['name'] ) {
 				$control_data['fields'][ $index ]['conditions']['terms'][] = [
@@ -88,7 +82,7 @@ class Honeypot_Handler {
 			}
 		}
 
-		$elementor->controls_manager->update_control_in_stack( $widget, 'form_fields', $control_data );
+		$widget->update_control( 'form_fields', $control_data );
 	}
 
 	public function __construct() {

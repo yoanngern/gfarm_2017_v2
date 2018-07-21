@@ -51,7 +51,7 @@ class PLL_Frontend_Share_Term_Slug extends PLL_Share_Term_Slug {
 			if ( isset( $traces[ $n ]['function'], $traces[ $n ]['args'][0] ) && 'get_term_by' === $traces[ $n ]['function'] ) {
 				$field = $traces[ $n ]['args'][0];
 
-				if ( in_array( $field , array( 'slug', 'name' ) ) ) {
+				if ( in_array( $field, array( 'slug', 'name' ) ) ) {
 					$join = "INNER JOIN {$wpdb->term_taxonomy} AS tt ON t.term_id = tt.term_id" . $this->model->term->join_clause();
 					$where = $wpdb->prepare( "WHERE tt.taxonomy = %s AND t.{$field} = %s", $taxonomy, $term->$field ) . $this->model->term->where_clause( $this->curlang );
 					$term = $wpdb->get_row( "SELECT t.*, tt.* FROM {$wpdb->terms} AS t {$join} {$where} LIMIT 1" );

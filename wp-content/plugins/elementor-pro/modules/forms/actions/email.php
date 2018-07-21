@@ -7,7 +7,9 @@ use ElementorPro\Modules\Forms\Classes\Ajax_Handler;
 use ElementorPro\Modules\Forms\Classes\Action_Base;
 use ElementorPro\Modules\Forms\Classes\Form_Record;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 class Email extends Action_Base {
 
@@ -44,6 +46,7 @@ class Email extends Action_Base {
 			]
 		);
 
+		/* translators: %s: Site title. */
 		$default_message = sprintf( __( 'New message from "%s"', 'elementor-pro' ), get_option( 'blogname' ) );
 
 		$widget->add_control(
@@ -111,7 +114,6 @@ class Email extends Action_Base {
 				'label' => __( 'Cc', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXT,
 				'default' => '',
-				'placeholder' => '',
 				'title' => __( 'Separate emails with commas', 'elementor-pro' ),
 				'render_type' => 'none',
 			]
@@ -123,7 +125,6 @@ class Email extends Action_Base {
 				'label' => __( 'Bcc', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXT,
 				'default' => '',
-				'placeholder' => '',
 				'title' => __( 'Separate emails with commas', 'elementor-pro' ),
 				'render_type' => 'none',
 			]
@@ -176,12 +177,13 @@ class Email extends Action_Base {
 
 	public function on_export( $element ) {
 		$controls_to_unset = [
-			 'email_to',
-			 'email_from',
-			 'email_from_name',
-			 'email_subject',
-			 'email_to_cc',
-			 'email_to_bcc',
+			'email_to',
+			'email_from',
+			'email_from_name',
+			'email_subject',
+			'email_reply_to',
+			'email_to_cc',
+			'email_to_bcc',
 		];
 
 		foreach ( $controls_to_unset as $base_id ) {
@@ -199,6 +201,7 @@ class Email extends Action_Base {
 
 		$fields = [
 			'email_to' => get_option( 'admin_email' ),
+			/* translators: %s: Site title. */
 			'email_subject' => sprintf( __( 'New message from "%s"', 'elementor-pro' ), get_bloginfo( 'name' ) ),
 			'email_content' => '[all-fields]',
 			'email_from_name' => get_bloginfo( 'name' ),
@@ -251,11 +254,31 @@ class Email extends Action_Base {
 			$headers .= 'Content-Type: text/html; charset=UTF-8' . "\r\n";
 		}
 
+		$cc_header = '';
 		if ( ! empty( $fields['email_to_cc'] ) ) {
 			$cc_header = 'Cc: ' . $fields['email_to_cc'] . "\r\n";
 		}
 
+		/**
+		 * Email headers.
+		 *
+		 * Filters the additional headers sent when the form send an email.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string|array $headers Additional headers.
+		 */
 		$headers = apply_filters( 'elementor_pro/forms/wp_mail_headers', $headers );
+
+		/**
+		 * Email content.
+		 *
+		 * Filters the content of the email sent by the form.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $email_content Email content.
+		 */
 		$fields['email_content'] = apply_filters( 'elementor_pro/forms/wp_mail_message', $fields['email_content'] );
 
 		$email_sent = wp_mail( $fields['email_to'], $fields['email_subject'], $fields['email_content'], $headers . $cc_header );
@@ -267,6 +290,16 @@ class Email extends Action_Base {
 			}
 		}
 
+		/**
+		 * Elementor form mail sent.
+		 *
+		 * Fires when an email was sent successfully.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array       $settings Form settings.
+		 * @param Form_Record $record   An instance of the form record.
+		 */
 		do_action( 'elementor_pro/forms/mail_sent', $settings, $record );
 
 		if ( ! $email_sent ) {

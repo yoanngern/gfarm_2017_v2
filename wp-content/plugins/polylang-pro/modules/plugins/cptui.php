@@ -14,10 +14,6 @@ class PLL_CPTUI {
 	 * @since 2.1
 	 */
 	public function init() {
-		if ( ! defined( 'CPTUI_VERSION' ) ) {
-			return;
-		}
-
 		add_filter( 'cptui_pre_register_post_type', array( $this, 'translate_strings' ) );
 		add_filter( 'cptui_pre_register_taxonomy', array( $this, 'translate_strings' ) );
 
@@ -114,8 +110,8 @@ class PLL_CPTUI {
 	 *
 	 * @since 2.1
 	 *
-	 * @param array $types       List of post type or taxonomies names
-	 * @param bool  $is_settings true when displaying the list in Polylang settings
+	 * @param array $types       List of post type or taxonomy names
+	 * @param bool  $is_settings True when displaying the list in Polylang settings
 	 * @return array
 	 */
 	public function pll_get_types( $types, $is_settings ) {

@@ -6,24 +6,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * A Box Shadow set of controls
+ * Elementor box shadow control.
  *
- * @param array  $default    {
- *      @type integer $horizontal Default 0
- *      @type integer $vertical   Default 0
- *      @type integer $blur       Default 10
- *      @type integer $spread     Default 0
- *      @type string  $color      Shadow color, in rgb|rgba|hex format.
- * }
+ * A base control for creating box shadows control. Displays input fields for
+ * horizontal shadow, vertical shadow, shadow blur, shadow spread and shadow
+ * color.
  *
  * @since 1.0.0
  */
 class Control_Box_Shadow extends Control_Base_Multiple {
 
+	/**
+	 * Get box shadow control type.
+	 *
+	 * Retrieve the control type, in this case `box_shadow`.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return string Control type.
+	 */
 	public function get_type() {
 		return 'box_shadow';
 	}
 
+	/**
+	 * Get box shadow control default value.
+	 *
+	 * Retrieve the default value of the box shadow control. Used to return the
+	 * default values while initializing the box shadow control.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return array Control default value.
+	 */
 	public function get_default_value() {
 		return [
 			'horizontal' => 0,
@@ -34,18 +51,19 @@ class Control_Box_Shadow extends Control_Base_Multiple {
 		];
 	}
 
+	/**
+	 * Get box shadow control sliders.
+	 *
+	 * Retrieve the sliders of the box shadow control. Sliders are used while
+	 * rendering the control output in the editor.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return array Control sliders.
+	 */
 	public function get_sliders() {
 		return [
-			'blur' => [
-				'label' => __( 'Blur', 'elementor' ),
-				'min' => 0,
-				'max' => 100,
-			],
-			'spread' => [
-				'label' => __( 'Spread', 'elementor' ),
-				'min' => -100,
-				'max' => 100,
-			],
 			'horizontal' => [
 				'label' => __( 'Horizontal', 'elementor' ),
 				'min' => -100,
@@ -56,28 +74,42 @@ class Control_Box_Shadow extends Control_Base_Multiple {
 				'min' => -100,
 				'max' => 100,
 			],
+			'blur' => [
+				'label' => __( 'Blur', 'elementor' ),
+				'min' => 0,
+				'max' => 100,
+			],
+			'spread' => [
+				'label' => __( 'Spread', 'elementor' ),
+				'min' => -100,
+				'max' => 100,
+			],
 		];
 	}
 
+	/**
+	 * Render box shadow control output in the editor.
+	 *
+	 * Used to generate the control HTML in the editor using Underscore JS
+	 * template. The variables for the class are available using `data` JS
+	 * object.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 */
 	public function content_template() {
 		?>
 		<#
 		var defaultColorValue = '';
 
 		if ( data.default.color ) {
-			if ( '#' !== data.default.color.substring( 0, 1 ) ) {
-				defaultColorValue = '#' + data.default.color;
-			} else {
-				defaultColorValue = data.default.color;
-			}
-
-			defaultColorValue = ' data-default-color=' + defaultColorValue; // Quotes added automatically.
+			defaultColorValue = ' data-default-color=' + data.default.color; // Quotes added automatically.
 		}
 		#>
 		<div class="elementor-control-field">
-			<label class="elementor-control-title"><?php _e( 'Color', 'elementor' ); ?></label>
+			<label class="elementor-control-title"><?php echo __( 'Color', 'elementor' ); ?></label>
 			<div class="elementor-control-input-wrapper">
-				<input data-setting="color" class="elementor-shadow-color-picker" type="text" maxlength="7" placeholder="<?php esc_attr_e( 'Hex Value', 'elementor' ); ?>" data-alpha="true"{{{ defaultColorValue }}} />
+				<input data-setting="color" class="elementor-shadow-color-picker" type="text" placeholder="<?php echo esc_attr( 'Hex/rgba', 'elementor' ); ?>" data-alpha="true"{{{ defaultColorValue }}} />
 			</div>
 		</div>
 		<?php
@@ -85,11 +117,11 @@ class Control_Box_Shadow extends Control_Base_Multiple {
 			$control_uid = $this->get_control_uid( $slider_name );
 			?>
 			<div class="elementor-shadow-slider">
-				<label for="<?php echo $control_uid; ?>" class="elementor-control-title"><?php echo $slider['label']; ?></label>
+				<label for="<?php echo esc_attr( $control_uid ); ?>" class="elementor-control-title"><?php echo $slider['label']; ?></label>
 				<div class="elementor-control-input-wrapper">
-					<div class="elementor-slider" data-input="<?php echo $slider_name; ?>"></div>
+					<div class="elementor-slider" data-input="<?php echo esc_attr( $slider_name ); ?>"></div>
 					<div class="elementor-slider-input">
-						<input id="<?php echo $control_uid; ?>" type="number" min="<?php echo $slider['min']; ?>" max="<?php echo $slider['max']; ?>" data-setting="<?php echo $slider_name; ?>"/>
+						<input id="<?php echo esc_attr( $control_uid ); ?>" type="number" min="<?php echo esc_attr( $slider['min'] ); ?>" max="<?php echo esc_attr( $slider['max'] ); ?>" data-setting="<?php echo esc_attr( $slider_name ); ?>"/>
 					</div>
 				</div>
 			</div>

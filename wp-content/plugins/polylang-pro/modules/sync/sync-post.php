@@ -6,7 +6,7 @@
  * @since 2.1
  */
 class PLL_Sync_Post {
-	public $model, $sync, $duplicate, $filters_post, $buttons;
+	public $options, $model, $sync, $duplicate, $filters_post, $buttons;
 	protected $temp_synchronized;
 
 	/**
@@ -17,6 +17,7 @@ class PLL_Sync_Post {
 	 * @param object $polylang
 	 */
 	public function __construct( &$polylang ) {
+		$this->options = &$polylang->options;
 		$this->model = &$polylang->model;
 		$this->sync = &$polylang->sync;
 		$this->duplicate = &$polylang->duplicate;
@@ -67,10 +68,10 @@ class PLL_Sync_Post {
 	 *
 	 * @since 2.1
 	 *
-	 * @param array $keys list of custom fields names
-	 * @param bool  $sync true if it is synchronization, false if it is a copy
-	 * @param int   $from id of the post from which we copy informations
-	 * @param int   $to   id of the post to which we paste informations
+	 * @param array $keys List of custom fields names
+	 * @param bool  $sync True if it is synchronization, false if it is a copy
+	 * @param int   $from Id of the post from which we copy the information
+	 * @param int   $to   Id of the post to which we paste the information
 	 * @return array
 	 */
 	public function copy_post_metas( $keys, $sync, $from, $to ) {
@@ -121,6 +122,16 @@ class PLL_Sync_Post {
 			// Temporarily sync group, even if false === $save_group as we need synchronized posts to copy *all* taxonomies and post metas
 			$this->temp_synchronized[ $post_id ][ $tr_id ] = true;
 
+			// Maybe duplicates the featured image
+			if ( $this->options['media_support'] ) {
+				add_filter( 'pll_translate_post_meta', array( $this->duplicate, 'duplicate_thumbnail' ), 10, 3 );
+			}
+
+			add_filter( 'pll_maybe_translate_term', array( $this->duplicate, 'duplicate_term' ), 10, 3 );
+
+			$this->sync->taxonomies->copy( $post_id, $tr_id, $lang );
+			$this->sync->post_metas->copy( $post_id, $tr_id, $lang );
+
 			$_POST['post_tr_lang'][ $lang ] = $tr_id; // Hack to avoid creating multiple posts if the original post is saved several times (ex WooCommerce 2.7+)
 
 			/** This action is documented in admin/admin-filters-post.php */
@@ -159,11 +170,23 @@ class PLL_Sync_Post {
 			$columns[] = 'post_status';
 		}
 
-		$tr_post = array_intersect_key( (array) $tr_post, array_flip( $columns ) );
+		/**
+		 * Filters the post fields to synchronize when synchronizing posts
+		 *
+		 * @since 2.3
+		 *
+		 * @param array  $fields     WP_Post fields to synchronize
+		 * @param int    $post_id    Post id of the source post
+		 * @param string $lang       Target language
+		 * @param bool   $save_group True to update the synchronization group, false otherwise
+		 */
+		$columns = apply_filters( 'pll_sync_post_fields', array_combine( $columns, $columns ), $post_id, $lang, $save_group );
+
+		$tr_post = array_intersect_key( (array) $tr_post, $columns );
 		$wpdb->update( $wpdb->posts, $tr_post, array( 'ID' => $tr_id ) ); // Don't use wp_update_post to avoid conflict (reverse sync)
 		clean_post_cache( $tr_id );
 
-		// Keep this here as teh 'save_post' action is fired before the sticky status is updated in DB
+		// Keep this here as the 'save_post' action is fired before the sticky status is updated in DB
 		isset( $_REQUEST['sticky'] ) && 'sticky' === $_REQUEST['sticky'] ? stick_post( $tr_id ) : unstick_post( $tr_id );
 
 		return $tr_id; // May be useful when the method is used by a 3rd party.
@@ -239,7 +262,7 @@ class PLL_Sync_Post {
 			}
 		} else {
 			$sync_post[] = $lang;
-			$d['sync'] = empty( $d['sync'] ) ? array_fill_keys( $sync_post, $lang ) : array_merge( array_diff( $d['sync'], array( $lang ) ),  array_fill_keys( $sync_post, $lang ) );
+			$d['sync'] = empty( $d['sync'] ) ? array_fill_keys( $sync_post, $lang ) : array_merge( array_diff( $d['sync'], array( $lang ) ), array_fill_keys( $sync_post, $lang ) );
 		}
 
 		wp_update_term( (int) $term->term_id, 'post_translations', array( 'description' => serialize( $d ) ) );
@@ -251,7 +274,7 @@ class PLL_Sync_Post {
 	 * @since 2.1
 	 *
 	 * @param int $post_id
-	 * @return array an associative array of with language code as key and post id as value
+	 * @return array An associative array of arrays with language code as key and post id as value
 	 */
 	public function get( $post_id ) {
 		$term = $this->model->post->get_object_term( $post_id, 'post_translations' );

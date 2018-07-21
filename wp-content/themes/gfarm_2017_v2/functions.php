@@ -1,15 +1,15 @@
 <?php
 
-function themeslug_enqueue_style() {
-	wp_enqueue_style( 'core', get_template_directory_uri() . '/style.css', false );
+function gfarm_enqueue_style() {
+	wp_enqueue_style( 'gfarm-style', get_template_directory_uri() . '/style.css', false, wp_get_theme()->get( 'Version' ) );
 }
 
-function themeslug_enqueue_script() {
-	wp_enqueue_script( 'my-js', get_template_directory_uri() . '/js/main.min.js', false );
+function gfarm_enqueue_script() {
+	wp_enqueue_script( 'gfarm-js', get_template_directory_uri() . '/js/main.min.js', false, wp_get_theme()->get( 'Version' ) );
 }
 
-add_action( 'wp_enqueue_scripts', 'themeslug_enqueue_style' );
-add_action( 'wp_enqueue_scripts', 'themeslug_enqueue_script' );
+add_action( 'wp_enqueue_scripts', 'gfarm_enqueue_style' );
+add_action( 'wp_enqueue_scripts', 'gfarm_enqueue_script' );
 
 
 add_action( 'elementor/widgets/widgets_registered', function () {
@@ -250,57 +250,51 @@ function my_wp_nav_menu_objects_sub_menu( $sorted_menu_items, $args ) {
 	}
 }
 
-function get_field_or_parent( $field, $post_id, $taxonomy = 'category', $term = "" ) {
+function get_field_or_parent( $field, $post, $taxonomy = 'category' ) {
 
-	if ( $term !== "" ) {
-		global $post;
-
-		$term_id = $term . "_" . $post_id;
-
-		$field_return = get_field( $field, $term_id );
-
-	} else {
-
-		if ( $post_id === null ) {
-			global $post;
-		} else {
-			$post = get_post( $post_id );
-		}
-
-		$field_return = get_field( $field, $post->ID );
+	if ( is_int( $post ) ) {
+		$post = get_post( $post );
 	}
+
+
+	$field_return = get_field( $field, $post );
 
 
 	if ( ! $field_return ) :
 
+
 		$categories = get_the_terms( $post->ID, $taxonomy );
 
-		foreach ( $categories as $category ) :
 
-			$field_return = get_field( $field, $category );
+		if ( $categories ) :
+			foreach ( $categories as $category ) :
 
-			if ( $field_return ) {
-				break;
-			}
+				$field_return = get_field( $field, $category );
 
-			while ( ! $field_return && $category->parent != null ) {
-
-				$current_cat      = get_term( $category->parent, $taxonomy );
-				$new_field_return = get_field( $field, $current_cat );
-
-				if ( $new_field_return ) {
-					$field_return = $new_field_return;
-				}
 
 				if ( $field_return ) {
 					break;
 				}
 
-				$category = $current_cat;
+				while ( ! $field_return && $category->parent != null ) {
 
-			}
+					$current_cat      = get_term( $category->parent, $taxonomy );
+					$new_field_return = get_field( $field, $current_cat );
 
-		endforeach;
+					if ( $new_field_return ) {
+						$field_return = $new_field_return;
+					}
+
+					if ( $field_return ) {
+						break;
+					}
+
+					$category = $current_cat;
+
+				}
+
+			endforeach;
+		endif;
 
 		return $field_return;
 

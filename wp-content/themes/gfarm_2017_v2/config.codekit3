@@ -7,21 +7,24 @@
 		"uuidString": "1D0A0F81-8219-4547-91A9-3C716911AAB3"
 		}
 	],
-"creatorBuild": "25900",
+"creatorBuild": "26680",
 "files": {
 	"\/404.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 0,
 		"oAP": "\/404.php",
 		"oF": 0
 		},
 	"\/browserconfig.xml": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/browserconfig.xml",
 		"oF": 0
 		},
 	"\/content-page.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 0,
 		"oAP": "\/content-page.php",
@@ -38,246 +41,287 @@
 		"oS": 0
 		},
 	"\/fonts\/akrobat-black-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-black-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-black-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-black-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-black-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-black-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-bold-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-bold-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-bold-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-bold-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-bold-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-bold-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-extrabold-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-extrabold-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-extrabold-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-extrabold-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-extrabold-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-extrabold-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-extralight-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-extralight-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-extralight-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-extralight-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-extralight-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-extralight-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-light-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-light-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-light-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-light-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-light-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-light-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-regular-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-regular-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-regular-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-regular-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-regular-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-regular-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-semibold-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-semibold-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-semibold-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-semibold-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-semibold-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-semibold-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-thin-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-thin-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-thin-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-thin-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/akrobat-thin-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/akrobat-thin-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-bold-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-bold-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-bold-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-bold-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-bold-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-bold-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-extrabold-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-extrabold-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-extrabold-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-extrabold-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-extrabold-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-extrabold-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-light-demo.html": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-light-demo.html",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-light-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-light-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-light-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-light-webfont.woff2",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-webfont.woff": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-webfont.woff",
 		"oF": 0
 		},
 	"\/fonts\/gearedslab-webfont.woff2": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/fonts\/gearedslab-webfont.woff2",
 		"oF": 0
 		},
 	"\/footer.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 0,
 		"oAP": "\/footer.php",
 		"oF": 0
 		},
 	"\/functions.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 0,
 		"oAP": "\/functions.php",
 		"oF": 0
 		},
 	"\/header-event.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/header-event.php",
 		"oF": 0
 		},
 	"\/header-events.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/header-events.php",
 		"oF": 0
 		},
 	"\/header.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 0,
 		"oAP": "\/header.php",
@@ -546,6 +590,7 @@
 		"q": 100
 		},
 	"\/images\/browserconfig.xml": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/images\/browserconfig.xml",
@@ -609,6 +654,7 @@
 	"\/images\/facebook_default_home.jpg": {
 		"ft": 16384,
 		"iS": 512949,
+		"jF": 0,
 		"oA": 0,
 		"oAP": "\/images\/facebook_default_home.jpg",
 		"oF": 0,
@@ -650,6 +696,7 @@
 		"q": 100
 		},
 	"\/images\/favicon.ico": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/images\/favicon.ico",
@@ -668,6 +715,7 @@
 	"\/images\/footer_bg.jpg": {
 		"ft": 16384,
 		"iS": 277211,
+		"jF": 0,
 		"oA": 0,
 		"oAP": "\/images\/footer_bg.jpg",
 		"oF": 0,
@@ -759,6 +807,7 @@
 		"q": 100
 		},
 	"\/index.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 0,
 		"oAP": "\/index.php",
@@ -865,6 +914,7 @@
 		"tS": 0
 		},
 	"\/js\/vendor\/handlebars-intl\/handlebars-intl-with-locales.js.map": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/js\/vendor\/handlebars-intl\/handlebars-intl-with-locales.js.map",
@@ -881,6 +931,7 @@
 		"tS": 0
 		},
 	"\/js\/vendor\/handlebars-intl\/handlebars-intl-with-locales.min.js.map": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/js\/vendor\/handlebars-intl\/handlebars-intl-with-locales.min.js.map",
@@ -897,6 +948,7 @@
 		"tS": 0
 		},
 	"\/js\/vendor\/handlebars-intl\/handlebars-intl.js.map": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/js\/vendor\/handlebars-intl\/handlebars-intl.js.map",
@@ -913,6 +965,7 @@
 		"tS": 0
 		},
 	"\/js\/vendor\/handlebars-intl\/handlebars-intl.min.js.map": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/js\/vendor\/handlebars-intl\/handlebars-intl.min.js.map",
@@ -3279,18 +3332,21 @@
 		"tS": 0
 		},
 	"\/page.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 0,
 		"oAP": "\/page.php",
 		"oF": 0
 		},
 	"\/page_elementor.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/page_elementor.php",
 		"oF": 0
 		},
 	"\/page_home.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 0,
 		"oAP": "\/page_home.php",
@@ -3308,348 +3364,406 @@
 		"q": 100
 		},
 	"\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_admin.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_admin.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_color.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_color.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_font.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_font.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_functions.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_functions.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_intro.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/_intro.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/admin.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/admin.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/intro.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/intro.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/style.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/00dca98eae06ac6314d1ad7a2c04afa3b608a258\/style.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/content.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/content.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/custom.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/custom.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/espresso_events.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/espresso_events.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/events.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/events.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/footer.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/footer.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/header.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/header.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/home.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/home.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/slider.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/slider.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/subnav.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/3b23117fe9e6218802138d5cd69216cc3512bf50\/subnav.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_color.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_color.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_font.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_font.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_functions.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_functions.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_intro.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_intro.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_reset.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/57571046503df43045dcc1036c4603fac1068ee9\/_reset.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/5d2ac9a37c980aa2651256cf71ae1a559aee4c9c\/style.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/5d2ac9a37c980aa2651256cf71ae1a559aee4c9c\/style.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_admin.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_admin.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_color.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_color.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_font.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_font.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_footer.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_footer.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_functions.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_functions.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_header.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_header.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_intro.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_intro.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_reset.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_reset.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_slides.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/_slides.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/style.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/80509735523dc04b22d4df3d925f2e8b029f9950\/style.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_color.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_color.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_font.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_font.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_functions.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_functions.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_intro.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_intro.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_reset.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9388b68e6cf3aaf3f3fe9e4ccb4fd4f4be85643e\/_reset.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_admin.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_admin.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_color.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_color.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_font.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_font.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_footer.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_footer.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_functions.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_functions.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_header.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_header.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_intro.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_intro.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_map.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_map.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_reset.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_reset.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_slides.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 1,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/_slides.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/style.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/9b79a7c401b767d340130330b9c09707a7d97346\/style.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/content.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/content.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/custom.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/custom.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/espresso_events.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/espresso_events.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/events.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/events.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/footer.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/footer.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/header.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/header.scssc",
 		"oF": 0
 		},
 	"\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/subnav.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/subnav.scssc",
 		"oF": 0
 		},
 	"\/scss\/advanced\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/footer.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/advanced\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/footer.scssc",
 		"oF": 0
 		},
 	"\/scss\/advanced\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/header.scssc": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/scss\/advanced\/.sass-cache\/be572fa12770979464d0839fc375968a7ffd17c4\/header.scssc",
@@ -3881,66 +3995,63 @@
 		"oS": 0
 		},
 	"\/template-parts\/blog\/index.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/template-parts\/blog\/index.php",
 		"oF": 0
 		},
 	"\/template-parts\/blog\/none.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/template-parts\/blog\/none.php",
 		"oF": 0
 		},
 	"\/template-parts\/event\/event.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/template-parts\/event\/event.php",
 		"oF": 0
 		},
 	"\/template-parts\/event\/index.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/template-parts\/event\/index.php",
 		"oF": 0
 		},
 	"\/template-parts\/event\/item.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/template-parts\/event\/item.php",
 		"oF": 0
 		},
 	"\/template-parts\/event\/list.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/template-parts\/event\/list.php",
 		"oF": 0
 		},
 	"\/template-parts\/event\/none.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/template-parts\/event\/none.php",
 		"oF": 0
 		},
 	"\/template-parts\/event\/single.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/template-parts\/event\/single.php",
 		"oF": 0
 		},
-	"\/template-parts\/people\/people_details.php": {
-		"ft": 8192,
-		"oA": 2,
-		"oAP": "\/template-parts\/people\/people_details.php",
-		"oF": 0
-		},
-	"\/template-parts\/people\/people_simple.php": {
-		"ft": 8192,
-		"oA": 2,
-		"oAP": "\/template-parts\/people\/people_simple.php",
-		"oF": 0
-		},
 	"\/widgets\/articles_list.php": {
+		"cB": 0,
 		"ft": 8192,
 		"oA": 2,
 		"oAP": "\/widgets\/articles_list.php",
@@ -3955,7 +4066,8 @@
 	"creationDate": 499879615,
 	"displayValue": "Gospel Farm 2017 v2",
 	"displayValueWasSetByUser": 1,
-	"iconImageName": "\/apple-touch-icon.png"
+	"iconImageName": "meme-crying",
+	"iconImageWasSetByUser": 0
 	},
 "projectSettings": {
 	"abortBuildOnError": 1,
@@ -3963,6 +4075,7 @@
 	"animateCSSInjections": 1,
 	"autoBuildNewItems": 1,
 	"autoprefixerBrowserString": "> 1%, last 2 versions, Firefox ESR, Opera 12.1",
+	"autoprefixerEnableIEGrid": 0,
 	"babelAuxiliaryCommentAfter": "",
 	"babelAuxiliaryCommentBefore": "",
 	"babelConfigFileHandlingType": 0,
@@ -4491,6 +4604,10 @@
 			"active": 0,
 			"optionString": "'expression'"
 			},
+		"function-paren-newline": {
+			"active": 0,
+			"optionString": "'multiline'"
+			},
 		"generator-star-spacing": {
 			"active": 0,
 			"optionString": "{'before': true, 'after': false}"
@@ -4522,6 +4639,10 @@
 		"id-match": {
 			"active": 0,
 			"optionString": "'^[a-z]+([A-Z][a-z]+)*$', {'properties': false, 'onlyDeclarations': true}"
+			},
+		"implicit-arrow-linebreak": {
+			"active": 0,
+			"optionString": "'beside'"
 			},
 		"indent": {
 			"active": 0,
@@ -4555,9 +4676,9 @@
 			"active": 0,
 			"optionString": "{'beforeBlockComment': true}"
 			},
-		"lines-around-directive": {
+		"lines-between-class-members": {
 			"active": 0,
-			"optionString": "{'before': 'always', 'after': 'always'}"
+			"optionString": "'always', {exceptAfterSingleLine: false}"
 			},
 		"max-depth": {
 			"active": 0,
@@ -4587,6 +4708,10 @@
 			"active": 0,
 			"optionString": "{'max': 1}"
 			},
+		"multiline-comment-style": {
+			"active": 0,
+			"optionString": "'starred-block'"
+			},
 		"multiline-ternary": {
 			"active": 0,
 			"optionString": "'always'"
@@ -4596,14 +4721,6 @@
 			"optionString": "{'newIsCap': true, 'capIsNew': true, 'newIsCapExceptions': [], 'capIsNewExceptions': ['Array', 'Boolean', 'Date', 'Error', 'Function', 'Number', 'Object', 'RegExp', 'String', 'Symbol'], 'properties': true}"
 			},
 		"new-parens": {
-			"active": 0,
-			"optionString": ""
-			},
-		"newline-after-var": {
-			"active": 0,
-			"optionString": "'always'"
-			},
-		"newline-before-return": {
 			"active": 0,
 			"optionString": ""
 			},
@@ -5345,7 +5462,7 @@
 			}
 		},
 	"esLintSourceType": 0,
-	"externalServerAddress": "dev.gospel-farm.ch",
+	"externalServerAddress": "http:\/\/gospel-farm.ch",
 	"gitIgnoreBuildFolder": 1,
 	"hideConfigFile": 0,
 	"jsCheckerReservedNamesString": "",
@@ -5707,7 +5824,8 @@
 		"createSourceMap": 0,
 		"minifyOutput": 1,
 		"outputStyle": 0,
-		"syntaxCheckerStyle": 1
+		"syntaxCheckerStyle": 1,
+		"transpilerStyle": 1
 		},
 	"languageDefaultsCSS": {
 		"autoOutputAction": 2,
@@ -5740,6 +5858,7 @@
 		"noEscapeInAttributes": 0,
 		"outputFormat": 2,
 		"outputStyle": 0,
+		"shouldRunCacheBuster": 0,
 		"useCDATA": 0,
 		"useDoubleQuotes": 0,
 		"useUnixNewlines": 0
@@ -5751,6 +5870,7 @@
 		"autoOutputPathReplace1": "",
 		"autoOutputPathReplace2": "",
 		"autoOutputPathStyle": 0,
+		"outputFormat": 0,
 		"quality": 100
 		},
 	"languageDefaultsJS": {
@@ -5781,7 +5901,8 @@
 		"autoOutputPathRelativePath": "",
 		"autoOutputPathReplace1": "",
 		"autoOutputPathReplace2": "",
-		"autoOutputPathStyle": 0
+		"autoOutputPathStyle": 0,
+		"shouldRunCacheBuster": 0
 		},
 	"languageDefaultsLESS": {
 		"allowInsecureImports": 0,
@@ -5813,13 +5934,13 @@
 		"enableFootnotes": 1,
 		"enableLabels": 1,
 		"enableSmartQuotes": 1,
-		"escapeLineBreaks": 0,
 		"maskEmailAddresses": 1,
 		"outputFormat": 0,
 		"outputStyle": 0,
 		"parseMetadata": 1,
 		"processHTML": 0,
 		"randomFootnoteNumbers": 0,
+		"shouldRunCacheBuster": 0,
 		"useCompatibilityMode": 0
 		},
 	"languageDefaultsOTHER": {
@@ -5828,7 +5949,8 @@
 		"autoOutputPathRelativePath": "",
 		"autoOutputPathReplace1": "",
 		"autoOutputPathReplace2": "",
-		"autoOutputPathStyle": 0
+		"autoOutputPathStyle": 0,
+		"shouldRunCacheBuster": 0
 		},
 	"languageDefaultsPNG": {
 		"autoOutputAction": 0,
@@ -5848,7 +5970,8 @@
 		"autoOutputPathReplace2": "",
 		"autoOutputPathStyle": 0,
 		"compileDebug": 1,
-		"outputStyle": 0
+		"outputStyle": 0,
+		"shouldRunCacheBuster": 0
 		},
 	"languageDefaultsSASS": {
 		"autoOutputAction": 0,
@@ -5876,7 +5999,8 @@
 		"logicless": 0,
 		"outputFormat": 0,
 		"outputStyle": 1,
-		"railsCompatible": 0
+		"railsCompatible": 0,
+		"shouldRunCacheBuster": 0
 		},
 	"languageDefaultsSTYLUS": {
 		"autoOutputAction": 0,

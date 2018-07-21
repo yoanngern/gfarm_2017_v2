@@ -1,29 +1,22 @@
 <?php
 namespace ElementorPro\Modules\Forms\Classes;
 
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 use ElementorPro\Modules\Forms\Module;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Form_Base extends Widget_Base {
-
-	public function get_name() {}
-
-	public function get_title() {}
-
-	public function get_icon() {}
-
-	public function get_categories() {
-		return [ 'pro-elements' ];
-	}
+abstract class Form_Base extends Base_Widget {
 
 	public function on_export( $element ) {
 		/** @var \ElementorPro\Modules\Forms\Classes\Action_Base[] $actions */
 		$actions = Module::instance()->get_form_actions();
 
 		foreach ( $actions as $action ) {
-			$element = $action->on_export( $element );
+			$new_element_data = $action->on_export( $element );
+			if ( null !== $new_element_data ) {
+				$element = $new_element_data;
+			}
 		}
 
 		return $element;
@@ -57,8 +50,7 @@ class Form_Base extends Widget_Base {
 		}
 
 		if ( $item['required'] ) {
-			$this->add_render_attribute( 'textarea' . $item_index , 'required', true );
-			$this->add_render_attribute( 'textarea' . $item_index , 'aria-required', 'true' );
+			$this->add_required_attribute( 'textarea' . $item_index );
 		}
 
 		return '<textarea ' . $this->get_render_attribute_string( 'textarea' . $item_index ) . '></textarea>';
@@ -75,7 +67,7 @@ class Form_Base extends Widget_Base {
 					],
 				],
 				'select' . $i => [
-					'name' => $this->get_attribute_name( $item ),
+					'name' => $this->get_attribute_name( $item ) . ( ! empty( $item['allow_multiple'] ) ? '[]' : '' ),
 					'id' => $this->get_attribute_id( $item ),
 					'class' => [
 						'elementor-field-textual',
@@ -86,8 +78,14 @@ class Form_Base extends Widget_Base {
 		);
 
 		if ( $item['required'] ) {
-			$this->add_render_attribute( 'select' . $i , 'required', true );
-			$this->add_render_attribute( 'select' . $i , 'aria-required', 'true' );
+			$this->add_required_attribute( 'select' . $i );
+		}
+
+		if ( $item['allow_multiple'] ) {
+			$this->add_render_attribute( 'select' . $i, 'multiple' );
+			if ( ! empty( $item['select_size'] ) ) {
+				$this->add_render_attribute( 'select' . $i, 'size', $item['select_size'] );
+			}
 		}
 
 		$options = preg_split( "/\\r\\n|\\r|\\n/", $item['field_options'] );
@@ -100,8 +98,7 @@ class Form_Base extends Widget_Base {
 		?>
 		<div <?php echo $this->get_render_attribute_string( 'select-wrapper' . $i ); ?>>
 			<select <?php echo $this->get_render_attribute_string( 'select' . $i ); ?>>
-				<?php
-				foreach ( $options as $option ) : ?>
+				<?php foreach ( $options as $option ) : ?>
 					<option value="<?php echo esc_attr( $option ); ?>"><?php echo $option; ?></option>
 				<?php endforeach; ?>
 			</select>
@@ -117,12 +114,24 @@ class Form_Base extends Widget_Base {
 		if ( $options ) {
 			$html .= '<div class="elementor-field-subgroup ' . esc_attr( $item['css_classes'] ) . ' ' . $item['inline_list'] . '">';
 			foreach ( $options as $key => $option ) {
-				$html .= '<span class="elementor-field-option"><input type="' . $type . '"
-							value="' . esc_attr( $option ) . '"
-							id="' . $this->get_attribute_id( $item_index ) . '-' . $key . '"
-							name="' . $this->get_attribute_name( $item ) . ( ( 'checkbox' === $type && count( $options ) > 1 ) ? '[]"' : '"' ) .
-							( ( $item['required'] && 'radio' === $type ) ? ' required aria-required="true"' : '' ) . '>
-							<label for="' . $this->get_attribute_id( $item ) . '-' . $key . '">' . $option . '</label></span>';
+				$element_id = $item['_id'] . $key;
+				$html_id = $this->get_attribute_id( $item ) . '-' . $key;
+
+				$this->add_render_attribute(
+					$element_id,
+					[
+						'type' => $type,
+						'value' => esc_attr( $option ),
+						'id' => $html_id,
+						'name' => $this->get_attribute_name( $item ) . ( ( 'checkbox' === $type && count( $options ) > 1 ) ? '[]' : '' ),
+					]
+				);
+
+				if ( $item['required'] && 'radio' === $type ) {
+					$this->add_required_attribute( $element_id );
+				}
+
+				$html .= '<span class="elementor-field-option"><input ' . $this->get_render_attribute_string( $element_id ) . '> <label for="' . $html_id . '">' . $option . '</label></span>';
 			}
 			$html .= '</div>';
 		}
@@ -137,6 +146,7 @@ class Form_Base extends Widget_Base {
 						'elementor-field-type-' . $item['field_type'],
 						'elementor-field-group',
 						'elementor-column',
+						'elementor-field-group-' . $item['_id'],
 					],
 				],
 				'input' . $i => [
@@ -150,7 +160,7 @@ class Form_Base extends Widget_Base {
 					],
 				],
 				'label' . $i => [
-					'for' => $this->get_attribute_id( $i ),
+					'for' => $this->get_attribute_id( $item ),
 					'class' => 'elementor-field-label',
 				],
 			]
@@ -163,15 +173,19 @@ class Form_Base extends Widget_Base {
 		$this->add_render_attribute( 'field-group' . $i, 'class', 'elementor-col-' . $item['width'] );
 
 		if ( ! empty( $item['width_tablet'] ) ) {
-			$this->add_render_attribute( 'field-group' . $i , 'class' , 'elementor-md-' . $item['width_tablet'] );
+			$this->add_render_attribute( 'field-group' . $i, 'class', 'elementor-md-' . $item['width_tablet'] );
+		}
+
+		if ( $item['allow_multiple'] ) {
+			$this->add_render_attribute( 'field-group' . $i, 'class', 'elementor-field-type-' . $item['field_type'] . '-multiple' );
 		}
 
 		if ( ! empty( $item['width_mobile'] ) ) {
-			$this->add_render_attribute( 'field-group' . $i , 'class' , 'elementor-sm-' . $item['width_mobile'] );
+			$this->add_render_attribute( 'field-group' . $i, 'class', 'elementor-sm-' . $item['width_mobile'] );
 		}
 
 		if ( ! empty( $item['placeholder'] ) ) {
-			$this->add_render_attribute( 'input' . $i , 'placeholder', $item['placeholder'] );
+			$this->add_render_attribute( 'input' . $i, 'placeholder', $item['placeholder'] );
 		}
 
 		if ( ! $instance['show_labels'] ) {
@@ -183,19 +197,23 @@ class Form_Base extends Widget_Base {
 			if ( ! empty( $instance['mark_required'] ) ) {
 				$class .= ' elementor-mark-required';
 			}
-			$this->add_render_attribute( 'field-group' . $i , 'class', $class )
-				 ->add_render_attribute( 'input' . $i , 'required', true )
-				 ->add_render_attribute( 'input' . $i , 'aria-required', 'true' );
+			$this->add_render_attribute( 'field-group' . $i, 'class', $class );
+			$this->add_required_attribute( 'input' . $i );
 		}
 	}
 
 	public function render_plain_content() {}
 
-	protected function get_attribute_name( $item ) {
+	public function get_attribute_name( $item ) {
 		return "form_fields[{$item['_id']}]";
 	}
 
-	protected function get_attribute_id( $item ) {
+	public function get_attribute_id( $item ) {
 		return 'form-field-' . $item['_id'];
+	}
+
+	private function add_required_attribute( $element ) {
+		$this->add_render_attribute( $element, 'required', 'required' );
+		$this->add_render_attribute( $element, 'aria-required', 'true' );
 	}
 }

@@ -5,7 +5,7 @@
 
     <div class="content">
 
-        <a href="/" class="logo_gfarm"></a>
+        <a href="<?php echo pll_home_url(); ?>" class="logo_gfarm"></a>
 
         <div class="text">
 
@@ -15,7 +15,7 @@
         </div>
 
         <div class="gw">
-            <span>Membre de</span>
+            <span><?php pll_e( 'Membre de' ); ?></span>
             <a href="http://gospel-wave.org" class="logo_gw"></a>
         </div>
 

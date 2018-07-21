@@ -5,7 +5,7 @@ use Elementor\Group_Control_Image_Size;
 use Elementor\Group_Control_Typography;
 use Elementor\Scheme_Color;
 use Elementor\Scheme_Typography;
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 use ElementorPro\Modules\QueryControl\Controls\Group_Control_Posts;
 use ElementorPro\Modules\QueryControl\Module;
 use Elementor\Controls_Manager;
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 /**
  * Class Portfolio
  */
-class Portfolio extends Widget_Base {
+class Portfolio extends Base_Widget {
 
 	/**
 	 * @var \WP_Query
@@ -34,10 +34,6 @@ class Portfolio extends Widget_Base {
 
 	public function get_icon() {
 		return 'eicon-gallery-grid';
-	}
-
-	public function get_categories() {
-		return [ 'pro-elements' ];
 	}
 
 	public function get_script_depends() {
@@ -107,7 +103,6 @@ class Portfolio extends Widget_Base {
 			Group_Control_Image_Size::get_type(),
 			[
 				'name' => 'thumbnail_size',
-				'label' => __( 'Image Size', 'elementor-pro' ),
 				'exclude' => [ 'custom' ],
 				'default' => 'medium',
 				'prefix_class' => 'elementor-portfolio--thumbnail-size-',
@@ -203,7 +198,6 @@ class Portfolio extends Widget_Base {
 			Group_Control_Posts::get_type(),
 			[
 				'name' => 'posts',
-				'label' => __( 'Posts', 'elementor-pro' ),
 			]
 		);
 
@@ -382,7 +376,6 @@ class Portfolio extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'typography_title',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-portfolio-item__title',
 				'condition' => [
@@ -438,7 +431,6 @@ class Portfolio extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'typography_filter',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-portfolio__filter',
 			]
@@ -594,7 +586,7 @@ class Portfolio extends Widget_Base {
 		<ul class="elementor-portfolio__filters">
 			<li class="elementor-portfolio__filter elementor-active" data-filter="__all"><?php echo __( 'All', 'elementor-pro' ); ?></li>
 			<?php foreach ( $terms as $term ) { ?>
-				<li class="elementor-portfolio__filter" data-filter="<?php echo $term->term_id; ?>"><?php echo $term->name; ?></li>
+				<li class="elementor-portfolio__filter" data-filter="<?php echo esc_attr( $term->term_id ); ?>"><?php echo $term->name; ?></li>
 			<?php } ?>
 		</ul>
 		<?php
@@ -697,4 +689,6 @@ class Portfolio extends Widget_Base {
 		$this->render_overlay_footer();
 		$this->render_post_footer();
 	}
+
+	public function render_plain_content() {}
 }

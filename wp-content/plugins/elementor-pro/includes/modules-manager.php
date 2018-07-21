@@ -14,26 +14,37 @@ final class Manager {
 	public function __construct() {
 		$modules = [
 			'query-control',
+			'custom-css',
+			// role-manager Must be before Global Widget
+			'role-manager',
+			'global-widget',
+			'assets-manager',
+
+			// Modules with Widgets.
+			'theme-builder',
 			'posts',
 			'slides',
 			'forms',
+			'nav-menu',
 			'animated-headline',
-			//'nav-menu',
 			'pricing',
 			'flip-box',
+			'call-to-action',
+			'carousel',
 			'countdown',
-			'woocommerce',
 			'share-buttons',
-			'custom-css',
-			'global-widget',
+			'theme-elements',
+			'blockquote',
+			'woocommerce',
+			'social',
 			'library',
+			'dynamic-tags',
+			'sticky',
 		];
 
 		foreach ( $modules as $module_name ) {
 			$class_name = str_replace( '-', ' ', $module_name );
-
 			$class_name = str_replace( ' ', '', ucwords( $class_name ) );
-
 			$class_name = __NAMESPACE__ . '\\Modules\\' . $class_name . '\Module';
 
 			/** @var Module_Base $class_name */

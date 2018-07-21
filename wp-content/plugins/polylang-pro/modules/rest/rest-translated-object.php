@@ -13,26 +13,40 @@ abstract class PLL_REST_Translated_Object {
 	 * Constructor
 	 *
 	 * @since 2.2
+	 * @since 2.2.1 $content_types is an array of arrays
 	 *
 	 * @param object $model         Instance of PLL_Model
-	 * @param array  $content_types Array of of post types or taxonomies
+	 * @param array  $content_types Array of arrays with post types or taxonomies as keys and options as values
+	 *                              The possible options are:
+	 *                              filters:      whether to filter queries, defaults to true
+	 *                              lang:         whether to return the language in the response, defaults to true
+	 *                              translations: whether to return the translations in the response, defaults to true
 	 */
 	public function __construct( &$model, $content_types ) {
 		$this->model = &$model;
 
-		foreach ( $content_types as $type ) {
-			add_filter( "rest_{$type}_query", array( $this, 'query' ), 10, 2 );
-			add_filter( "rest_{$type}_collection_params", array( $this, 'collection_params' ) );
+		foreach ( $content_types as $type => $args ) {
 
-			register_rest_field( $type, 'lang', array(
-				'get_callback'    => array( $this, 'get_language' ),
-				'update_callback' => array( $this, 'set_language' ),
-			) );
+			$args = wp_parse_args( $args, array_fill_keys( array( 'filters', 'lang', 'translations' ), true ) );
 
-			register_rest_field( $type, 'translations', array(
-				'get_callback' => array( $this, 'get_translations' ),
-				'update_callback' => array( $this, 'save_translations' ),
-			) );
+			if ( $args['filters'] ) {
+				add_filter( "rest_{$type}_query", array( $this, 'query' ), 10, 2 );
+				add_filter( "rest_{$type}_collection_params", array( $this, 'collection_params' ) );
+			}
+
+			if ( $args['lang'] ) {
+				register_rest_field( $type, 'lang', array(
+					'get_callback'    => array( $this, 'get_language' ),
+					'update_callback' => array( $this, 'set_language' ),
+				) );
+			}
+
+			if ( $args['translations'] ) {
+				register_rest_field( $type, 'translations', array(
+					'get_callback' => array( $this, 'get_translations' ),
+					'update_callback' => array( $this, 'save_translations' ),
+				) );
+			}
 		}
 	}
 
@@ -90,7 +104,9 @@ abstract class PLL_REST_Translated_Object {
 	 * @return bool
 	 */
 	public function set_language( $lang, $object ) {
-		$this->model->{$this->type}->set_language( $object->{$this->id}, $lang );
+		if ( isset( $object->{$this->id} ) ) { // Test to avoid a warning with WooCommerce
+			$this->model->{$this->type}->set_language( $object->{$this->id}, $lang );
+		}
 		return true;
 	}
 
@@ -112,11 +128,13 @@ abstract class PLL_REST_Translated_Object {
 	 * @since 2.2
 	 *
 	 * @param array  $translations Array of translations with language codes as keys and object ids as values
-	 * @param object $object      Instance of WP_Post or WP_Term
+	 * @param object $object       Instance of WP_Post or WP_Term
 	 * @return bool
 	 */
 	public function save_translations( $translations, $object ) {
-		$this->model->{$this->type}->save_translations( $object->{$this->id}, $translations );
+		if ( isset( $object->{$this->id} ) ) { // Test to avoid a warning with WooCommerce
+			$this->model->{$this->type}->save_translations( $object->{$this->id}, $translations );
+		}
 		return true;
 	}
 }

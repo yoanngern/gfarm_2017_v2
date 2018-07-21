@@ -6,7 +6,6 @@
  * @since 1.9
  */
 class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
-	public $curlang;
 
 	/**
 	 * Constructor
@@ -17,16 +16,15 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 	 * @param object $curlang     Current language
 	 */
 	public function __construct( &$slugs_model, &$curlang ) {
-		parent::__construct( $slugs_model );
+		parent::__construct( $slugs_model, $curlang );
 
 		$this->model = &$slugs_model->model;
 		$this->links_model = &$slugs_model->links_model;
-		$this->curlang = &$curlang;
 
 		// Translates slugs in archive link
 		if ( $this->links_model->using_permalinks ) {
-			foreach ( array( 'author_link', 'post_type_archive_link', 'search_link', 'get_pagenum_link', 'attachment_link' ) as $filter ) {
-				add_filter( $filter, array( $this, 'translate_slug' ), 20, 'post_type_archive_link' == $filter ? 2 : 1 );
+			foreach ( array( 'author_link', 'search_link', 'get_pagenum_link', 'attachment_link' ) as $filter ) {
+				add_filter( $filter, array( $this, 'translate_slug' ), 20 );
 			}
 		}
 
@@ -39,42 +37,13 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 	}
 
 	/**
-	 * Translate the slugs
-	 *
-	 * @since 1.9
-	 *
-	 * @param string $link
-	 * @param string $post_type optional
-	 * @return string modified link
-	 */
-	public function translate_slug( $link, $post_type = '' ) {
-		if ( empty( $this->curlang ) ) {
-			return $link;
-		}
-
-		$types = array(
-			'post_type_archive_link' => 'archive_' . $post_type,
-			'get_pagenum_link'       => 'paged',
-			'author_link'            => 'author',
-			'attachment_link'        => 'attachment',
-			'search_link'            => 'search',
-		);
-		$link = $this->slugs_model->translate_slug( $link, $this->curlang, $types[ current_filter() ] );
-
-		if ( ! empty( $GLOBALS['wp_rewrite'] ) ) {
-			$link = $this->slugs_model->translate_slug( $link, $this->curlang, 'front' );
-		}
-		return $link;
-	}
-
-	/**
 	 * Translate the slugs in archive urls
 	 *
 	 * @since 1.9
 	 *
 	 * @param string $url
 	 * @param object $language
-	 * @return string modified url
+	 * @return string Modified url
 	 */
 	public function pll_get_archive_url( $url, $language ) {
 		if ( is_post_type_archive() && ( $post_type = get_query_var( 'post_type' ) ) ) {
@@ -111,7 +80,7 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 	 *
 	 * @param string $redirect_url
 	 * @param object $language
-	 * @return string modified canonical url
+	 * @return string Modified canonical url
 	 */
 	public function pll_check_canonical_url( $redirect_url, $language ) {
 		global $wp_query, $post;
@@ -120,8 +89,7 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 
 		if ( is_post_type_archive() ) {
 			$obj = $wp_query->get_queried_object();
-			$slug = true == $obj->has_archive ? $obj->rewrite['slug'] : $obj->has_archive;
-			$slugs[] = 'archive_' . $slug;
+			$slugs[] = 'archive_' . $obj->name;
 		}
 
 		elseif ( is_single() || is_page() ) {
@@ -195,9 +163,9 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 	 *
 	 * @since 1.9
 	 *
-	 * @param string $_link url to modify
-	 * @param string $link  original url to modify
-	 * @return string modified link
+	 * @param string $_link Url to modify
+	 * @param string $link  Original url to modify
+	 * @return string Modified link
 	 */
 	public function remove_paged_from_link( $_link, $link ) {
 		if ( isset( $this->slugs_model->translated_slugs['paged'] ) ) {
@@ -217,10 +185,10 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 	 *
 	 * @since 2.0.6
 	 *
-	 * @param string $_url url to modify
-	 * @param string $url  original url to modify
+	 * @param string $_url Url to modify
+	 * @param string $url  Original url to modify
 	 * @param int    $page
-	 * @return string modified url
+	 * @return string Modified url
 	 */
 	public function add_paged_to_link( $_url, $url, $page ) {
 		if ( isset( $this->slugs_model->translated_slugs['paged'] ) ) {
@@ -229,5 +197,4 @@ class PLL_Frontend_Translate_Slugs extends PLL_Translate_Slugs {
 		}
 		return $_url;
 	}
-
 }

@@ -15,10 +15,6 @@ class PLL_TEC {
 	 * @since 2.2
 	 */
 	public function init() {
-		if ( ! class_exists( 'Tribe__Events__Main' ) ) {
-			return;
-		}
-
 		add_filter( 'pll_get_taxonomies', array( $this, 'translate_taxonomies' ), 10, 2 );
 		add_filter( 'pll_get_post_types', array( $this, 'translate_types' ), 10, 2 );
 
@@ -38,8 +34,10 @@ class PLL_TEC {
 			add_filter( 'tribe_display_event_linked_post_dropdown_id', array( $this, 'translate_linked_post' ), 10, 2 );
 		}
 
+		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 60 ); // After TEC
+
 		add_filter( 'pll_copy_post_metas', array( $this, 'copy_post_metas' ) );
-		add_action( 'pll_save_post', array( $this, 'pll_save_post' ), 20, 3 ); // After metas synchronization in PLL_Admin_Sync
+		add_filter( 'pll_translate_post_meta', array( $this, 'translate_meta' ), 10, 3 );
 
 		// Translate links with translated slugs
 		add_action( 'init', array( $this, 'reset_slugs' ), 11 ); // Just after TEC
@@ -67,10 +65,12 @@ class PLL_TEC {
 			add_filter( 'pll_sanitize_string_translation', array( $this, 'sanitize_strings' ), 10, 3 );
 		}
 
+		// Translate strings on frontend
 		if ( PLL() instanceof PLL_Frontend ) {
-			add_action( 'option_tribe_events_calendar_options', array( $this, 'translate_strings' ) ); // Translate strings on frontend
-			add_action( 'parse_query', array( $this, 'parse_query' ) );
+			add_action( 'option_tribe_events_calendar_options', array( $this, 'translate_strings' ) );
 		}
+
+		add_filter( 'pll_filter_query_excluded_query_vars', array( $this, 'fix_events_query' ), 10, 2 );
 	}
 
 	/**
@@ -78,9 +78,9 @@ class PLL_TEC {
 	 *
 	 * @since 2.2
 	 *
-	 * @param array $taxonomies list of taxonomy names for which Polylang manages language and translations
-	 * @param bool  $hide       true when displaying the list in Polylang settings
-	 * @return array list of taxonomy names for which Polylang manages language and translations
+	 * @param array $taxonomies List of taxonomy names for which Polylang manages language and translations
+	 * @param bool  $hide       True when displaying the list in Polylang settings
+	 * @return array List of taxonomy names for which Polylang manages language and translations
 	 */
 	public function translate_taxonomies( $taxonomies, $hide ) {
 		// Hide from Polylang settings
@@ -92,9 +92,9 @@ class PLL_TEC {
 	 *
 	 * @since 2.2
 	 *
-	 * @param array $types list of post type names for which Polylang manages language and translations
-	 * @param bool  $hide  true when displaying the list in Polylang settings
-	 * @return array list of post type names for which Polylang manages language and translations
+	 * @param array $types List of post type names for which Polylang manages language and translations
+	 * @param bool  $hide  True when displaying the list in Polylang settings
+	 * @return array List of post type names for which Polylang manages language and translations
 	 */
 	public function translate_types( $types, $hide ) {
 		$tec_types = array( 'tribe_events', 'tribe_venue', 'tribe_organizer' );
@@ -126,8 +126,8 @@ class PLL_TEC {
 	 * @since 2.2
 	 *
 	 * @param mixed  $value
-	 * @param int    $id     post id
-	 * @param string $meta   meta key
+	 * @param int    $id     Post id
+	 * @param string $meta   Meta key
 	 * @param bool   $single
 	 * @return mixed
 	 */
@@ -160,7 +160,7 @@ class PLL_TEC {
 				$translations[ $lang ] = $tr_id = wp_insert_post( $post );
 				pll_set_post_language( $tr_id, $lang );
 				pll_save_post_translations( $translations );
-				PLL()->sync->copy_post_metas( $post_id, $tr_id, $lang );
+				PLL()->sync->post_metas->copy( $post_id, $tr_id, $lang );
 			}
 			$posts[ $key ] = $tr_id;
 		}
@@ -180,11 +180,27 @@ class PLL_TEC {
 	}
 
 	/**
+	 * Removes date filters when searching for untranslated events in the metabox autocomplete field
+	 *
+	 * @since 2.2.8
+	 *
+	 * @param object $query WP_Query object
+	 */
+	public function pre_get_posts( $query ) {
+		if ( wp_doing_ajax() && isset( $_GET['action'] ) && 'pll_posts_not_translated' === $_GET['action'] ) {
+			// See Tribe__Events__Query::pre_get_posts() when should_remove_date_filters() returns true
+			remove_filter( 'posts_where', array( Tribe__Events__Query, 'posts_where' ), 10, 2 );
+			remove_filter( 'posts_fields', array( Tribe__Events__Query, 'posts_fields' ) );
+			remove_filter( 'posts_orderby', array( Tribe__Events__Query, 'posts_orderby' ), 10, 2 );
+		}
+	}
+
+	/**
 	 * Synchronize event metas
 	 *
 	 * @since 2.2
 	 *
-	 * @param array $metas custom fields to copy or synchronize
+	 * @param array $metas Custom fields to copy or synchronize
 	 * @return array
 	 */
 	public function copy_post_metas( $metas ) {
@@ -192,49 +208,20 @@ class PLL_TEC {
 	}
 
 	/**
-	 * Synchronizes venue and organizer across events translations
+	 * Translate venues and organizers before they are copied or synchronized
 	 *
-	 * @since 2.2
+	 * @since 2.3
 	 *
-	 * @param int    $post_id      post id
-	 * @param object $post         post object
-	 * @param array  $translations post translations
+	 * @param mixed  $value Meta value
+	 * @param string $key   Meta key
+	 * @param string $lang  Language of target
+	 * @return mixed
 	 */
-	public function pll_save_post( $post_id, $post, $translations ) {
-		if ( 'tribe_events' === $post->post_type ) {
-			// Synchronize metas in translations
-			foreach ( $translations as $lang => $tr_id ) {
-				if ( $tr_id ) {
-					// Synchronize
-					$this->translate_metas( $post_id, $tr_id, $lang, true );
-				}
-			}
+	public function translate_meta( $value, $key, $lang ) {
+		if ( ( '_EventVenueID' === $key || '_EventOrganizerID' === $key ) && $tr_value = pll_get_post( $value, $lang ) ) {
+			$value = $tr_value;
 		}
-	}
-
-	/**
-	 * Copy or synchronize metas needing a translation
-	 *
-	 * @since 2.2
-	 *
-	 * @param int    $from id of the event from which we copy informations
-	 * @param int    $to   id of the event to which we paste informations
-	 * @param string $lang language slug
-	 * @param bool   $sync true if it is synchronization, false if it is a copy, defaults to false
-	 */
-	protected function translate_metas( $from, $to, $lang, $sync = false ) {
-		if ( $value = get_post_meta( $from, '_EventVenueID', true ) ) {
-			update_post_meta( $to, '_EventVenueID', ( $tr_value = pll_get_post( $value, $lang ) ) ? $tr_value : $value );
-		} else {
-			delete_post_meta( $to, '_EventVenueID' );
-		}
-
-		if ( $values = get_post_meta( $from, '_EventOrganizerID' ) ) {
-			delete_post_meta( $to, '_EventOrganizerID' );
-			foreach ( $values as $value ) {
-				add_post_meta( $to, '_EventOrganizerID', ( $tr_value = pll_get_post( $value, $lang ) ) ? $tr_value : $value );
-			}
-		}
+		return $value;
 	}
 
 	/**
@@ -270,8 +257,8 @@ class PLL_TEC {
 	 *
 	 * @since 2.2
 	 *
-	 * @param array  $args        Array of arguments for registering a taxonomy.
-	 * @param string $taxonomy    Taxonomy key.
+	 * @param array  $args     Array of arguments for registering a taxonomy.
+	 * @param string $taxonomy Taxonomy key.
 	 */
 	function register_taxonomy_args( $args, $taxonomy ) {
 		if ( 'tribe_events_cat' === $taxonomy ) {
@@ -351,9 +338,9 @@ class PLL_TEC {
 	 *
 	 * @since 1.9
 	 *
-	 * @param string $translation translation to sanitize
-	 * @param string $name        unique name for the string, not used
-	 * @param string $context     the group in which the string is registered
+	 * @param string $translation Translation to sanitize
+	 * @param string $name        Unique name for the string, not used
+	 * @param string $context     The group in which the string is registered
 	 * @return string
 	 */
 	public function sanitize_string_translation( $translation, $name, $context ) {
@@ -439,19 +426,18 @@ class PLL_TEC {
 	}
 
 	/**
-	 * Forces filtering events by the current language on frontend
-	 * This is necessary because the query may contain 'post__in'
-	 * which disable the default PLL_Query filter
+	 * Fix events query when events are not translated
 	 *
-	 * @since 2.2
+	 * @since 2.3.7
 	 *
-	 * @param object $query WP_Query object
+	 * @param array  $excludes Query vars excluded from the language filter
+	 * @param object $query    WP Query
+	 * @return array
 	 */
-	public function parse_query( $query ) {
-		$qv = $query->query_vars;
-		if ( empty( $qv['lang'] ) && isset( $qv['post_type'] ) && 'tribe_events' === $qv['post_type'] ) {
-			$pll_query = new PLL_Query( $query, $this->model );
-			$pll_query->set_language( PLL()->curlang );
+	public function fix_events_query( $excludes, $query ) {
+		if ( ! empty( $query->query['post_type'] ) && 'tribe_events' === $query->query['post_type'] ) {
+			$excludes = array_diff( $excludes, array( 'post__in' ) );
 		}
+		return $excludes;
 	}
 }

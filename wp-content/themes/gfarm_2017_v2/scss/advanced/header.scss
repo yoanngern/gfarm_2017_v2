@@ -12,6 +12,7 @@ body > header {
         padding: 6px 10px 0;
         line-height: 1.1em;
         vertical-align: top;
+        z-index: 100;
 
     }
 
@@ -47,14 +48,53 @@ body > header {
         }
 
         &.menu-language-container {
-            float: right;
-            position: relative;
+            right: 0;
+            position: absolute;
             display: inline-block;
             top: auto;
             width: auto;
+            background-color: $gray-light;
 
-            ul {
+
+            & > ul > li > a {
+                float: right;
+                vertical-align: top;
+            }
+
+            & > ul {
                 margin-right: 30px;
+
+                a {
+                    display: inline-block;
+                }
+
+                ul.sub-menu {
+                    display: inline-block;
+                    z-index: 1000;
+                    background-color: $gray_light;
+                    vertical-align: top;
+                    transition: all 200ms ease-in-out 0s;
+
+
+
+                    &.show {
+
+
+
+                        li {
+                            padding: 0 20px;
+                            opacity: 1;
+                        }
+                    }
+
+                    & > li {
+                        display: inline-block;
+                        opacity: 0;
+                        transition: all 200ms ease-in-out 0s;
+                        padding: 0;
+                        vertical-align: top;
+                    }
+                }
             }
         }
     }
@@ -83,6 +123,11 @@ body > header {
     }
 
     @media only screen and (min-width: 1050px) {
+
+        a.title {
+            position: absolute;
+            left: 0;
+        }
 
         div {
             display: block;

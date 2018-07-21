@@ -2,13 +2,13 @@
 namespace ElementorPro\Modules\Library\Widgets;
 
 use Elementor\Controls_Manager;
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 use ElementorPro\Modules\Library\Module;
 use ElementorPro\Plugin;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Template extends Widget_Base {
+class Template extends Base_Widget {
 
 	public function get_name() {
 		return 'template';
@@ -20,10 +20,6 @@ class Template extends Widget_Base {
 
 	public function get_icon() {
 		return 'eicon-document-file';
-	}
-
-	public function get_categories() {
-		return [ 'pro-elements' ];
 	}
 
 	public function is_reload_preview_required() {
@@ -82,6 +78,10 @@ class Template extends Widget_Base {
 
 	protected function render() {
 		$template_id = $this->get_settings( 'template_id' );
+		if ( 'publish' !== get_post_status( $template_id ) ) {
+			return;
+		}
+
 		?>
 		<div class="elementor-template">
 			<?php

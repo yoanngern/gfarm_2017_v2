@@ -65,7 +65,7 @@ class PLL_Xdata_Subdomain extends PLL_Xdata_Base {
 		$redirect = urlencode( ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 
 		if ( $js = $this->maybe_get_xdomain_js( $redirect, $this->curlang ) ) {
-			echo '<script type="text/javascript">' . $js . '</script>';
+			echo '<script async type="text/javascript">' . $js . '</script>';
 		}
 	}
 
@@ -106,7 +106,7 @@ class PLL_Xdata_Subdomain extends PLL_Xdata_Base {
 	 *
 	 * @since 2.1
 	 *
-	 * @param string $location redirect url
+	 * @param string $location Redirect url
 	 * @return string
 	 */
 	public function fix_cookie_in_redirect( $location ) {

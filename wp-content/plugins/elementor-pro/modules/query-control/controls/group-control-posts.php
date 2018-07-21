@@ -3,6 +3,7 @@ namespace ElementorPro\Modules\QueryControl\Controls;
 
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Base;
+use ElementorPro\Classes\Utils;
 use ElementorPro\Modules\QueryControl\Module;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -21,7 +22,7 @@ class Group_Control_Posts extends Group_Control_Base {
 		unset( $element['settings'][ $control_id . '_posts_ids' ] );
 		unset( $element['settings'][ $control_id . '_authors' ] );
 
-		foreach ( self::get_post_types() as $post_type => $label ) {
+		foreach ( Utils::get_post_types() as $post_type => $label ) {
 			$taxonomy_filter_args = [
 				'show_in_nav_menus' => true,
 				'object_type' => [ $post_type ],
@@ -41,12 +42,12 @@ class Group_Control_Posts extends Group_Control_Base {
 		$fields = [];
 
 		$fields['post_type'] = [
-			'label' => _x( 'Source', 'Posts Query Control', 'elementor-pro' ),
+			'label' => __( 'Source', 'elementor-pro' ),
 			'type' => Controls_Manager::SELECT,
 		];
 
 		$fields['posts_ids'] = [
-			'label' => _x( 'Search & Select', 'Posts Query Control', 'elementor-pro' ),
+			'label' => __( 'Search & Select', 'elementor-pro' ),
 			'type' => Module::QUERY_CONTROL_ID,
 			'post_type' => '',
 			'options' => [],
@@ -58,31 +59,21 @@ class Group_Control_Posts extends Group_Control_Base {
 			],
 		];
 
-		$author_args = [
-			'label' => _x( 'Author', 'Posts Query Control', 'elementor-pro' ),
+		$fields['authors'] = [
+			'label' => __( 'Author', 'elementor-pro' ),
 			'label_block' => true,
+			'type' => Module::QUERY_CONTROL_ID,
 			'multiple' => true,
 			'default' => [],
 			'options' => [],
+			'filter_type' => 'author',
 			'condition' => [
-				'post_type!' => 'by_id',
+				'post_type!' => [
+					'by_id',
+					'current_query',
+				],
 			],
 		];
-
-		$user_query = new \WP_User_Query( [ 'role' => 'Author', 'fields' => 'ID' ] );
-
-		// For large websites, use Ajax to search
-		if ( $user_query->get_total() > self::INLINE_MAX_RESULTS ) {
-			$author_args['type'] = Module::QUERY_CONTROL_ID;
-
-			$author_args['filter_type'] = 'author';
-		} else {
-			$author_args['type'] = Controls_Manager::SELECT2;
-
-			$author_args['options'] = $this->get_authors();
-		}
-
-		$fields['authors'] = $author_args;
 
 		return $fields;
 	}
@@ -90,11 +81,12 @@ class Group_Control_Posts extends Group_Control_Base {
 	protected function prepare_fields( $fields ) {
 		$args = $this->get_args();
 
-		$post_types = self::get_post_types( $args );
+		$post_types = Utils::get_post_types( $args );
 
 		$post_types_options = $post_types;
 
-		$post_types_options['by_id'] = _x( 'Manual Selection', 'Posts Query Control', 'elementor-pro' );
+		$post_types_options['by_id'] = __( 'Manual Selection', 'elementor-pro' );
+		$post_types_options['current_query'] = __( 'Current Query', 'elementor-pro' );
 
 		$fields['post_type']['options'] = $post_types_options;
 
@@ -137,7 +129,10 @@ class Group_Control_Posts extends Group_Control_Base {
 			} else {
 				$taxonomy_args['type'] = Controls_Manager::SELECT2;
 
-				$terms = get_terms( $taxonomy );
+				$terms = get_terms( [
+					'taxonomy' => $taxonomy,
+					'hide_empty' => false,
+				] );
 
 				foreach ( $terms as $term ) {
 					$options[ $term->term_id ] = $term->name;
@@ -173,23 +168,9 @@ class Group_Control_Posts extends Group_Control_Base {
 		return $authors;
 	}
 
-	private static function get_post_types( $args = [] ) {
-		$post_type_args = [
-			'show_in_nav_menus' => true,
+	protected function get_default_options() {
+		return [
+			'popover' => false,
 		];
-
-		if ( ! empty( $args['post_type'] ) ) {
-			$post_type_args['name'] = $args['post_type'];
-		}
-
-		$_post_types = get_post_types( $post_type_args , 'objects' );
-
-		$post_types  = [];
-
-		foreach ( $_post_types as $post_type => $object ) {
-			$post_types[ $post_type ] = $object->label;
-		}
-
-		return $post_types;
 	}
 }

@@ -45,20 +45,20 @@ class PLL_Active_Languages {
 	 *
 	 * @param array  $classes
 	 * @param object $language
-	 * @return array modified list of classes
+	 * @return array Modified list of classes
 	 */
 	public function row_classes( $classes, $language ) {
 		return isset( $language->active ) && false === $language->active ? array( 'inactive' ) : array();
 	}
 
 	/**
-	 * remove the default lang action for disabled language
+	 * Remove the default lang action for disabled languages
 	 *
 	 * @since 1.9
 	 *
 	 * @param string $action
 	 * @param object $language
-	 * @return array modified list of row actions
+	 * @return array Modified list of row actions
 	 */
 	public function remove_default_lang_action( $action, $language ) {
 		if ( isset( $language->active ) && false === $language->active ) {
@@ -75,7 +75,7 @@ class PLL_Active_Languages {
 	 *
 	 * @param array  $actions
 	 * @param object $language
-	 * @return array modified list of row actions
+	 * @return array Modified list of row actions
 	 */
 	public function row_actions( $actions, $language ) {
 		if ( $language->slug == $this->options['default_lang'] ) {
@@ -109,7 +109,7 @@ class PLL_Active_Languages {
 	 * @since 1.9
 	 *
 	 * @param int  $lang_id
-	 * @param bool $enable true to enable, false to disable
+	 * @param bool $enable True to enable, false to disable
 	 */
 	public function _enable( $lang_id, $enable ) {
 		$lang_id = (int) $lang_id;

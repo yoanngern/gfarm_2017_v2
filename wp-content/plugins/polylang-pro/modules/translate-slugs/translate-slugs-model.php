@@ -21,7 +21,7 @@ class PLL_Translate_Slugs_Model {
 
 		add_action( 'switch_blog', array( $this, 'switch_blog' ), 20, 2 );
 
-		add_action( 'wp_loaded', array( $this, 'init_translated_slugs' ) );
+		add_action( 'wp_loaded', array( $this, 'init_translated_slugs' ), 1 );
 
 		// Make sure to prepare rewrite rules when flushing
 		add_action( 'pre_option_rewrite_rules', array( $this, 'prepare_rewrite_rules' ), 20 ); // after Polylang
@@ -70,7 +70,7 @@ class PLL_Translate_Slugs_Model {
 	public function init_translated_slugs() {
 		$this->translated_slugs = $this->get_translatable_slugs();
 
-		// Keep only slugs which are translated to avoid unnecessary rewrite rules
+		// Keep only the slugs which are translated to avoid unnecessary rewrite rules
 		foreach ( $this->translated_slugs as $key => $value ) {
 			if ( 1 == count( array_unique( $value['translations'] ) ) && reset( $value['translations'] ) == $value['slug'] ) {
 				unset( $this->translated_slugs[ $key ] );
@@ -83,10 +83,10 @@ class PLL_Translate_Slugs_Model {
 	 *
 	 * @since 1.9
 	 *
-	 * @param string $link url to modify
-	 * @param object $lang language
-	 * @param string $type type of slug to translate
-	 * @return string modified url
+	 * @param string $link Url to modify
+	 * @param object $lang Language
+	 * @param string $type Type of slug to translate
+	 * @return string Modified url
 	 */
 	public function translate_slug( $link, $lang, $type ) {
 		if ( ! empty( $lang ) && isset( $this->translated_slugs[ $type ] ) ) {
@@ -104,10 +104,10 @@ class PLL_Translate_Slugs_Model {
 	 *
 	 * @since 1.9
 	 *
-	 * @param string $link url to modify
-	 * @param object $lang language
-	 * @param string $type type of slug to translate
-	 * @return string modified url
+	 * @param string $link Url to modify
+	 * @param object $lang Language
+	 * @param string $type Type of slug to translate
+	 * @return string Modified url
 	 */
 	public function switch_translated_slug( $link, $lang, $type ) {
 		if ( isset( $this->translated_slugs[ $type ] ) ) {
@@ -125,7 +125,7 @@ class PLL_Translate_Slugs_Model {
 
 	/**
 	 * Returns informations on translatable slugs
-	 * stores them in a transient
+	 * and stores them in a transient
 	 *
 	 * @since 1.9
 	 *
@@ -149,7 +149,7 @@ class PLL_Translate_Slugs_Model {
 
 					if ( ! empty( $type->rewrite['slug'] ) && $this->model->is_translated_post_type( $type->name ) ) {
 						$slug = preg_replace( '#%.+?%#', '', $type->rewrite['slug'] ); // For those adding a taxonomy base in custom post type link. See http://wordpress.stackexchange.com/questions/94817/add-category-base-to-url-in-custom-post-type-taxonomy
-						$slug = trim( $slug, '/' ); // It seems that some plugins add / (ex: woocommerce)
+						$slug = trim( $slug, '/' ); // It seems that some plugins add / (ex: WooCommerce)
 						$slugs[ $type->name ]['slug'] = $slug;
 						$tr_slug = $mo->translate( $slug );
 						$slugs[ $type->name ]['translations'][ $language->slug ] = empty( $tr_slug ) ? $slug : $tr_slug;
@@ -173,7 +173,7 @@ class PLL_Translate_Slugs_Model {
 				foreach ( get_taxonomies() as $tax ) {
 					$tax = get_taxonomy( $tax );
 					if ( ! empty( $tax->rewrite['slug'] ) && ( $this->model->is_translated_taxonomy( $tax->name ) || 'post_format' == $tax->name ) ) {
-						$slug = trim( $tax->rewrite['slug'], '/' ); // It seems that some plugins add / (ex: woocommerce for product attributes)
+						$slug = trim( $tax->rewrite['slug'], '/' ); // It seems that some plugins add / (ex: WooCommerce for product attributes)
 						$slugs[ $tax->name ]['slug'] = $slug;
 						$tr_slug = $mo->translate( $slug );
 						$slugs[ $tax->name ]['translations'][ $language->slug ] = empty( $tr_slug ) ? $slug : $tr_slug;
@@ -181,7 +181,7 @@ class PLL_Translate_Slugs_Model {
 				}
 
 				// Post formats
-				// get_theme_support sends an array of array
+				// get_theme_support sends an array of arrays
 				$formats = get_theme_support( 'post-formats' );
 				if ( isset( $formats[0] ) && is_array( $formats[0] ) ) {
 					foreach ( $formats[0] as $format ) {
@@ -216,9 +216,9 @@ class PLL_Translate_Slugs_Model {
 				 *
 				 * @since 1.9
 				 *
-				 * @param array  $slugs    the list of slugs
-				 * @param object $language the language object
-				 * @param object $mo       the translations object
+				 * @param array  $slugs    The list of slugs
+				 * @param object $language The language object
+				 * @param object $mo       The translations object
 				 */
 				$slugs = apply_filters_ref_array( 'pll_translated_slugs', array( $slugs, $language, &$mo ) );
 			}
@@ -237,7 +237,7 @@ class PLL_Translate_Slugs_Model {
 	 *
 	 * @since 1.9
 	 *
-	 * @param array $pre not used
+	 * @param array $pre Not used
 	 * @return unmodified $pre
 	 */
 	public function prepare_rewrite_rules( $pre ) {
@@ -269,9 +269,9 @@ class PLL_Translate_Slugs_Model {
 	 * @since 1.9
 	 * @since 2.2 Add the $capture parameter
 	 *
-	 * @param string $type    type of slug
-	 * @param bool   $capture whether the slugs must be captured, defaults to false
-	 * @return string the pattern
+	 * @param string $type    Type of slug
+	 * @param bool   $capture Whether the slugs must be captured, defaults to false
+	 * @return string The pattern
 	 */
 	protected function get_translated_slugs_pattern( $type, $capture = false ) {
 		$slugs[] = $this->translated_slugs[ $type ]['slug'];
@@ -288,9 +288,9 @@ class PLL_Translate_Slugs_Model {
 	 *
 	 * @since 1.9
 	 *
-	 * @param array  $rules rewrite rules
-	 * @param string $type  type of slug to translate
-	 * @return array modified rewrite rules
+	 * @param array  $rules Rewrite rules
+	 * @param string $type  Type of slug to translate
+	 * @return array Modified rewrite rules
 	 */
 	protected function translate_rule( $rules, $type ) {
 		if ( empty( $this->translated_slugs[ $type ] ) ) {
@@ -316,8 +316,8 @@ class PLL_Translate_Slugs_Model {
 	 *
 	 * @since 1.9
 	 *
-	 * @param array $rules rewrite rules
-	 * @return array modified rewrite rules
+	 * @param array $rules Rewrite rules
+	 * @return array Modified rewrite rules
 	 */
 	protected function translate_post_format_rule( $rules ) {
 		$newrules = array();
@@ -342,17 +342,19 @@ class PLL_Translate_Slugs_Model {
 	 *
 	 * @since 1.9
 	 *
-	 * @param array $rules rewrite rules
-	 * @return array modified rewrite rules
+	 * @param array $rules Rewrite rules
+	 * @return array Modified rewrite rules
 	 */
 	protected function translate_post_type_archive_rule( $rules ) {
 		$cpts = array_intersect( $this->model->get_translated_post_types(), get_post_types( array( '_builtin' => false ) ) );
-		$cpts = $cpts ? '#post_type=(' . implode( '|', $cpts ) . ')#' : '';
 
 		foreach ( $rules as $key => $rule ) {
-			if ( $cpts && preg_match( $cpts, $rule, $matches ) && ! strpos( $rule, 'name=' ) && ( $post_type = $matches[1] ) && isset( $this->translated_slugs[ 'archive_' . $post_type ] ) ) {
-				$new_slug = $this->get_translated_slugs_pattern( 'archive_' . $post_type );
-				$newrules[ str_replace( $this->translated_slugs[ 'archive_' . $post_type ]['slug'] . '/', $new_slug, $key ) ] = $rule;
+			$query = parse_url( $rule, PHP_URL_QUERY );
+			parse_str( $query, $qv );
+
+			if ( ! empty( $cpts ) && ! empty( $qv['post_type'] ) && in_array( $qv['post_type'], $cpts ) && ! strpos( $rule, 'name=' ) && isset( $this->translated_slugs[ 'archive_' . $qv['post_type'] ] ) ) {
+				$new_slug = $this->get_translated_slugs_pattern( 'archive_' . $qv['post_type'] );
+				$newrules[ str_replace( $this->translated_slugs[ 'archive_' . $qv['post_type'] ]['slug'] . '/', $new_slug, $key ) ] = $rule;
 			} else {
 				$newrules[ $key ] = $rule;
 			}
@@ -365,8 +367,8 @@ class PLL_Translate_Slugs_Model {
 	 *
 	 * @since 1.9
 	 *
-	 * @param array $rules rewrite rules
-	 * @return array modified rewrite rules
+	 * @param array $rules Rewrite rules
+	 * @return array Modified rewrite rules
 	 */
 	protected function translate_paged_rule( $rules ) {
 		if ( empty( $this->translated_slugs['paged'] ) ) {
@@ -397,8 +399,8 @@ class PLL_Translate_Slugs_Model {
 	 *
 	 * @since 1.9
 	 *
-	 * @param array $rules rewrite rules
-	 * @return array modified rewrite rules
+	 * @param array $rules Rewrite rules
+	 * @return array Modified rewrite rules
 	 */
 	function rewrite_translated_slug( $rules ) {
 		$filter = str_replace( '_rewrite_rules', '', current_filter() );
@@ -439,9 +441,9 @@ class PLL_Translate_Slugs_Model {
 	 *
 	 * @since 1.9
 	 *
-	 * @param string $translation translation to sanitize
-	 * @param string $name        unique name for the string, not used
-	 * @param string $context     the group in which the string is registered
+	 * @param string $translation Translation to sanitize
+	 * @param string $name        Unique name for the string, not used
+	 * @param string $context     The group in which the string is registered
 	 * @return string
 	 */
 	public function sanitize_string_translation( $translation, $name, $context ) {

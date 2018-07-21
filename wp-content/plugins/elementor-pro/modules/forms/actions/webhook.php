@@ -33,7 +33,7 @@ class Webhook extends Action_Base {
 			[
 				'label' => __( 'Webhook URL', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXT,
-				'placeholder' => 'https://your-webhook-url',
+				'placeholder' => __( 'https://your-webhook-url.com', 'elementor-pro' ),
 				'label_block' => true,
 				'separator' => 'before',
 				'description' => __( 'Enter the integration URL (like Zapier) that will receive the form\'s submitted data.', 'elementor-pro' ),
@@ -46,8 +46,6 @@ class Webhook extends Action_Base {
 			[
 				'label' => __( 'Advanced Data', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
 				'default' => 'no',
 				'render_type' => 'none',
 			]
@@ -65,7 +63,7 @@ class Webhook extends Action_Base {
 			return;
 		}
 
-		if ( isset( $settings['webhooks_advanced_data'] ) &&  'yes' === $settings['webhooks_advanced_data'] ) {
+		if ( isset( $settings['webhooks_advanced_data'] ) && 'yes' === $settings['webhooks_advanced_data'] ) {
 			$body['form'] = [
 				'id' => $settings['id'],
 				'name' => $settings['form_name'],
@@ -83,14 +81,35 @@ class Webhook extends Action_Base {
 			'body' => $body,
 		];
 
+		/**
+		 * Forms webhook request arguments.
+		 *
+		 * Filters the request arguments delivered by the form webhook when executing
+		 * an ajax request.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array       $args   Webhook request arguments.
+		 * @param Form_Record $record An instance of the form record.
+		 */
 		$args = apply_filters( 'elementor_pro/forms/webhooks/request_args', $args, $record );
 
 		$response = wp_remote_post( $settings['webhooks'], $args );
 
+		/**
+		 * Elementor form webhook response.
+		 *
+		 * Fires when the webhook response is retrieved.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param \WP_Error|array $response The response or WP_Error on failure.
+		 * @param Form_Record     $record   An instance of the form record.
+		 */
 		do_action( 'elementor_pro/forms/webhooks/response', $response, $record );
 
 		if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
-			// TODO: $response log / send an error
+			$ajax_handler->add_admin_error_message( 'Webhook Error' );
 		}
 	}
 }

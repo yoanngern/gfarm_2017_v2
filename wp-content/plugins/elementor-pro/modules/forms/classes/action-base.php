@@ -4,10 +4,14 @@ namespace ElementorPro\Modules\Forms\Classes;
 
 use Elementor\Widget_Base;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 abstract class Action_Base {
+
 	abstract public function get_name();
+
 	abstract public function get_label();
 
 	/**

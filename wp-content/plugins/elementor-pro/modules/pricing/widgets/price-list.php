@@ -4,13 +4,14 @@ namespace ElementorPro\Modules\Pricing\Widgets;
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Image_Size;
 use Elementor\Group_Control_Typography;
+use Elementor\Repeater;
 use Elementor\Scheme_Color;
 use Elementor\Scheme_Typography;
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Price_List extends Widget_Base {
+class Price_List extends Base_Widget {
 
 	public function get_name() {
 		return 'price-list';
@@ -37,45 +38,60 @@ class Price_List extends Widget_Base {
 			]
 		);
 
+		$repeater = new Repeater();
+
+		$repeater->add_control(
+			'price',
+			[
+				'label' => __( 'Price', 'elementor-pro' ),
+				'type' => Controls_Manager::TEXT,
+			]
+		);
+
+		$repeater->add_control(
+			'title',
+			[
+				'label' => __( 'Title & Description', 'elementor-pro' ),
+				'type' => Controls_Manager::TEXT,
+				'default' => '',
+				'label_block' => 'true',
+			]
+		);
+
+		$repeater->add_control(
+			'item_description',
+			[
+				'label' => __( 'Description', 'elementor-pro' ),
+				'type' => Controls_Manager::TEXTAREA,
+				'default' => '',
+				'show_label' => false,
+			]
+		);
+
+		$repeater->add_control(
+			'image',
+			[
+				'label' => __( 'Image', 'elementor-pro' ),
+				'type' => Controls_Manager::MEDIA,
+				'default' => [],
+			]
+		);
+
+		$repeater->add_control(
+			'link',
+			[
+				'label' => __( 'Link', 'elementor-pro' ),
+				'type' => Controls_Manager::URL,
+				'default' => [ 'url' => '#' ],
+			]
+		);
+
 		$this->add_control(
 			'price_list',
 			[
 				'label' => __( 'List Items', 'elementor-pro' ),
 				'type' => Controls_Manager::REPEATER,
-				'fields' => [
-					[
-						'name' => 'price',
-						'label' => __( 'Price', 'elementor-pro' ),
-						'type' => Controls_Manager::TEXT,
-						'default' => '',
-					],
-					[
-						'name' => 'title',
-						'label' => __( 'Title & Description', 'elementor-pro' ),
-						'type' => Controls_Manager::TEXT,
-						'default' => '',
-						'label_block' => 'true',
-					],
-					[
-						'name' => 'item_description',
-						'label' => __( 'Description', 'elementor-pro' ),
-						'type' => Controls_Manager::TEXTAREA,
-						'default' => '',
-						'show_label' => false,
-					],
-					[
-						'name' => 'image',
-						'label' => __( 'Image', 'elementor-pro' ),
-						'type' => Controls_Manager::MEDIA,
-						'default' => [],
-					],
-					[
-						'name' => 'link',
-						'label' => __( 'Link', 'elementor-pro' ),
-						'type' => Controls_Manager::URL,
-						'default' => [ 'url' => '#' ],
-					],
-				],
+				'fields' => $repeater->get_controls(),
 				'default' => [
 					[
 						'title' => __( 'First item on the list', 'elementor-pro' ),
@@ -136,7 +152,6 @@ class Price_List extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'heading_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-price-list-header',
 			]
@@ -170,7 +185,6 @@ class Price_List extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'description_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
 				'selector' => '{{WRAPPER}} .elementor-price-list-description',
 			]
@@ -198,8 +212,9 @@ class Price_List extends Widget_Base {
 					'none' => __( 'None', 'elementor-pro' ),
 				],
 				'default' => 'dotted',
+				'render_type' => 'template',
 				'selectors' => [
-					'{{WRAPPER}} .elementor-price-list-separator' => 'border-bottom-style: {{VALUE}};',
+					'{{WRAPPER}} .elementor-price-list-separator' => 'border-bottom-style: {{VALUE}}',
 				],
 			]
 		);
@@ -218,7 +233,7 @@ class Price_List extends Widget_Base {
 					'separator_style!' => 'none',
 				],
 				'selectors' => [
-					'{{WRAPPER}} .elementor-price-list-separator' => 'border-bottom-width: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} .elementor-price-list-separator' => 'border-bottom-width: {{SIZE}}{{UNIT}}',
 				],
 				'default' => [
 					'size' => 2,
@@ -278,7 +293,6 @@ class Price_List extends Widget_Base {
 			Group_Control_Image_Size::get_type(),
 			[
 				'name' => 'image_size',
-				'label' => __( 'Image Size', 'elementor-pro' ),
 				'default' => 'thumbnail',
 			]
 		);
@@ -369,7 +383,7 @@ class Price_List extends Widget_Base {
 					'top' => 'flex-start',
 					'bottom' => 'flex-end',
 				],
-				'default' => 'flex-start',
+				'default' => 'top',
 			]
 		);
 
@@ -421,37 +435,43 @@ class Price_List extends Widget_Base {
 	}
 
 	protected function render() {
-		$instance = $this->get_settings();
+		$settings = $this->get_settings(); ?>
 
-		echo '<ul class="elementor-price-list">';
+		<ul class="elementor-price-list">
 
-		foreach ( $instance['price_list'] as $item ) {
-			echo $this->render_item_header( $item );
+		<?php foreach ( $settings['price_list'] as $item ) : ?>
+			<?php if ( ! empty( $item['title'] ) || ! empty( $item['price'] ) || ! empty( $item['item_description'] ) ) : ?>
+			<?php echo $this->render_item_header( $item ); ?>
+			<?php if ( ! empty( $item['image']['url'] ) ) : ?>
+				<div class="elementor-price-list-image">
+					<?php echo $this->render_image( $item, $settings ); ?>
+				</div>
+			<?php endif; ?>
+			<div class="elementor-price-list-text">
+			<?php if ( ! empty( $item['title'] ) || ! empty( $item['price'] ) ) : ?>
+				<div class="elementor-price-list-header">
+				<?php if ( ! empty( $item['title'] ) ) : ?>
+					<span class="elementor-price-list-title"><?php echo $item['title']; ?></span>
+				<?php endif; ?>
+				<?php if ( 'none' != $settings['separator_style'] ) : ?>
+					<span class="elementor-price-list-separator"></span>
+				<?php endif; ?>
+				<?php if ( ! empty( $item['price'] ) ) : ?>
+					<span class="elementor-price-list-price"><?php echo $item['price']; ?></span>
+				<?php endif; ?>
+				</div>
+			<?php endif; ?>
+			<?php if ( ! empty( $item['item_description'] ) ) : ?>
+				<p class="elementor-price-list-description"><?php echo $item['item_description']; ?></p>
+			<?php endif; ?>
+			</div>
+			<?php echo $this->render_item_footer( $item ); ?>
+			<?php endif; ?>
+		<?php endforeach; ?>
 
-			if ( ! empty( $item['image']['url'] ) ) {
-				echo '<div class="elementor-price-list-image">' . $this->render_image( $item, $instance ) . '</div>';
-			}
+		</ul>
 
-			echo '<div class="elementor-price-list-text">';
-			echo '<div class="elementor-price-list-header">';
-			echo '<span class="elementor-price-list-title">' . $item['title'] . '</span>';
-
-			if ( 'none' != $instance['separator_style'] ) {
-				echo '<span class="elementor-price-list-separator"></span>';
-			}
-
-			echo '<span class="elementor-price-list-price">' . $item['price'] . '</span>';
-			echo '</div>'; // end header
-			echo '<p class="elementor-price-list-description">' . $item['item_description'] . '</p>';
-			echo '</div>'; // end text
-
-			echo $this->render_item_footer( $item );
-
-		} ?>
-		<?php
-
-		echo '</ul>';
-	}
+	<?php }
 
 	protected function _content_template() {
 		?>
@@ -464,7 +484,10 @@ class Price_List extends Widget_Base {
 					if ( item.link.url ) {
 						item_open_wrap = '<li><a href="' + item.link.url + '" class="elementor-price-list-item">';
 						item_close_wrap = '</a></li>';
-					} #>
+					}
+
+					if ( ! _.isEmpty( item.title ) || ! _.isEmpty( item.price ) || ! _.isEmpty( item.description ) || ! _.isEmpty( item.image ) ) { #>
+
 					{{{ item_open_wrap }}}
 					<# if ( item.image && item.image.id ) {
 
@@ -473,25 +496,49 @@ class Price_List extends Widget_Base {
 							url: item.image.url,
 							size: settings.image_size_size,
 							dimension: settings.image_size_custom_dimension,
-							model: editModel
+							model: view.getEditModel()
 						};
 
 						var image_url = elementor.imagesManager.getImageUrl( image );
 
-						if (  image_url ) { #>
+						if ( image_url ) { #>
 							<div class="elementor-price-list-image"><img src="{{ image_url }}" alt="{{ item.title }}"></div>
 						<# } #>
 
 					<# } #>
-					<div class="elementor-price-list-text">
-						<div class="elementor-price-list-header">
-							<span class="elementor-price-list-title">{{{ item.title }}}</span>
-							<span class="elementor-price-list-separator"></span>
-							<span class="elementor-price-list-price">{{{ item.price }}}</span>
+
+
+					<# if ( ! _.isEmpty( item.title ) || ! _.isEmpty( item.price ) || ! _.isEmpty( item.item_description ) ) { #>
+						<div class="elementor-price-list-text">
+
+							<# if ( ! _.isEmpty( item.title ) || ! _.isEmpty( item.price ) ) { #>
+								<div class="elementor-price-list-header">
+
+								<# if ( ! _.isEmpty( item.title ) ) { #>
+									<span class="elementor-price-list-title">{{{ item.title }}}</span>
+								<# } #>
+
+								<# if ( 'none' != settings.separator_style ) { #>
+									<span class="elementor-price-list-separator"></span>
+								<# } #>
+
+								<# if ( ! _.isEmpty( item.price ) ) { #>
+									<span class="elementor-price-list-price">{{{ item.price }}}</span>
+								<# } #>
+
+								</div>
+							<# } #>
+
+							<# if ( ! _.isEmpty( item.item_description ) ) { #>
+								<p class="elementor-price-list-description">{{{ item.item_description }}}</p>
+							<# } #>
+
 						</div>
-						<p class="elementor-price-list-description">{{{ item.item_description }}}</p>
-					</div>
+					<# } #>
+
 					{{{ item_close_wrap }}}
+
+					<# } #>
 			 <# } #>
 		</ul>
 	<?php }

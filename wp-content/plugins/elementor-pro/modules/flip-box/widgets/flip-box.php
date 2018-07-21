@@ -8,11 +8,11 @@ use Elementor\Group_Control_Image_Size;
 use Elementor\Group_Control_Typography;
 use Elementor\Scheme_Typography;
 use Elementor\Utils;
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Flip_Box extends Widget_Base {
+class Flip_Box extends Base_Widget {
 
 	public function get_name() {
 		return 'flip-box';
@@ -24,10 +24,6 @@ class Flip_Box extends Widget_Base {
 
 	public function get_icon() {
 		return 'eicon-flip-box';
-	}
-
-	public function get_categories() {
-		return [ 'pro-elements' ];
 	}
 
 	protected function _register_controls() {
@@ -85,7 +81,6 @@ class Flip_Box extends Widget_Base {
 			Group_Control_Image_Size::get_type(),
 			[
 				'name' => 'image', // Actually its `image_size`
-				'label' => __( 'Image Size', 'elementor-pro' ),
 				'default' => 'thumbnail',
 				'condition' => [
 					'graphic_element' => 'image',
@@ -145,7 +140,7 @@ class Flip_Box extends Widget_Base {
 				'label' => __( 'Title & Description', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXT,
 				'default' => __( 'This is the heading', 'elementor-pro' ),
-				'placeholder' => __( 'Your Title', 'elementor-pro' ),
+				'placeholder' => __( 'Enter your title', 'elementor-pro' ),
 				'label_block' => true,
 				'separator' => 'before',
 			]
@@ -157,8 +152,7 @@ class Flip_Box extends Widget_Base {
 				'label' => __( 'Description', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXTAREA,
 				'default' => __( 'Click edit button to change this text. Lorem ipsum dolor sit amet consectetur adipiscing elit dolor', 'elementor-pro' ),
-				'placeholder' => __( 'Your Description', 'elementor-pro' ),
-				'title' => __( 'Input image text here', 'elementor-pro' ),
+				'placeholder' => __( 'Enter your description', 'elementor-pro' ),
 				'separator' => 'none',
 				'rows' => 10,
 				'show_label' => false,
@@ -217,7 +211,7 @@ class Flip_Box extends Widget_Base {
 				'label' => __( 'Title & Description', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXT,
 				'default' => __( 'This is the heading', 'elementor-pro' ),
-				'placeholder' => __( 'Your Title', 'elementor-pro' ),
+				'placeholder' => __( 'Enter your title', 'elementor-pro' ),
 				'label_block' => true,
 			]
 		);
@@ -228,8 +222,7 @@ class Flip_Box extends Widget_Base {
 				'label' => __( 'Description', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXTAREA,
 				'default' => __( 'Click edit button to change this text. Lorem ipsum dolor sit amet consectetur adipiscing elit dolor', 'elementor-pro' ),
-				'placeholder' => __( 'Your Description', 'elementor-pro' ),
-				'title' => __( 'Input image text here', 'elementor-pro' ),
+				'placeholder' => __( 'Enter your description', 'elementor-pro' ),
 				'separator' => 'none',
 				'rows' => 10,
 				'show_label' => false,
@@ -251,7 +244,7 @@ class Flip_Box extends Widget_Base {
 			[
 				'label' => __( 'Link', 'elementor-pro' ),
 				'type' => Controls_Manager::URL,
-				'placeholder' => __( 'http://your-link.com', 'elementor-pro' ),
+				'placeholder' => __( 'https://your-link.com', 'elementor-pro' ),
 			]
 		);
 
@@ -361,12 +354,12 @@ class Flip_Box extends Widget_Base {
 				'type' => Controls_Manager::SELECT,
 				'default' => 'flip',
 				'options' => [
-					'flip' => __( 'Flip', 'elementor-pro' ),
-					'slide' => __( 'Slide', 'elementor-pro' ),
-					'push' => __( 'Push', 'elementor-pro' ),
-					'zoom-in' => __( 'Zoom In', 'elementor-pro' ),
-					'zoom-out' => __( 'Zoom Out', 'elementor-pro' ),
-					'fade' => __( 'Fade', 'elementor-pro' ),
+					'flip' => 'Flip',
+					'slide' => 'Slide',
+					'push' => 'Push',
+					'zoom-in' => 'Zoom In',
+					'zoom-out' => 'Zoom Out',
+					'fade' => 'Fade',
 				],
 				'prefix_class' => 'elementor-flip-box--effect-',
 			]
@@ -560,7 +553,7 @@ class Flip_Box extends Widget_Base {
 		$this->add_control(
 			'image_opacity',
 			[
-				'label' => __( 'Opacity (%)', 'elementor-pro' ),
+				'label' => __( 'Opacity', 'elementor-pro' ),
 				'type' => Controls_Manager::SLIDER,
 				'default' => [
 					'size' => 1,
@@ -585,7 +578,6 @@ class Flip_Box extends Widget_Base {
 			Group_Control_Border::get_type(),
 			[
 				'name' => 'image_border',
-				'label' => __( 'Image Border', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-flip-box__image img',
 				'condition' => [
 					'graphic_element' => 'image',
@@ -821,7 +813,6 @@ class Flip_Box extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography_a',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-flip-box__front .elementor-flip-box__layer__title',
 				'condition' => [
@@ -861,7 +852,6 @@ class Flip_Box extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'description_typography_a',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
 				'selector' => '{{WRAPPER}} .elementor-flip-box__front .elementor-flip-box__layer__description',
 				'condition' => [
@@ -1012,7 +1002,6 @@ class Flip_Box extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography_b',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-flip-box__back .elementor-flip-box__layer__title',
 				'condition' => [
@@ -1073,7 +1062,6 @@ class Flip_Box extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'description_typography_b',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
 				'selector' => '{{WRAPPER}} .elementor-flip-box__back .elementor-flip-box__layer__description',
 				'condition' => [
@@ -1117,7 +1105,6 @@ class Flip_Box extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'button_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-flip-box__button',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'condition' => [
@@ -1390,7 +1377,7 @@ class Flip_Box extends Widget_Base {
 					url: settings.image.url,
 					size: settings.image_size,
 					dimension: settings.image_custom_dimension,
-					model: editModel
+					model: view.getEditModel()
 				};
 
 				var imageUrl = elementor.imagesManager.getImageUrl( image );

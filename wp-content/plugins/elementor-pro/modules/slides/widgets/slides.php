@@ -5,11 +5,11 @@ use Elementor\Controls_Manager;
 use Elementor\Group_Control_Typography;
 use Elementor\Repeater;
 use Elementor\Scheme_Typography;
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Slides extends Widget_Base {
+class Slides extends Base_Widget {
 
 	public function get_name() {
 		return 'slides';
@@ -109,9 +109,6 @@ class Slides extends Widget_Base {
 			[
 				'label' => __( 'Ken Burns Effect', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => '',
 				'separator' => 'before',
 				'conditions' => [
@@ -153,9 +150,6 @@ class Slides extends Widget_Base {
 			[
 				'label' => __( 'Background Overlay', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => '',
 				'separator' => 'before',
 				'conditions' => [
@@ -180,7 +174,6 @@ class Slides extends Widget_Base {
 					'terms' => [
 						[
 							'name' => 'background_overlay',
-							'operator' => '==',
 							'value' => 'yes',
 						],
 					],
@@ -229,7 +222,7 @@ class Slides extends Widget_Base {
 			[
 				'label' => __( 'Link', 'elementor-pro' ),
 				'type' => Controls_Manager::URL,
-				'placeholder' => __( 'http://your-link.com', 'elementor-pro' ),
+				'placeholder' => __( 'https://your-link.com', 'elementor-pro' ),
 			]
 		);
 
@@ -264,10 +257,7 @@ class Slides extends Widget_Base {
 			[
 				'label' => __( 'Custom', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'return_value' => 'yes',
-				'description'   => __( 'Set custom style that will only affect this specific slide.', 'elementor-pro' ),
+				'description' => __( 'Set custom style that will only affect this specific slide.', 'elementor-pro' ),
 			]
 		);
 
@@ -303,7 +293,6 @@ class Slides extends Widget_Base {
 					'terms' => [
 						[
 							'name' => 'custom_style',
-							'operator' => '==',
 							'value' => 'yes',
 						],
 					],
@@ -343,7 +332,6 @@ class Slides extends Widget_Base {
 					'terms' => [
 						[
 							'name' => 'custom_style',
-							'operator' => '==',
 							'value' => 'yes',
 						],
 					],
@@ -378,7 +366,6 @@ class Slides extends Widget_Base {
 					'terms' => [
 						[
 							'name' => 'custom_style',
-							'operator' => '==',
 							'value' => 'yes',
 						],
 					],
@@ -400,7 +387,6 @@ class Slides extends Widget_Base {
 					'terms' => [
 						[
 							'name' => 'custom_style',
-							'operator' => '==',
 							'value' => 'yes',
 						],
 					],
@@ -418,6 +404,7 @@ class Slides extends Widget_Base {
 				'label' => __( 'Slides', 'elementor-pro' ),
 				'type' => Controls_Manager::REPEATER,
 				'show_label' => true,
+				'fields' => $repeater->get_controls(),
 				'default' => [
 					[
 						'heading' => __( 'Slide 1 Heading', 'elementor-pro' ),
@@ -438,7 +425,6 @@ class Slides extends Widget_Base {
 						'background_color' => '#1abc9c',
 					],
 				],
-				'fields' => array_values( $repeater->get_controls() ),
 				'title_field' => '{{{ heading }}}',
 			]
 		);
@@ -499,9 +485,6 @@ class Slides extends Widget_Base {
 			[
 				'label' => __( 'Pause on Hover', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 			]
 		);
@@ -511,9 +494,6 @@ class Slides extends Widget_Base {
 			[
 				'label' => __( 'Autoplay', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 			]
 		);
@@ -538,9 +518,6 @@ class Slides extends Widget_Base {
 			[
 				'label' => __( 'Infinite Loop', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 			]
 		);
@@ -758,7 +735,6 @@ class Slides extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'heading_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-slide-heading',
 			]
@@ -807,7 +783,6 @@ class Slides extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'description_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_2,
 				'selector' => '{{WRAPPER}} .elementor-slide-description',
 			]
@@ -848,7 +823,6 @@ class Slides extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'button_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-slide-button',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 			]
@@ -1134,13 +1108,13 @@ class Slides extends Widget_Base {
 					$this->add_render_attribute( 'slide_link' . $slide_count, 'target', '_blank' );
 				}
 
-			    if ( 'button' === $slide['link_click'] ) {
-				    $btn_element = 'a';
-				    $btn_attributes = $this->get_render_attribute_string( 'slide_link' . $slide_count );
-			    } else {
-				    $slide_element = 'a';
-				    $slide_attributes = $this->get_render_attribute_string( 'slide_link' . $slide_count );
-			    }
+				if ( 'button' === $slide['link_click'] ) {
+					$btn_element = 'a';
+					$btn_attributes = $this->get_render_attribute_string( 'slide_link' . $slide_count );
+				} else {
+					$slide_element = 'a';
+					$slide_attributes = $this->get_render_attribute_string( 'slide_link' . $slide_count );
+				}
 			}
 
 			if ( 'yes' === $slide['background_overlay'] ) {
@@ -1169,7 +1143,7 @@ class Slides extends Widget_Base {
 
 			$slide_html .= '</div>';
 			$slide_html = '<div class="slick-slide-bg' . $ken_class . '"></div><' . $slide_element . ' ' . $slide_attributes . ' class="slick-slide-inner">' . $slide_html . '</' . $slide_element . '>';
-			$slides[] = '<div class="elementor-repeater-item-' . $slide['_id'] . '">' . $slide_html . '</div>';
+			$slides[] = '<div class="elementor-repeater-item-' . $slide['_id'] . ' slick-slide">' . $slide_html . '</div>';
 			$slide_count++;
 		}
 
@@ -1211,7 +1185,7 @@ class Slides extends Widget_Base {
 		] );
 
 		?>
-		<div class="elementor-slides-wrapper elementor-slick-slider" dir="<?php echo $direction; ?>">
+		<div class="elementor-slides-wrapper elementor-slick-slider" dir="<?php echo esc_attr( $direction ); ?>">
 			<div <?php echo $this->get_render_attribute_string( 'slides' ); ?>>
 				<?php echo implode( '', $slides ); ?>
 			</div>
@@ -1260,7 +1234,7 @@ class Slides extends Widget_Base {
 		<div class="elementor-slides-wrapper elementor-slick-slider" dir="{{ direction }}">
 			<div data-slider_options="{{ sliderOptionsStr }}" class="elementor-slides {{ dotsClass }} {{ arrowsClass }}" data-animation="{{ settings.content_animation }}">
 				<# _.each( settings.slides, function( slide ) { #>
-					<div class="elementor-repeater-item-{{ slide._id }}">
+					<div class="elementor-repeater-item-{{ slide._id }} slick-slide">
 						<#
 						var kenClass = '';
 

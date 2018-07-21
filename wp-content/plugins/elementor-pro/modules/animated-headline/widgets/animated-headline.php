@@ -106,7 +106,7 @@ class Animated_Headline extends Widget_Base {
 				'label' => __( 'Before Text', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXT,
 				'default' => __( 'This page is', 'elementor-pro' ),
-				'placeholder' => __( 'Your Headline', 'elementor-pro' ),
+				'placeholder' => __( 'Enter your headline', 'elementor-pro' ),
 				'label_block' => true,
 				'separator' => 'before',
 			]
@@ -148,7 +148,7 @@ class Animated_Headline extends Widget_Base {
 			[
 				'label' => __( 'After Text', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXT,
-				'placeholder' => __( 'Your Headline', 'elementor-pro' ),
+				'placeholder' => __( 'Enter your headline', 'elementor-pro' ),
 				'label_block' => true,
 				'separator' => 'none',
 			]
@@ -254,6 +254,7 @@ class Animated_Headline extends Widget_Base {
 				'type' => Controls_Manager::SWITCHER,
 				'selectors' => [
 					"{{WRAPPER}} .elementor-headline-dynamic-wrapper svg" => 'z-index: 2',
+					"{{WRAPPER}} .elementor-headline-dynamic-text" => 'z-index: auto',
 				],
 			]
 		);
@@ -289,7 +290,7 @@ class Animated_Headline extends Widget_Base {
 					'value' => Scheme_Color::COLOR_2,
 				],
 				'selectors' => [
-					'{{WRAPPER}} span' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .elementor-headline-plain-text' => 'color: {{VALUE}}',
 
 				],
 			]
@@ -299,7 +300,6 @@ class Animated_Headline extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-headline',
 			]
@@ -333,7 +333,6 @@ class Animated_Headline extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'words_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-headline-dynamic-text',
 				'exclude' => ['font_size'],

@@ -26,8 +26,29 @@ class PLL_REST_API {
 	 * @since 2.2
 	 */
 	public function init() {
-		$this->post = new PLL_REST_Post( $this->model, $this->model->get_translated_post_types() );
-		$this->term = new PLL_REST_Term( $this->model, $this->model->get_translated_taxonomies() );
+		$post_types = array_fill_keys( $this->model->get_translated_post_types(), array() );
+
+		/**
+		 * Filter post types and their options passed to PLL_Rest_Post contructor
+		 *
+		 * @since 2.2.1
+		 *
+		 * @param array $post_types An array of arrays with post types as keys and options as values
+		 */
+		$post_types = apply_filters( 'pll_rest_api_post_types', $post_types );
+		$this->post = new PLL_REST_Post( $this->model, $post_types );
+
+		$taxonomies = array_fill_keys( $this->model->get_translated_taxonomies(), array() );
+
+		/**
+		 * Filter post types and their options passed to PLL_Rest_Term constructor
+		 *
+		 * @since 2.2.1
+		 *
+		 * @param array $taxonomies An array of arrays with taxonomies as keys and options as values
+		 */
+		$taxonomies = apply_filters( 'pll_rest_api_taxonomies', $taxonomies );
+		$this->term = new PLL_REST_Term( $this->model, $taxonomies );
 
 		register_rest_route( 'pll/v1', '/languages', array(
 			'methods'  => WP_REST_Server::READABLE,

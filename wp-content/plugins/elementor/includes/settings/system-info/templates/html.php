@@ -21,12 +21,11 @@ foreach ( $reports as $report_name => $report ) : ?>
 			<?php
 			foreach ( $report['report'] as $field_name => $field ) :
 
-				if ( in_array( $report_name, [ 'plugins', 'network_plugins', 'mu_plugins' ] ) ) :
+				if ( in_array( $report_name, [ 'plugins', 'network_plugins', 'mu_plugins' ], true ) ) :
 					foreach ( $field['value'] as $plugin ) :
 					?>
 						<tr>
-							<td>
-								<?php
+							<td><?php
 								if ( $plugin['PluginURI'] ) :
 									$plugin_name = "<a href='{$plugin['PluginURI']}'>{$plugin['Name']}</a>";
 								else :
@@ -38,12 +37,9 @@ foreach ( $reports as $report_name => $report ) : ?>
 								endif;
 
 								echo $plugin_name;
-								?>
-								</td>
-							<td>
-								<?php
+							?></td>
+							<td><?php
 								if ( $plugin['Author'] ) :
-
 									if ( $plugin['AuthorURI'] ) :
 										$author = "<a href='{$plugin['AuthorURI']}'>{$plugin['Author']}</a>";
 									else :
@@ -52,24 +48,22 @@ foreach ( $reports as $report_name => $report ) : ?>
 
 									echo "By $author";
 								endif;
-								?>
-								</td>
+							?></td>
 							<td></td>
 						</tr>
 					<?php
 					endforeach;
 				else :
+					$warning_class = ! empty( $field['warning'] ) ? ' class="elementor-warning"' : '';
 				?>
-					<tr>
+					<tr<?php echo $warning_class; ?>>
 						<td><?php echo $field['label']; ?>:</td>
-						<td><?php echo nl2br( $field['value'] ); ?></td>
-						<td>
-						<?php
-						if ( ! empty( $field['recommendation'] ) ) :
+						<td><?php echo $field['value']; ?></td>
+						<td><?php
+							if ( ! empty( $field['recommendation'] ) ) {
 								echo $field['recommendation'];
-							endif;
-							?>
-							</td>
+							}
+						?></td>
 					</tr>
 				<?php
 				endif;

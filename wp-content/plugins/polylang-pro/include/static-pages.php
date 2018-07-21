@@ -19,6 +19,7 @@ abstract class PLL_Static_Pages {
 	public function __construct( &$polylang ) {
 		$this->model = &$polylang->model;
 		$this->options = &$polylang->options;
+		$this->curlang = &$polylang->curlang;
 
 		$this->init();
 
@@ -84,5 +85,18 @@ abstract class PLL_Static_Pages {
 		}
 
 		return $languages;
+	}
+
+	/**
+	 * Translates page for posts
+	 *
+	 * @since 1.8
+	 *
+	 * @param int $v page for posts page id
+	 * @return int
+	 */
+	public function translate_page_for_posts( $v ) {
+		// Don't attempt to translate in a 'switch_blog' action as there is a risk to call this function while initializing the languages cache
+		return isset( $this->curlang->page_for_posts ) && ! doing_action( 'switch_blog' ) ? $this->curlang->page_for_posts : $v;
 	}
 }

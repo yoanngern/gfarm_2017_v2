@@ -6,37 +6,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * A Switcher (on/off) control - basically a fancy UI representation of a checkbox.
+ * Elementor switcher control.
  *
- * @param string $label_off           The label for off status
- *                                    Default ''
- * @param string $label_on            The label for on status
- *                                    Default ''
- * @param string $return_value        The value of the control
- *                                    Default 'yes'
+ * A base control for creating switcher control. Displays an on/off switcher,
+ * basically a fancy UI representation of a checkbox.
  *
  * @since 1.0.0
- *
-```<php
-	$this->add_control(
-		'show_title',
-		[
-			'label' => __( 'Show Title', 'plugin-domain' ),
-			'type' => Controls_Manager::SWITCHER,
-			'default' => 'yes',
-			'label_on' => __( 'Show', 'plugin-domain' ),
-			'label_off' => __( 'Hide', 'plugin-domain' ),
-			'return_value' => 'yes',
-		]
-	);
-?>```
  */
 class Control_Switcher extends Base_Data_Control {
 
+	/**
+	 * Get switcher control type.
+	 *
+	 * Retrieve the control type, in this case `switcher`.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return string Control type.
+	 */
 	public function get_type() {
 		return 'switcher';
 	}
 
+	/**
+	 * Render switcher control output in the editor.
+	 *
+	 * Used to generate the control HTML in the editor using Underscore JS
+	 * template. The variables for the class are available using `data` JS
+	 * object.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 */
 	public function content_template() {
 		$control_uid = $this->get_control_uid();
 		?>
@@ -56,6 +58,17 @@ class Control_Switcher extends Base_Data_Control {
 		<?php
 	}
 
+	/**
+	 * Get switcher control default settings.
+	 *
+	 * Retrieve the default settings of the switcher control. Used to return the
+	 * default settings while initializing the switcher control.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 *
+	 * @return array Control default settings.
+	 */
 	protected function get_default_settings() {
 		return [
 			'label_off' => __( 'No', 'elementor' ),

@@ -1,5 +1,5 @@
-/*! elementor - v1.6.5 - 24-08-2017 */
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*! elementor - v2.1.4 - 18-07-2018 */
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 var ElementsHandler;
 
 ElementsHandler = function( $ ) {
@@ -24,7 +24,6 @@ ElementsHandler = function( $ ) {
 
 	var addGlobalHandlers = function() {
 		elementorFrontend.hooks.addAction( 'frontend/element_ready/global', require( 'elementor-frontend/handlers/global' ) );
-		elementorFrontend.hooks.addAction( 'frontend/element_ready/widget', require( 'elementor-frontend/handlers/widget' ) );
 	};
 
 	var addElementsHandlers = function() {
@@ -96,7 +95,7 @@ ElementsHandler = function( $ ) {
 
 module.exports = ElementsHandler;
 
-},{"elementor-frontend/handlers/accordion":4,"elementor-frontend/handlers/alert":5,"elementor-frontend/handlers/counter":6,"elementor-frontend/handlers/global":7,"elementor-frontend/handlers/image-carousel":8,"elementor-frontend/handlers/progress":9,"elementor-frontend/handlers/section":10,"elementor-frontend/handlers/tabs":11,"elementor-frontend/handlers/text-editor":12,"elementor-frontend/handlers/toggle":13,"elementor-frontend/handlers/video":14,"elementor-frontend/handlers/widget":15}],2:[function(require,module,exports){
+},{"elementor-frontend/handlers/accordion":4,"elementor-frontend/handlers/alert":5,"elementor-frontend/handlers/counter":7,"elementor-frontend/handlers/global":8,"elementor-frontend/handlers/image-carousel":9,"elementor-frontend/handlers/progress":10,"elementor-frontend/handlers/section":11,"elementor-frontend/handlers/tabs":12,"elementor-frontend/handlers/text-editor":13,"elementor-frontend/handlers/toggle":14,"elementor-frontend/handlers/video":15}],2:[function(require,module,exports){
 /* global elementorFrontendConfig */
 ( function( $ ) {
 	var elements = {},
@@ -129,6 +128,8 @@ module.exports = ElementsHandler;
 			elements.$body = $( 'body' );
 
 			elements.$elementor = elements.$document.find( '.elementor' );
+
+			elements.$wpAdminBar = elements.$document.find( '#wpadminbar' );
 		};
 
 		var bindEvents = function() {
@@ -140,6 +141,11 @@ module.exports = ElementsHandler;
 				youtube: new YouTubeModule(),
 				anchors: new AnchorsModule(),
 				lightbox: new LightboxModule()
+			};
+
+			self.modules = {
+				StretchElement: require( 'elementor-frontend/modules/stretch-element' ),
+				Masonry: require( 'elementor-utils/masonry' )
 			};
 
 			self.elementsHandler = new ElementsHandler( $ );
@@ -263,12 +269,28 @@ module.exports = ElementsHandler;
 				return;
 			}
 
+			this.removeListeners( listenerID, event, to );
+
 			if ( to instanceof jQuery ) {
 				var eventNS = event + '.' + listenerID;
 
-				to.off( eventNS ).on( eventNS, callback );
+				to.on( eventNS, callback );
 			} else {
-				to.off( event, null, listenerID ).on( event, callback, listenerID );
+				to.on( event, callback, listenerID );
+			}
+		};
+
+		this.removeListeners = function( listenerID, event, callback, from ) {
+			if ( ! from ) {
+				from = self.getElements( '$window' );
+			}
+
+			if ( from instanceof jQuery ) {
+				var eventNS = event + '.' + listenerID;
+
+				from.off( eventNS, callback );
+			} else {
+				from.off( event, callback, listenerID );
 			}
 		};
 
@@ -277,10 +299,23 @@ module.exports = ElementsHandler;
 		};
 
 		this.waypoint = function( $element, callback, options ) {
-			var correctCallback = function() {
-				var element = this.element || this;
+			var defaultOptions = {
+				offset: '100%',
+				triggerOnce: true
+			};
 
-				return callback.apply( element, arguments );
+			options = $.extend( defaultOptions, options );
+
+			var correctCallback = function() {
+				var element = this.element || this,
+					result = callback.apply( element, arguments );
+
+				// If is Waypoint new API and is frontend
+				if ( options.triggerOnce && this.destroy ) {
+					this.destroy();
+				}
+
+				return result;
 			};
 
 			return $element.elementorWaypoint( correctCallback, options );
@@ -294,25 +329,41 @@ if ( ! elementorFrontend.isEditMode() ) {
 	jQuery( elementorFrontend.init );
 }
 
-},{"../utils/hooks":19,"./handler-module":3,"elementor-frontend/elements-handler":1,"elementor-frontend/utils/anchors":16,"elementor-frontend/utils/lightbox":17,"elementor-frontend/utils/youtube":18,"elementor-utils/hot-keys":20}],3:[function(require,module,exports){
+},{"../utils/hooks":20,"./handler-module":3,"elementor-frontend/elements-handler":1,"elementor-frontend/modules/stretch-element":16,"elementor-frontend/utils/anchors":17,"elementor-frontend/utils/lightbox":18,"elementor-frontend/utils/youtube":19,"elementor-utils/hot-keys":21,"elementor-utils/masonry":22}],3:[function(require,module,exports){
 var ViewModule = require( '../utils/view-module' ),
 	HandlerModule;
 
 HandlerModule = ViewModule.extend( {
 	$element: null,
 
+	editorListeners: null,
+
 	onElementChange: null,
+
+	onEditSettingsChange: null,
 
 	onGeneralSettingsChange: null,
 
 	onPageSettingsChange: null,
 
+	isEdit: null,
+
 	__construct: function( settings ) {
 		this.$element  = settings.$element;
 
-		if ( elementorFrontend.isEditMode() ) {
-			this.addEditorListener();
+		this.isEdit = this.$element.hasClass( 'elementor-element-edit-mode' );
+
+		if ( this.isEdit ) {
+			this.addEditorListeners();
 		}
+	},
+
+	findElement: function( selector ) {
+		var $mainElement = this.$element;
+
+		return $mainElement.find( selector ).filter( function() {
+			return jQuery( this ).closest( '.elementor-element' ).is( $mainElement );
+		} );
 	},
 
 	getUniqueHandlerID: function( cid, $element ) {
@@ -327,9 +378,22 @@ HandlerModule = ViewModule.extend( {
 		return cid + $element.attr( 'data-element_type' ) + this.getConstructorID();
 	},
 
-	addEditorListener: function() {
-		var self = this,
-			uniqueHandlerID = self.getUniqueHandlerID();
+	initEditorListeners: function() {
+		var self = this;
+
+		self.editorListeners = [
+			{
+				event: 'element:destroy',
+				to: elementor.channels.data,
+				callback: function( removedModel ) {
+					if ( removedModel.cid !== self.getModelCID() ) {
+						return;
+					}
+
+					self.onDestroy();
+				}
+			}
+		];
 
 		if ( self.onElementChange ) {
 			var elementName = self.getElementName(),
@@ -339,25 +403,71 @@ HandlerModule = ViewModule.extend( {
 				eventName += ':' + elementName;
 			}
 
-			elementorFrontend.addListenerOnce( uniqueHandlerID, eventName, function( controlView, elementView ) {
-				var elementViewHandlerID = self.getUniqueHandlerID( elementView.model.cid, elementView.$el );
+			self.editorListeners.push( {
+				event: eventName,
+				to: elementor.channels.editor,
+				callback: function( controlView, elementView ) {
+					var elementViewHandlerID = self.getUniqueHandlerID( elementView.model.cid, elementView.$el );
 
-				if ( elementViewHandlerID !== uniqueHandlerID ) {
-					return;
+					if ( elementViewHandlerID !== self.getUniqueHandlerID() ) {
+						return;
+					}
+
+					self.onElementChange( controlView.model.get( 'name' ),  controlView, elementView );
 				}
+			} );
+		}
 
-				self.onElementChange( controlView.model.get( 'name' ),  controlView, elementView );
-			}, elementor.channels.editor );
+		if ( self.onEditSettingsChange ) {
+			self.editorListeners.push( {
+				event: 'change:editSettings',
+				to: elementor.channels.editor,
+				callback: function( changedModel, view ) {
+					if ( view.model.cid !== self.getModelCID() ) {
+						return;
+					}
+
+					self.onEditSettingsChange( Object.keys( changedModel.changed )[0] );
+				}
+			} );
 		}
 
 		[ 'page', 'general' ].forEach( function( settingsType ) {
-			var listenerMethodName = 'on' + settingsType.charAt( 0 ).toUpperCase() + settingsType.slice( 1 ) + 'SettingsChange';
+			var listenerMethodName = 'on' + elementor.helpers.firstLetterUppercase( settingsType ) + 'SettingsChange';
 
 			if ( self[ listenerMethodName ] ) {
-				elementorFrontend.addListenerOnce( uniqueHandlerID, 'change', function( model ) {
-					self[ listenerMethodName ]( model.changed );
-				}, elementor.settings[ settingsType ].model );
+				self.editorListeners.push( {
+					event: 'change',
+					to: elementor.settings[ settingsType ].model,
+					callback: function( model ) {
+						self[ listenerMethodName ]( model.changed );
+					}
+				} );
 			}
+		} );
+	},
+
+	getEditorListeners: function() {
+		if ( ! this.editorListeners ) {
+			this.initEditorListeners();
+		}
+
+		return this.editorListeners;
+	},
+
+	addEditorListeners: function() {
+		var uniqueHandlerID = this.getUniqueHandlerID();
+
+		this.getEditorListeners().forEach( function( listener ) {
+			elementorFrontend.addListenerOnce( uniqueHandlerID, listener.event, listener.callback, listener.to );
+		} );
+	},
+
+	removeEditorListeners: function() {
+		var uniqueHandlerID = this.getUniqueHandlerID();
+
+		this.getEditorListeners().forEach( function( listener ) {
+			elementorFrontend.removeListeners( uniqueHandlerID, listener.event, null, listener.to );
 		} );
 	},
 
@@ -377,7 +487,7 @@ HandlerModule = ViewModule.extend( {
 		var elementSettings = {},
 			modelCID = this.getModelCID();
 
-		if ( elementorFrontend.isEditMode() && modelCID ) {
+		if ( this.isEdit && modelCID ) {
 			var settings = elementorFrontend.config.elements.data[ modelCID ],
 				settingsKeys = elementorFrontend.config.elements.keys[ settings.attributes.widgetType || settings.attributes.elType ];
 
@@ -394,53 +504,38 @@ HandlerModule = ViewModule.extend( {
 	},
 
 	getEditSettings: function( setting ) {
-		if ( ! elementorFrontend.isEditMode() ) {
-			return {};
+		var attributes = {};
+
+		if ( this.isEdit ) {
+			attributes = elementorFrontend.config.elements.editSettings[ this.getModelCID() ].attributes;
 		}
 
-		var editSettings = elementorFrontend.config.elements.editSettings[ this.getModelCID() ];
+		return this.getItems( attributes, setting );
+	},
 
-		return this.getItems( editSettings.attributes, setting );
+	onDestroy: function() {
+		this.removeEditorListeners();
+
+		if ( this.unbindEvents ) {
+			this.unbindEvents();
+		}
 	}
 } );
 
 module.exports = HandlerModule;
 
-},{"../utils/view-module":22}],4:[function(require,module,exports){
-var activateSection = function( sectionIndex, $accordionTitles ) {
-	var $activeTitle = $accordionTitles.filter( '.active' ),
-		$requestedTitle = $accordionTitles.filter( '[data-section="' + sectionIndex + '"]' ),
-		isRequestedActive = $requestedTitle.hasClass( 'active' );
+},{"../utils/view-module":24}],4:[function(require,module,exports){
+var TabsModule = require( 'elementor-frontend/handlers/base-tabs' );
 
-	$activeTitle
-		.removeClass( 'active' )
-		.next()
-		.slideUp();
-
-	if ( ! isRequestedActive ) {
-		$requestedTitle
-			.addClass( 'active' )
-			.next()
-			.slideDown();
-	}
-};
-
-module.exports = function( $scope, $ ) {
-	var defaultActiveSection = $scope.find( '.elementor-accordion' ).data( 'active-section' ),
-		$accordionTitles = $scope.find( '.elementor-accordion-title' );
-
-	if ( ! defaultActiveSection ) {
-		defaultActiveSection = 1;
-	}
-
-	activateSection( defaultActiveSection, $accordionTitles );
-
-	$accordionTitles.on( 'click', function() {
-		activateSection( this.dataset.section, $accordionTitles );
+module.exports = function( $scope ) {
+	new TabsModule( {
+		$element: $scope,
+		showTabFn: 'slideDown',
+		hideTabFn: 'slideUp'
 	} );
 };
 
-},{}],5:[function(require,module,exports){
+},{"elementor-frontend/handlers/base-tabs":6}],5:[function(require,module,exports){
 module.exports = function( $scope, $ ) {
 	$scope.find( '.elementor-alert-dismiss' ).on( 'click', function() {
 		$( this ).parent().fadeOut();
@@ -448,6 +543,136 @@ module.exports = function( $scope, $ ) {
 };
 
 },{}],6:[function(require,module,exports){
+var HandlerModule = require( 'elementor-frontend/handler-module' );
+
+module.exports = HandlerModule.extend( {
+	$activeContent: null,
+
+	getDefaultSettings: function() {
+		return {
+			selectors: {
+				tabTitle: '.elementor-tab-title',
+				tabContent: '.elementor-tab-content'
+			},
+			classes: {
+				active: 'elementor-active'
+			},
+			showTabFn: 'show',
+			hideTabFn: 'hide',
+			toggleSelf: true,
+			hidePrevious: true,
+			autoExpand: true
+		};
+	},
+
+	getDefaultElements: function() {
+		var selectors = this.getSettings( 'selectors' );
+
+		return {
+			$tabTitles: this.findElement( selectors.tabTitle ),
+			$tabContents: this.findElement( selectors.tabContent )
+		};
+	},
+
+	activateDefaultTab: function() {
+		var settings = this.getSettings();
+
+		if ( ! settings.autoExpand || 'editor' === settings.autoExpand && ! this.isEdit ) {
+			return;
+		}
+
+		var defaultActiveTab = this.getEditSettings( 'activeItemIndex' ) || 1,
+			originalToggleMethods = {
+				showTabFn: settings.showTabFn,
+				hideTabFn: settings.hideTabFn
+			};
+
+		// Toggle tabs without animation to avoid jumping
+		this.setSettings( {
+			showTabFn: 'show',
+			hideTabFn: 'hide'
+		} );
+
+		this.changeActiveTab( defaultActiveTab );
+
+		// Return back original toggle effects
+		this.setSettings( originalToggleMethods );
+	},
+
+	deactivateActiveTab: function( tabIndex ) {
+		var settings = this.getSettings(),
+			activeClass = settings.classes.active,
+			activeFilter = tabIndex ? '[data-tab="' + tabIndex + '"]' : '.' + activeClass,
+			$activeTitle = this.elements.$tabTitles.filter( activeFilter ),
+			$activeContent = this.elements.$tabContents.filter( activeFilter );
+
+		$activeTitle.add( $activeContent ).removeClass( activeClass );
+
+		$activeContent[ settings.hideTabFn ]();
+	},
+
+	activateTab: function( tabIndex ) {
+		var settings = this.getSettings(),
+			activeClass = settings.classes.active,
+			$requestedTitle = this.elements.$tabTitles.filter( '[data-tab="' + tabIndex + '"]' ),
+			$requestedContent = this.elements.$tabContents.filter( '[data-tab="' + tabIndex + '"]' );
+
+		$requestedTitle.add( $requestedContent ).addClass( activeClass );
+
+		$requestedContent[ settings.showTabFn ]();
+	},
+
+	isActiveTab: function( tabIndex ) {
+		return this.elements.$tabTitles.filter( '[data-tab="' + tabIndex + '"]' ).hasClass( this.getSettings( 'classes.active' ) );
+	},
+
+	bindEvents: function() {
+		var self = this;
+
+		self.elements.$tabTitles.on( 'focus', function( event ) {
+			self.changeActiveTab( event.currentTarget.dataset.tab );
+		} );
+
+		if ( self.getSettings( 'toggleSelf' ) ) {
+			self.elements.$tabTitles.on( 'mousedown', function( event ) {
+				if ( jQuery( event.currentTarget ).is( ':focus' ) ) {
+					self.changeActiveTab( event.currentTarget.dataset.tab );
+				}
+			} );
+		}
+	},
+
+	onInit: function() {
+		HandlerModule.prototype.onInit.apply( this, arguments );
+
+		this.activateDefaultTab();
+	},
+
+	onEditSettingsChange: function( propertyName ) {
+		if ( 'activeItemIndex' === propertyName ) {
+			this.activateDefaultTab();
+		}
+	},
+
+	changeActiveTab: function( tabIndex ) {
+		var isActiveTab = this.isActiveTab( tabIndex ),
+			settings = this.getSettings();
+
+		if ( ( settings.toggleSelf || ! isActiveTab ) && settings.hidePrevious ) {
+			this.deactivateActiveTab();
+		}
+
+		if ( ! settings.hidePrevious && isActiveTab ) {
+			this.deactivateActiveTab( tabIndex );
+		}
+
+		if ( ! isActiveTab ) {
+			this.activateTab( tabIndex );
+		}
+	}
+} );
+
+},{"elementor-frontend/handler-module":3}],7:[function(require,module,exports){
 module.exports = function( $scope, $ ) {
 	elementorFrontend.waypoint( $scope.find( '.elementor-counter-number' ), function() {
 		var $number = $( this ),
@@ -460,10 +685,10 @@ module.exports = function( $scope, $ ) {
 		}
 
 		$number.numerator( data );
-	}, { offset: '90%' } );
+	} );
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var HandlerModule = require( 'elementor-frontend/handler-module' ),
 	GlobalHandler;
 
@@ -489,21 +714,17 @@ GlobalHandler = HandlerModule.extend( {
 		return elementSettings.animation || elementSettings._animation;
 	},
 	onInit: function() {
-		var self = this;
+		HandlerModule.prototype.onInit.apply( this, arguments );
 
-		HandlerModule.prototype.onInit.apply( self, arguments );
+		var animation = this.getAnimation();
 
-		if ( ! self.getAnimation() ) {
+		if ( ! animation ) {
 			return;
 		}
 
-		var waypoint = elementorFrontend.waypoint( self.$element, function() {
-			self.animate();
+		this.$element.removeClass( animation );
 
-			if ( waypoint && waypoint[0] && waypoint[0].destroy ) { // If it's Waypoint new API and is frontend
-				waypoint[0].destroy();
-			}
-		}, { offset: '90%' } );
+		elementorFrontend.waypoint( this.$element, this.animate.bind( this ) );
 	},
 	onElementChange: function( propertyName ) {
 		if ( /^_?animation/.test( propertyName ) ) {
@@ -516,7 +737,7 @@ module.exports = function( $scope ) {
 	new GlobalHandler( { $element: $scope } );
 };
 
-},{"elementor-frontend/handler-module":3}],8:[function(require,module,exports){
+},{"elementor-frontend/handler-module":3}],9:[function(require,module,exports){
 var HandlerModule = require( 'elementor-frontend/handler-module' ),
 	ImageCarouselHandler;
 
@@ -542,7 +763,8 @@ ImageCarouselHandler = HandlerModule.extend( {
 
 		var elementSettings = this.getElementSettings(),
 			slidesToShow = +elementSettings.slides_to_show || 3,
-			isSingleSlide = 1 === slidesToShow;
+			isSingleSlide = 1 === slidesToShow,
+			breakpoints = elementorFrontend.config.breakpoints;
 
 		var slickOptions = {
 			slidesToShow: slidesToShow,
@@ -556,14 +778,14 @@ ImageCarouselHandler = HandlerModule.extend( {
 			rtl: 'rtl' === elementSettings.direction,
 			responsive: [
 				{
-					breakpoint: 768,
+					breakpoint: breakpoints.lg,
 					settings: {
 						slidesToShow: +elementSettings.slides_to_show_tablet || ( isSingleSlide ? 1 : 2 ),
 						slidesToScroll: 1
 					}
 				},
 				{
-					breakpoint: 481,
+					breakpoint: breakpoints.md,
 					settings: {
 						slidesToShow: +elementSettings.slides_to_show_mobile || 1,
 						slidesToScroll: 1
@@ -586,16 +808,16 @@ module.exports = function( $scope ) {
 	new ImageCarouselHandler( { $element: $scope } );
 };
 
-},{"elementor-frontend/handler-module":3}],9:[function(require,module,exports){
+},{"elementor-frontend/handler-module":3}],10:[function(require,module,exports){
 module.exports = function( $scope, $ ) {
 	elementorFrontend.waypoint( $scope.find( '.elementor-progress-bar' ), function() {
 		var $progressbar = $( this );
 
 		$progressbar.css( 'width', $progressbar.data( 'max' ) + '%' );
-	}, { offset: '90%' } );
+	} );
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var HandlerModule = require( 'elementor-frontend/handler-module' );
 
 var BackgroundVideo = HandlerModule.extend( {
@@ -649,9 +871,39 @@ var BackgroundVideo = HandlerModule.extend( {
 		$video.width( size.width ).height( size.height );
 	},
 
+	startVideoLoop: function() {
+		var self = this;
+
+		// If the section has been removed
+		if ( ! self.player.getIframe().contentWindow ) {
+			return;
+		}
+
+		var elementSettings = self.getElementSettings(),
+			startPoint = elementSettings.background_video_start || 0,
+			endPoint = elementSettings.background_video_end;
+
+		self.player.seekTo( startPoint );
+
+		if ( endPoint ) {
+			var durationToEnd = endPoint - startPoint + 1;
+
+			setTimeout( function() {
+				self.startVideoLoop();
+			}, durationToEnd * 1000 );
+		}
+	},
+
 	prepareYTVideo: function( YT, videoID ) {
 		var self = this,
-			$backgroundVideoContainer = self.elements.$backgroundVideoContainer;
+			$backgroundVideoContainer = self.elements.$backgroundVideoContainer,
+			elementSettings = self.getElementSettings(),
+			startStateCode = YT.PlayerState.PLAYING;
+
+		// Since version 67, Chrome doesn't fire the `PLAYING` state at start time
+		if ( window.chrome ) {
+			startStateCode = YT.PlayerState.UNSTARTED;
+		}
 
 		$backgroundVideoContainer.addClass( 'elementor-loading elementor-invisible' );
 
@@ -663,22 +915,25 @@ var BackgroundVideo = HandlerModule.extend( {
 
 					self.changeVideoSize();
 
+					self.startVideoLoop();
+
 					self.player.playVideo();
 				},
 				onStateChange: function( event ) {
 					switch ( event.data ) {
-						case YT.PlayerState.PLAYING:
+						case startStateCode:
 							$backgroundVideoContainer.removeClass( 'elementor-invisible elementor-loading' );
 
 							break;
 						case YT.PlayerState.ENDED:
-							self.player.seekTo( 0 );
+							self.player.seekTo( elementSettings.background_video_start || 0 );
 					}
 				}
 			},
 			playerVars: {
 				controls: 0,
-				showinfo: 0
+				showinfo: 0,
+				rel: 0
 			}
 		} );
 
@@ -736,78 +991,66 @@ var BackgroundVideo = HandlerModule.extend( {
 
 var StretchedSection = HandlerModule.extend( {
 
+	stretchElement: null,
+
 	bindEvents: function() {
-		elementorFrontend.addListenerOnce( this.$element.data( 'model-cid' ), 'resize', this.stretchSection );
+		var handlerID = this.getUniqueHandlerID();
+
+		elementorFrontend.addListenerOnce( handlerID, 'resize', this.stretch );
+
+		elementorFrontend.addListenerOnce( handlerID, 'sticky:stick', this.stretch, this.$element );
+
+		elementorFrontend.addListenerOnce( handlerID, 'sticky:unstick', this.stretch, this.$element );
 	},
 
-	stretchSection: function() {
-		// Clear any previously existing css associated with this script
-		var direction = elementorFrontend.config.is_rtl ? 'right' : 'left',
-			resetCss = {},
-			isStretched = this.$element.hasClass( 'elementor-section-stretched' );
+	unbindEvents: function() {
+		elementorFrontend.removeListeners( this.getUniqueHandlerID(), 'resize', this.stretch );
+	},
 
-		if ( elementorFrontend.isEditMode() || isStretched ) {
-			resetCss.width = 'auto';
+	initStretch: function() {
+		this.stretchElement = new elementorFrontend.modules.StretchElement( {
+			element: this.$element,
+			selectors: {
+				container: this.getStretchContainer()
+			}
+		} );
+	},
 
-			resetCss[ direction ] = 0;
+	getStretchContainer: function() {
+		return elementorFrontend.getGeneralSettings( 'elementor_stretched_section_container' ) || window;
+	},
 
-			this.$element.css( resetCss );
-		}
-
-		if ( ! isStretched ) {
+	stretch: function() {
+		if ( ! this.getElementSettings( 'stretch_section' ) ) {
 			return;
 		}
 
-		var $sectionContainer,
-			hasSpecialContainer = false;
-
-		try {
-			$sectionContainer = jQuery( elementorFrontend.getGeneralSettings( 'elementor_stretched_section_container' ) );
-
-			if ( $sectionContainer.length ) {
-				hasSpecialContainer = true;
-			}
-		} catch ( e ) {}
-
-		if ( ! hasSpecialContainer ) {
-			$sectionContainer = elementorFrontend.getElements( '$window' );
-		}
-
-		var containerWidth = $sectionContainer.outerWidth(),
-			sectionWidth = this.$element.outerWidth(),
-			sectionOffset = this.$element.offset().left,
-			correctOffset = sectionOffset;
-
-		if ( hasSpecialContainer ) {
-			var containerOffset = $sectionContainer.offset().left;
-
-			if ( sectionOffset > containerOffset ) {
-				correctOffset = sectionOffset - containerOffset;
-			} else {
-				correctOffset = 0;
-			}
-		}
-
-		if ( elementorFrontend.config.is_rtl ) {
-			correctOffset = containerWidth - ( sectionWidth + correctOffset );
-		}
-
-		resetCss.width = containerWidth + 'px';
-
-		resetCss[ direction ] = -correctOffset + 'px';
-
-		this.$element.css( resetCss );
+		this.stretchElement.stretch();
 	},
 
 	onInit: function() {
 		HandlerModule.prototype.onInit.apply( this, arguments );
 
-		this.stretchSection();
+		this.initStretch();
+
+		this.stretch();
+	},
+
+	onElementChange: function( propertyName ) {
+		if ( 'stretch_section' === propertyName ) {
+			if ( this.getElementSettings( 'stretch_section' ) ) {
+				this.stretch();
+			} else {
+				this.stretchElement.reset();
+			}
+		}
 	},
 
 	onGeneralSettingsChange: function( changed ) {
 		if ( 'elementor_stretched_section_container' in changed ) {
-			this.stretchSection();
+			this.stretchElement.setSettings( 'selectors.container', this.getStretchContainer() );
+
+			this.stretch();
 		}
 	}
 } );
@@ -896,54 +1139,68 @@ var Shapes = HandlerModule.extend( {
 	}
 } );
 
+var HandlesPosition = HandlerModule.extend( {
+
+    isFirst: function() {
+        return this.$element.is( '.elementor-edit-mode .elementor-top-section:first' );
+    },
+
+    getOffset: function() {
+        return this.$element.offset().top;
+    },
+
+    setHandlesPosition: function() {
+        var self = this;
+
+        if ( self.isFirst() ) {
+            var offset = self.getOffset(),
+                $handlesElement = self.$element.find( '> .elementor-element-overlay > .elementor-editor-section-settings' ),
+                insideHandleClass = 'elementor-section--handles-inside';
+
+            if ( offset < 25 ) {
+                self.$element.addClass( insideHandleClass );
+
+                if ( offset < -5 ) {
+                    $handlesElement.css( 'top', -offset );
+                } else {
+                    $handlesElement.css( 'top', '' );
+                }
+            } else {
+                self.$element.removeClass( insideHandleClass );
+            }
+        }
+    },
+
+    onInit: function() {
+        this.setHandlesPosition();
+        this.$element.on( 'mouseenter', this.setHandlesPosition );
+    }
+} );
+
 module.exports = function( $scope ) {
 	if ( elementorFrontend.isEditMode() || $scope.hasClass( 'elementor-section-stretched' ) ) {
 		new StretchedSection( { $element: $scope } );
 	}
 
 	if ( elementorFrontend.isEditMode() ) {
-		new Shapes( { $element:  $scope } );
+		new Shapes( { $element: $scope } );
+		new HandlesPosition( { $element: $scope } );
 	}
 
 	new BackgroundVideo( { $element: $scope } );
 };
 
-},{"elementor-frontend/handler-module":3}],11:[function(require,module,exports){
-module.exports = function( $scope, $ ) {
-	var defaultActiveTab = $scope.find( '.elementor-tabs' ).data( 'active-tab' ),
-		$tabsTitles = $scope.find( '.elementor-tab-title' ),
-		$tabs = $scope.find( '.elementor-tab-content' ),
-		$active,
-		$content;
+},{"elementor-frontend/handler-module":3}],12:[function(require,module,exports){
+var TabsModule = require( 'elementor-frontend/handlers/base-tabs' );
 
-	if ( ! defaultActiveTab ) {
-		defaultActiveTab = 1;
-	}
-
-	var activateTab = function( tabIndex ) {
-		if ( $active ) {
-			$active.removeClass( 'active' );
-
-			$content.hide();
-		}
-
-		$active = $tabsTitles.filter( '[data-tab="' + tabIndex + '"]' );
-
-		$active.addClass( 'active' );
-
-		$content = $tabs.filter( '[data-tab="' + tabIndex + '"]' );
-
-		$content.show();
-	};
-
-	activateTab( defaultActiveTab );
-
-	$tabsTitles.on( 'click', function() {
-		activateTab( this.dataset.tab );
+module.exports = function( $scope ) {
+	new TabsModule( {
+		$element: $scope,
+		toggleSelf: false
 	} );
 };
 
-},{}],12:[function(require,module,exports){
+},{"elementor-frontend/handlers/base-tabs":6}],13:[function(require,module,exports){
 var HandlerModule = require( 'elementor-frontend/handler-module' ),
 	TextEditor;
 
@@ -1046,25 +1303,20 @@ module.exports = function( $scope ) {
 	new TextEditor( { $element: $scope } );
 };
 
-},{"elementor-frontend/handler-module":3}],13:[function(require,module,exports){
-module.exports = function( $scope, $ ) {
-	var $toggleTitles = $scope.find( '.elementor-toggle-title' );
+},{"elementor-frontend/handler-module":3}],14:[function(require,module,exports){
+var TabsModule = require( 'elementor-frontend/handlers/base-tabs' );
 
-	$toggleTitles.on( 'click', function() {
-		var $active = $( this ),
-			$content = $active.next();
-
-		if ( $active.hasClass( 'active' ) ) {
-			$active.removeClass( 'active' );
-			$content.slideUp();
-		} else {
-			$active.addClass( 'active' );
-			$content.slideDown();
-		}
+module.exports = function( $scope ) {
+	new TabsModule( {
+		$element: $scope,
+		showTabFn: 'slideDown',
+		hideTabFn: 'slideUp',
+		hidePrevious: false,
+		autoExpand: 'editor'
 	} );
 };
 
-},{}],14:[function(require,module,exports){
+},{"elementor-frontend/handlers/base-tabs":6}],15:[function(require,module,exports){
 var HandlerModule = require( 'elementor-frontend/handler-module' ),
 	VideoModule;
 
@@ -1073,8 +1325,8 @@ VideoModule = HandlerModule.extend( {
 		return {
 			selectors: {
 				imageOverlay: '.elementor-custom-embed-image-overlay',
-				videoWrapper: '.elementor-wrapper',
-				videoFrame: 'iframe'
+				video: '.elementor-video',
+				videoIframe: '.elementor-video-iframe'
 			}
 		};
 	},
@@ -1082,14 +1334,11 @@ VideoModule = HandlerModule.extend( {
 	getDefaultElements: function() {
 		var selectors = this.getSettings( 'selectors' );
 
-		var elements = {
+		return {
 			$imageOverlay: this.$element.find( selectors.imageOverlay ),
-			$videoWrapper: this.$element.find( selectors.videoWrapper )
+			$video: this.$element.find( selectors.video ),
+			$videoIframe: this.$element.find( selectors.videoIframe )
 		};
-
-		elements.$videoFrame = elements.$videoWrapper.find( selectors.videoFrame );
-
-		return elements;
 	},
 
 	getLightBox: function() {
@@ -1105,10 +1354,16 @@ VideoModule = HandlerModule.extend( {
 	},
 
 	playVideo: function() {
-		var $videoFrame = this.elements.$videoFrame,
-			newSourceUrl = $videoFrame[0].src.replace( '&autoplay=0', '' );
+		if ( this.elements.$video.length ) {
+			this.elements.$video[0].play();
 
-		$videoFrame[0].src = newSourceUrl + '&autoplay=1';
+			return;
+		}
+
+		var $videoIframe = this.elements.$videoIframe,
+			newSourceUrl = $videoIframe[0].src.replace( '&autoplay=0', '' );
+
+		$videoIframe[0].src = newSourceUrl + '&autoplay=1';
 	},
 
 	animateVideo: function() {
@@ -1148,34 +1403,97 @@ module.exports = function( $scope ) {
 	new VideoModule( { $element: $scope } );
 };
 
-},{"elementor-frontend/handler-module":3}],15:[function(require,module,exports){
-module.exports = function( $scope, $ ) {
-	if ( ! elementorFrontend.isEditMode() ) {
-		return;
-	}
-
-	if ( $scope.hasClass( 'elementor-widget-edit-disabled' ) ) {
-		return;
-	}
-
-	$scope.find( '.elementor-element' ).each( function() {
-		elementorFrontend.elementsHandler.runReadyTrigger( $( this ) );
-	} );
-};
-
-},{}],16:[function(require,module,exports){
+},{"elementor-frontend/handler-module":3}],16:[function(require,module,exports){
 var ViewModule = require( '../../utils/view-module' );
 
 module.exports = ViewModule.extend( {
 	getDefaultSettings: function() {
+		return {
+			element: null,
+			direction: elementorFrontend.config.is_rtl ? 'right' : 'left',
+			selectors: {
+				container: window
+			}
+		};
+	},
 
+	getDefaultElements: function() {
+		return {
+			$element: jQuery( this.getSettings( 'element' ) )
+		};
+	},
+
+	stretch: function() {
+		var containerSelector = this.getSettings( 'selectors.container' ),
+			$container;
+
+		try {
+			$container = jQuery( containerSelector );
+		} catch ( e ) {}
+
+		if ( ! $container || ! $container.length ) {
+			$container = jQuery( this.getDefaultSettings().selectors.container );
+		}
+
+		this.reset();
+
+		var $element = this.elements.$element,
+			containerWidth = $container.outerWidth(),
+			elementOffset = $element.offset().left,
+			isFixed = 'fixed' === $element.css( 'position' ),
+			correctOffset = isFixed ? 0 : elementOffset;
+
+		if ( window !== $container[0] ) {
+			var containerOffset = $container.offset().left;
+
+			if ( isFixed ) {
+				correctOffset = containerOffset;
+			} else {
+				if ( elementOffset > containerOffset ) {
+					correctOffset = elementOffset - containerOffset;
+				}
+			}
+		}
+
+		if ( ! isFixed ) {
+			if ( elementorFrontend.config.is_rtl ) {
+				correctOffset = containerWidth - ( $element.outerWidth() + correctOffset );
+			}
+
+			correctOffset = -correctOffset;
+		}
+
+		var css = {};
+
+		css.width = containerWidth + 'px';
+
+		css[ this.getSettings( 'direction' ) ] = correctOffset + 'px';
+
+		$element.css( css );
+	},
+
+	reset: function() {
+		var css = {};
+
+		css.width = '';
+
+		css[ this.getSettings( 'direction' ) ] = '';
+
+		this.elements.$element.css( css );
+	}
+} );
+
+},{"../../utils/view-module":24}],17:[function(require,module,exports){
+var ViewModule = require( '../../utils/view-module' );
+
+module.exports = ViewModule.extend( {
+	getDefaultSettings: function() {
 		return {
 			scrollDuration: 500,
 			selectors: {
 				links: 'a[href*="#"]',
 				targets: '.elementor-element, .elementor-menu-anchor',
-				scrollable: 'html, body',
-				wpAdminBar: '#wpadminbar'
+				scrollable: 'html, body'
 			}
 		};
 	},
@@ -1185,8 +1503,7 @@ module.exports = ViewModule.extend( {
 			selectors = this.getSettings( 'selectors' );
 
 		return {
-			$scrollable: $( selectors.scrollable ),
-			$wpAdminBar: $( selectors.wpAdminBar )
+			$scrollable: $( selectors.scrollable )
 		};
 	},
 
@@ -1209,11 +1526,22 @@ module.exports = ViewModule.extend( {
 			return;
 		}
 
-		var hasAdminBar = ( 1 <= this.elements.$wpAdminBar.length ),
-			scrollTop = $anchor.offset().top;
+		var scrollTop = $anchor.offset().top,
+			$wpAdminBar = elementorFrontend.getElements( '$wpAdminBar' ),
+			$activeStickies = jQuery( '.elementor-sticky--active' ),
+			maxStickyHeight = 0;
 
-		if ( hasAdminBar ) {
-			scrollTop -= this.elements.$wpAdminBar.height();
+		if ( $wpAdminBar.length > 0 ) {
+			scrollTop -= $wpAdminBar.height();
+		}
+
+		// Offset height of tallest sticky
+		if ( $activeStickies.length > 0 ) {
+			 maxStickyHeight = Math.max.apply( null, $activeStickies.map( function() {
+				return jQuery( this ).outerHeight();
+			} ).get() );
+
+			scrollTop -= maxStickyHeight;
 		}
 
 		event.preventDefault();
@@ -1232,7 +1560,7 @@ module.exports = ViewModule.extend( {
 	}
 } );
 
-},{"../../utils/view-module":22}],17:[function(require,module,exports){
+},{"../../utils/view-module":24}],18:[function(require,module,exports){
 var ViewModule = require( '../../utils/view-module' ),
 	LightboxModule;
 
@@ -1250,7 +1578,7 @@ LightboxModule = ViewModule.extend( {
 				item: 'elementor-lightbox-item',
 				image: 'elementor-lightbox-image',
 				videoContainer: 'elementor-video-container',
-				videoWrapper: 'elementor-video-wrapper',
+				videoWrapper: 'elementor-fit-aspect-ratio',
 				playButton: 'elementor-custom-embed-play',
 				playButtonIcon: 'fa',
 				playing: 'elementor-playing',
@@ -1342,7 +1670,7 @@ LightboxModule = ViewModule.extend( {
 
 				break;
 			case 'video':
-				self.setVideoContent( options.url );
+				self.setVideoContent( options );
 
 				break;
 			case 'slideshow':
@@ -1371,18 +1699,30 @@ LightboxModule = ViewModule.extend( {
 		self.getModal().setMessage( $item );
 	},
 
-	setVideoContent: function( videoEmbedURL ) {
-		videoEmbedURL = videoEmbedURL.replace( '&autoplay=0', '' ) + '&autoplay=1';
-
+	setVideoContent: function( options ) {
 		var classes = this.getSettings( 'classes' ),
 			$videoContainer = jQuery( '<div>', { 'class': classes.videoContainer } ),
 			$videoWrapper = jQuery( '<div>', { 'class': classes.videoWrapper } ),
-			$videoFrame = jQuery( '<iframe>', { src: videoEmbedURL } ),
+			$videoElement,
 			modal = this.getModal();
+
+		if ( 'hosted' === options.videoType ) {
+			var videoParams = { src: options.url, autoplay: '' };
+
+			options.videoParams.forEach( function( param ) {
+				videoParams[ param ] = '';
+			} );
+
+			$videoElement = jQuery( '<video>', videoParams );
+		} else {
+			var videoURL = options.url.replace( '&autoplay=0', '' ) + '&autoplay=1';
+
+			$videoElement = jQuery( '<iframe>', { src: videoURL, allowfullscreen: 1 } );
+		}
 
 		$videoContainer.append( $videoWrapper );
 
-		$videoWrapper.append( $videoFrame );
+		$videoWrapper.append( $videoElement );
 
 		modal.setMessage( $videoContainer );
 
@@ -1393,7 +1733,7 @@ LightboxModule = ViewModule.extend( {
 		modal.onHide = function() {
 			onHideMethod();
 
-			modal.getElements( 'message' ).removeClass( 'elementor-video-wrapper' );
+			modal.getElements( 'message' ).removeClass( 'elementor-fit-aspect-ratio' );
 		};
 	},
 
@@ -1414,13 +1754,7 @@ LightboxModule = ViewModule.extend( {
 				slideClass += ' ' + classes.video;
 			}
 
-			var $slide = $( '<div>', { 'class': slideClass } ),
-				$zoomContainer = $( '<div>', { 'class': 'swiper-zoom-container' } ),
-				$slideImage = $( '<img>', { 'class': classes.image + ' ' + classes.preventClose } ).attr( 'src', slide.image );
-
-			$slide.append( $zoomContainer );
-
-			$zoomContainer.append( $slideImage );
+			var $slide = $( '<div>', { 'class': slideClass } );
 
 			if ( slide.video ) {
 				$slide.attr( 'data-elementor-slideshow-video', slide.video );
@@ -1428,6 +1762,13 @@ LightboxModule = ViewModule.extend( {
 				var $playIcon = $( '<div>', { 'class': classes.playButton } ).html( $( '<i>', { 'class': classes.playButtonIcon } ) );
 
 				$slide.append( $playIcon );
+			} else {
+				var $zoomContainer = $( '<div>', { 'class': 'swiper-zoom-container' } ),
+					$slideImage = $( '<img>', { 'class': classes.image + ' ' + classes.preventClose } ).attr( 'src', slide.image );
+
+				$zoomContainer.append( $slideImage );
+
+				$slide.append( $zoomContainer );
 			}
 
 			$slidesWrapper.append( $slide );
@@ -1449,13 +1790,20 @@ LightboxModule = ViewModule.extend( {
 			onShowMethod();
 
 			var swiperOptions = {
-				prevButton: $prevButton,
-				nextButton: $nextButton,
-				paginationClickable: true,
+				navigation: {
+					prevEl: $prevButton,
+					nextEl: $nextButton
+				},
+				pagination: {
+					clickable: true
+				},
+				on: {
+					slideChangeTransitionEnd: self.onSlideChange
+				},
 				grabCursor: true,
-				onSlideChangeEnd: self.onSlideChange,
 				runCallbacksOnInit: false,
-				loop: true
+				loop: true,
+				keyboard: true
 			};
 
 			if ( options.swiper ) {
@@ -1489,25 +1837,22 @@ LightboxModule = ViewModule.extend( {
 	},
 
 	getSlide: function( slideState ) {
-		return this.swiper.slides.filter( this.getSettings( 'selectors.slideshow.' + slideState + 'Slide' ) );
+		return jQuery( this.swiper.slides ).filter( this.getSettings( 'selectors.slideshow.' + slideState + 'Slide' ) );
 	},
 
 	playSlideVideo: function() {
-		var selectors = this.getSettings( 'selectors' ),
-			$activeSlide = this.getSlide( 'active' ),
+		var $activeSlide = this.getSlide( 'active' ),
 			videoURL = $activeSlide.data( 'elementor-slideshow-video' );
 
 		if ( ! videoURL ) {
 			return;
 		}
 
-		var classes = this.getSettings( 'classes' );
-
-		var $videoContainer = jQuery( '<div>', { 'class': classes.videoContainer + ' ' + classes.invisible } ),
+		var classes = this.getSettings( 'classes' ),
+			$videoContainer = jQuery( '<div>', { 'class': classes.videoContainer + ' ' + classes.invisible } ),
 			$videoWrapper = jQuery( '<div>', { 'class': classes.videoWrapper } ),
 			$videoFrame = jQuery( '<iframe>', { src: videoURL } ),
-			$playIcon = $activeSlide.children( '.' + classes.playButton ),
-			$slideImage = $activeSlide.find( '.' + classes.image );
+			$playIcon = $activeSlide.children( '.' + classes.playButton );
 
 		$videoContainer.append( $videoWrapper );
 
@@ -1515,12 +1860,10 @@ LightboxModule = ViewModule.extend( {
 
 		$activeSlide.append( $videoContainer );
 
-		$playIcon.addClass( classes.playing );
-
-		$playIcon.add( $slideImage ).removeClass( classes.hidden );
+		$playIcon.addClass( classes.playing ).removeClass( classes.hidden );
 
 		$videoFrame.on( 'load', function() {
-			$playIcon.add( $slideImage ).addClass( classes.hidden );
+			$playIcon.addClass( classes.hidden );
 
 			$videoContainer.removeClass( classes.invisible );
 		} );
@@ -1554,10 +1897,14 @@ LightboxModule = ViewModule.extend( {
 	},
 
 	openLink: function( event ) {
-		var element = event.currentTarget;
+		var element = event.currentTarget,
+			$target = jQuery( event.target ),
+			editMode = elementorFrontend.isEditMode(),
+			isClickInsideElementor = !! $target.closest( '#elementor' ).length;
 
 		if ( ! this.isLightboxLink( element ) ) {
-			if ( elementorFrontend.isEditMode() ) {
+
+			if ( editMode && isClickInsideElementor ) {
 				event.preventDefault();
 			}
 
@@ -1683,7 +2030,7 @@ LightboxModule = ViewModule.extend( {
 
 module.exports = LightboxModule;
 
-},{"../../utils/view-module":22}],18:[function(require,module,exports){
+},{"../../utils/view-module":24}],19:[function(require,module,exports){
 var ViewModule = require( '../../utils/view-module' );
 
 module.exports = ViewModule.extend( {
@@ -1698,7 +2045,6 @@ module.exports = ViewModule.extend( {
 	},
 
 	getDefaultElements: function() {
-
 		return {
 			$firstScript: jQuery( this.getSettings( 'selectors.firstScript' ) )
 		};
@@ -1734,7 +2080,7 @@ module.exports = ViewModule.extend( {
 	}
 } );
 
-},{"../../utils/view-module":22}],19:[function(require,module,exports){
+},{"../../utils/view-module":24}],20:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1993,13 +2339,9 @@ var EventManager = function() {
 
 module.exports = EventManager;
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var HotKeys = function() {
-	var hotKeysHandlers = this.hotKeysHandlers = {};
-
-	var isMac = function() {
-		return -1 !== navigator.userAgent.indexOf( 'Mac OS X' );
-	};
+	var hotKeysHandlers = {};
 
 	var applyHotKey = function( event ) {
 		var handlers = hotKeysHandlers[ event.which ];
@@ -2027,7 +2369,7 @@ var HotKeys = function() {
 	};
 
 	this.isControlEvent = function( event ) {
-		return event[ isMac() ? 'metaKey' : 'ctrlKey' ];
+		return event[ elementor.envData.mac ? 'metaKey' : 'ctrlKey' ];
 	};
 
 	this.addHotKeyHandler = function( keyCode, handlerName, handler ) {
@@ -2045,7 +2387,60 @@ var HotKeys = function() {
 
 module.exports = new HotKeys();
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
+var ViewModule = require( './view-module' );
+
+module.exports = ViewModule.extend( {
+
+	getDefaultSettings: function() {
+		return {
+			container: null,
+			items: null,
+			columnsCount: 3,
+			verticalSpaceBetween: 30
+		};
+	},
+
+	getDefaultElements: function() {
+		return {
+			$container: jQuery( this.getSettings( 'container' ) ),
+			$items: jQuery( this.getSettings( 'items' ) )
+		};
+	},
+
+	run: function() {
+		var heights = [],
+			distanceFromTop = this.elements.$container.position().top,
+			settings = this.getSettings(),
+			columnsCount = settings.columnsCount;
+
+		distanceFromTop += parseInt( this.elements.$container.css( 'margin-top' ), 10 );
+
+		this.elements.$items.each( function( index ) {
+			var row = Math.floor( index / columnsCount ),
+				$item = jQuery( this ),
+				itemHeight = $item[0].getBoundingClientRect().height + settings.verticalSpaceBetween;
+
+			if ( row ) {
+				var itemPosition = $item.position(),
+                    indexAtRow = index % columnsCount,
+                    pullHeight = itemPosition.top - distanceFromTop - heights[ indexAtRow ];
+
+				pullHeight -= parseInt( $item.css( 'margin-top' ), 10 );
+
+				pullHeight *= -1;
+
+				$item.css( 'margin-top', pullHeight + 'px' );
+
+                heights[ indexAtRow ] += itemHeight;
+			} else {
+				heights.push( itemHeight );
+			}
+		} );
+	}
+} );
+
+},{"./view-module":24}],23:[function(require,module,exports){
 var Module = function() {
 	var $ = jQuery,
 		instanceParams = arguments,
@@ -2144,11 +2539,23 @@ var Module = function() {
 	};
 
 	this.on = function( eventName, callback ) {
-		if ( ! events[ eventName ] ) {
-			events[ eventName ] = [];
+		if ( 'object' === typeof eventName ) {
+			$.each( eventName, function( singleEventName ) {
+				self.on( singleEventName, this );
+			} );
+
+			return self;
 		}
 
-		events[ eventName ].push( callback );
+		var eventNames = eventName.split( ' ' );
+
+		eventNames.forEach( function( singleEventName ) {
+			if ( ! events[ singleEventName ] ) {
+				events[ singleEventName ] = [];
+			}
+
+			events[ singleEventName ].push( callback );
+		} );
 
 		return self;
 	};
@@ -2184,12 +2591,14 @@ var Module = function() {
 		var callbacks = events[ eventName ];
 
 		if ( ! callbacks ) {
-			return;
+			return self;
 		}
 
 		$.each( callbacks, function( index, callback ) {
 			callback.apply( self, params );
 		} );
+
+		return self;
 	};
 
 	init();
@@ -2237,7 +2646,7 @@ Module.extend = function( properties ) {
 
 module.exports = Module;
 
-},{}],22:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var Module = require( './module' ),
 	ViewModule;
 
@@ -2263,5 +2672,5 @@ ViewModule = Module.extend( {
 
 module.exports = ViewModule;
 
-},{"./module":21}]},{},[2])
+},{"./module":23}]},{},[2])
 //# sourceMappingURL=frontend.js.map

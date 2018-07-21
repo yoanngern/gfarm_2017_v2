@@ -309,7 +309,7 @@ class EDD_SL_Plugin_Updater {
 	public function http_request_args( $args, $url ) {
 		// If it is an https request and we are performing a package download, disable ssl verification
 		if ( strpos( $url, 'https://' ) !== false && strpos( $url, 'edd_action=package_download' ) ) {
-			$args['sslverify'] = false;
+			$args['sslverify'] = get_option( 'force_sslverify', false );
 		}
 		return $args;
 	}
@@ -335,7 +335,7 @@ class EDD_SL_Plugin_Updater {
 			return;
 		}
 
-		if( $this->api_url == trailingslashit (home_url() ) ) {
+		if ( $this->api_url == trailingslashit ( strtolower( home_url() ) ) ) {
 			return false; // Don't allow a plugin to ping itself
 		}
 
@@ -347,13 +347,16 @@ class EDD_SL_Plugin_Updater {
 			'version'    => isset( $data['version'] ) ? $data['version'] : false,
 			'slug'       => $data['slug'],
 			'author'     => $data['author'],
-			'url'        => home_url(),
+			'url'        => strtolower( home_url() ),
 			'beta'       => ! empty( $data['beta'] ),
 		);
 
-		$request = wp_remote_post( $this->api_url, array( 'timeout' => 15, 'sslverify' => false, 'body' => $api_params ) );
-
-
+		$request = wp_remote_post( $this->api_url, array(
+			'timeout' => 15,
+			'sslverify' => get_option( 'force_sslverify', false ),
+			'body' => $api_params
+			)
+		);
 
 		if ( ! is_wp_error( $request ) ) {
 			$request = json_decode( wp_remote_retrieve_body( $request ) );
@@ -411,11 +414,16 @@ class EDD_SL_Plugin_Updater {
 				'item_id'    => isset( $data['item_id'] ) ? $data['item_id'] : false,
 				'slug'       => $_REQUEST['slug'],
 				'author'     => $data['author'],
-				'url'        => home_url(),
+				'url'        => strtolower( home_url() ),
 				'beta'       => ! empty( $data['beta'] )
 			);
 
-			$request = wp_remote_post( $this->api_url, array( 'timeout' => 15, 'sslverify' => false, 'body' => $api_params ) );
+			$request = wp_remote_post( $this->api_url, array(
+				'timeout' => 15,
+				'sslverify' => get_option( 'force_sslverify', false ),
+				'body' => $api_params
+				)
+			);
 
 			if ( ! is_wp_error( $request ) ) {
 				$version_info = json_decode( wp_remote_retrieve_body( $request ) );
@@ -472,7 +480,7 @@ class EDD_SL_Plugin_Updater {
 			'value'   => json_encode( $value )
 		);
 
-		update_option( $cache_key, $data );
+		update_option( $cache_key, $data, 'no' );
 
 	}
 

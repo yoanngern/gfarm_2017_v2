@@ -80,7 +80,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Image_Size::get_type(),
 			[
 				'name' => 'thumbnail_size',
-				'label' => __( 'Thumbnail Size', 'elementor-pro' ),
 				'default' => 'medium',
 				'exclude' => [ 'custom' ],
 				'condition' => [
@@ -202,7 +201,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 				'type' => Controls_Manager::SWITCHER,
 				'label_on' => __( 'Show', 'elementor-pro' ),
 				'label_off' => __( 'Hide', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 				'separator' => 'before',
 			]
@@ -241,7 +239,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 				'type' => Controls_Manager::SWITCHER,
 				'label_on' => __( 'Show', 'elementor-pro' ),
 				'label_off' => __( 'Hide', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 			]
 		);
@@ -251,6 +248,7 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			[
 				'label' => __( 'Excerpt Length', 'elementor-pro' ),
 				'type' => Controls_Manager::NUMBER,
+				/** This filter is documented in wp-includes/formatting.php */
 				'default' => apply_filters( 'excerpt_length', 25 ),
 				'condition' => [
 					$this->get_control_id( 'show_excerpt' ) => 'yes',
@@ -267,7 +265,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 				'type' => Controls_Manager::SWITCHER,
 				'label_on' => __( 'Show', 'elementor-pro' ),
 				'label_off' => __( 'Hide', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 				'separator' => 'before',
 			]
@@ -279,7 +276,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 				'label' => __( 'Read More Text', 'elementor-pro' ),
 				'type' => Controls_Manager::TEXT,
 				'default' => __( 'Read More »', 'elementor-pro' ),
-				'placeholder' => __( 'Read More »', 'elementor-pro' ),
 				'condition' => [
 					$this->get_control_id( 'show_read_more' ) => 'yes',
 				],
@@ -330,26 +326,26 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			'section_design_layout',
 			[
 				'label' => __( 'Layout', 'elementor-pro' ),
-				'tab'   => Controls_Manager::TAB_STYLE,
+				'tab' => Controls_Manager::TAB_STYLE,
 			]
 		);
 
 		$this->add_control(
 			'column_gap',
 			[
-				'label'     => __( 'Columns Gap', 'elementor-pro' ),
-				'type'      => Controls_Manager::SLIDER,
-				'default'   => [
+				'label' => __( 'Columns Gap', 'elementor-pro' ),
+				'type' => Controls_Manager::SLIDER,
+				'default' => [
 					'size' => 30,
 				],
-				'range'     => [
+				'range' => [
 					'px' => [
 						'min' => 0,
 						'max' => 100,
 					],
 				],
 				'selectors' => [
-					'{{WRAPPER}} .elementor-post'            => 'padding-right: calc( {{SIZE}}{{UNIT}}/2 ); padding-left: calc( {{SIZE}}{{UNIT}}/2 );',
+					'{{WRAPPER}} .elementor-post,{{WRAPPER}} .elementor-posts-nothing-found' => 'padding-right: calc( {{SIZE}}{{UNIT}}/2 ); padding-left: calc( {{SIZE}}{{UNIT}}/2 );',
 					'{{WRAPPER}} .elementor-posts-container' => 'margin-left: calc( -{{SIZE}}{{UNIT}}/2 ); margin-right: calc( -{{SIZE}}{{UNIT}}/2 );',
 				],
 			]
@@ -358,12 +354,12 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		$this->add_control(
 			'row_gap',
 			[
-				'label'     => __( 'Rows Gap', 'elementor-pro' ),
-				'type'      => Controls_Manager::SLIDER,
-				'default'   => [
+				'label' => __( 'Rows Gap', 'elementor-pro' ),
+				'type' => Controls_Manager::SLIDER,
+				'default' => [
 					'size' => 35,
 				],
-				'range'     => [
+				'range' => [
 					'px' => [
 						'min' => 0,
 						'max' => 100,
@@ -378,21 +374,21 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		$this->add_control(
 			'alignment',
 			[
-				'label'        => __( 'Alignment', 'elementor-pro' ),
-				'type'         => Controls_Manager::CHOOSE,
-				'label_block'  => false,
-				'options'      => [
-					'left'   => [
+				'label' => __( 'Alignment', 'elementor-pro' ),
+				'type' => Controls_Manager::CHOOSE,
+				'label_block' => false,
+				'options' => [
+					'left' => [
 						'title' => __( 'Left', 'elementor-pro' ),
-						'icon'  => 'fa fa-align-left',
+						'icon' => 'fa fa-align-left',
 					],
 					'center' => [
 						'title' => __( 'Center', 'elementor-pro' ),
-						'icon'  => 'fa fa-align-center',
+						'icon' => 'fa fa-align-center',
 					],
-					'right'  => [
+					'right' => [
 						'title' => __( 'Right', 'elementor-pro' ),
-						'icon'  => 'fa fa-align-right',
+						'icon' => 'fa fa-align-right',
 					],
 				],
 				'prefix_class' => 'elementor-posts--align-',
@@ -407,7 +403,7 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			'section_design_image',
 			[
 				'label' => __( 'Image', 'elementor-pro' ),
-				'tab'   => Controls_Manager::TAB_STYLE,
+				'tab' => Controls_Manager::TAB_STYLE,
 				'condition' => [
 					$this->get_control_id( 'thumbnail!' ) => 'none',
 				],
@@ -417,10 +413,10 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		$this->add_control(
 			'img_border_radius',
 			[
-				'label'      => __( 'Border Radius', 'elementor-pro' ),
-				'type'       => Controls_Manager::DIMENSIONS,
+				'label' => __( 'Border Radius', 'elementor-pro' ),
+				'type' => Controls_Manager::DIMENSIONS,
 				'size_units' => [ 'px', '%' ],
-				'selectors'  => [
+				'selectors' => [
 					'{{WRAPPER}} .elementor-post__thumbnail' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 				],
 				'condition' => [
@@ -432,19 +428,19 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		$this->add_control(
 			'image_spacing',
 			[
-				'label'     => __( 'Spacing', 'elementor-pro' ),
-				'type'      => Controls_Manager::SLIDER,
-				'range'     => [
+				'label' => __( 'Spacing', 'elementor-pro' ),
+				'type' => Controls_Manager::SLIDER,
+				'range' => [
 					'px' => [
 						'max' => 100,
 					],
 				],
 				'selectors' => [
-					'{{WRAPPER}}.elementor-posts--thumbnail-left .elementor-post__thumbnail__link'  => 'margin-right: {{SIZE}}{{UNIT}}',
+					'{{WRAPPER}}.elementor-posts--thumbnail-left .elementor-post__thumbnail__link' => 'margin-right: {{SIZE}}{{UNIT}}',
 					'{{WRAPPER}}.elementor-posts--thumbnail-right .elementor-post__thumbnail__link' => 'margin-left: {{SIZE}}{{UNIT}}',
-					'{{WRAPPER}}.elementor-posts--thumbnail-top .elementor-post__thumbnail__link'   => 'margin-bottom: {{SIZE}}{{UNIT}}',
+					'{{WRAPPER}}.elementor-posts--thumbnail-top .elementor-post__thumbnail__link' => 'margin-bottom: {{SIZE}}{{UNIT}}',
 				],
-				'default'   => [
+				'default' => [
 					'size' => 20,
 				],
 				'condition' => [
@@ -480,7 +476,7 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		$this->add_control(
 			'title_color',
 			[
-				'label'     => __( 'Color', 'elementor-pro' ),
+				'label' => __( 'Color', 'elementor-pro' ),
 				'type' => Controls_Manager::COLOR,
 				'scheme' => [
 					'type' => Scheme_Color::get_type(),
@@ -499,7 +495,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography',
-				'label'    => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-post__title, {{WRAPPER}} .elementor-post__title a',
 				'condition' => [
@@ -511,7 +506,7 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		$this->add_control(
 			'title_spacing',
 			[
-				'label'     => __( 'Spacing', 'elementor-pro' ),
+				'label' => __( 'Spacing', 'elementor-pro' ),
 				'type' => Controls_Manager::SLIDER,
 				'range' => [
 					'px' => [
@@ -542,7 +537,7 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		$this->add_control(
 			'meta_color',
 			[
-				'label'     => __( 'Color', 'elementor-pro' ),
+				'label' => __( 'Color', 'elementor-pro' ),
 				'type' => Controls_Manager::COLOR,
 				'selectors' => [
 					'{{WRAPPER}} .elementor-post__meta-data' => 'color: {{VALUE}};',
@@ -571,7 +566,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'meta_typography',
-				'label'    => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_2,
 				'selector' => '{{WRAPPER}} .elementor-post__meta-data',
 				'condition' => [
@@ -629,7 +623,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'excerpt_typography',
-				'label'    => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
 				'selector' => '{{WRAPPER}} .elementor-post__excerpt p',
 				'condition' => [
@@ -691,7 +684,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'read_more_typography',
-				'label'    => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-post__read-more',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'condition' => [
@@ -725,29 +717,29 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 	public function render() {
 		$this->parent->query_posts();
 
-		$wp_query = $this->parent->get_query();
+		/** @var \WP_Query $query */
+		$query = $this->parent->get_query();
 
-		if ( ! $wp_query->found_posts ) {
+		if ( ! $query->found_posts ) {
 			return;
 		}
 
-		add_filter( 'excerpt_more', [ $this, 'filter_excerpt_more' ], 20 );
-		add_filter( 'excerpt_length', [ $this, 'filter_excerpt_length' ], 20 );
-
 		$this->render_loop_header();
 
-		while ( $wp_query->have_posts() ) {
-			$wp_query->the_post();
-
+		// It's the global `wp_query` it self. and the loop was started from the theme.
+		if ( $query->in_the_loop ) {
 			$this->render_post();
+		} else {
+			while ( $query->have_posts() ) {
+				$query->the_post();
+
+				$this->render_post();
+			}
 		}
 
 		$this->render_loop_footer();
 
 		wp_reset_postdata();
-
-		remove_filter( 'excerpt_length', [ $this, 'filter_excerpt_length' ], 20 );
-		remove_filter( 'excerpt_more', [ $this, 'filter_excerpt_more' ], 20 );
 	}
 
 	public function filter_excerpt_length() {
@@ -756,6 +748,10 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 
 	public function filter_excerpt_more( $more ) {
 		return '';
+	}
+
+	public function get_container_class() {
+		return 'elementor-posts--skin-' . $this->get_id();
 	}
 
 	protected function render_thumbnail() {
@@ -801,11 +797,18 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		if ( ! $this->get_instance_value( 'show_excerpt' ) ) {
 			return;
 		}
+
+		add_filter( 'excerpt_more', [ $this, 'filter_excerpt_more' ], 20 );
+		add_filter( 'excerpt_length', [ $this, 'filter_excerpt_length' ], 20 );
+
 		?>
 		<div class="elementor-post__excerpt">
 			<?php the_excerpt(); ?>
 		</div>
 		<?php
+
+		remove_filter( 'excerpt_length', [ $this, 'filter_excerpt_length' ], 20 );
+		remove_filter( 'excerpt_more', [ $this, 'filter_excerpt_more' ], 20 );
 	}
 
 	protected function render_read_more() {
@@ -849,7 +852,7 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 				'elementor-posts-container',
 				'elementor-posts',
 				'elementor-grid',
-				'elementor-posts--skin-' . $this->get_id(),
+				$this->get_container_class(),
 			],
 		] );
 		?>
@@ -868,7 +871,7 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		}
 
 		$page_limit = $this->parent->get_query()->max_num_pages;
-		if ( '' !== $parent_settings['pagination_page_limit']  ) {
+		if ( '' !== $parent_settings['pagination_page_limit'] ) {
 			$page_limit = min( $parent_settings['pagination_page_limit'], $page_limit );
 		}
 
@@ -901,7 +904,7 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		}
 
 		?>
-		<nav class="elementor-pagination" role="navigation" aria-label="<?php _e( 'Pagination', 'elementor-pro' ); ?>">
+		<nav class="elementor-pagination" role="navigation" aria-label="<?php esc_attr_e( 'Pagination', 'elementor-pro' ); ?>">
 			<?php echo implode( PHP_EOL, $links ); ?>
 		</nav>
 		<?php
@@ -947,7 +950,10 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 	protected function render_date() {
 		?>
 		<span class="elementor-post-date">
-			<?php echo apply_filters( 'the_date', get_the_date(), get_option( 'date_format' ), '', '' ); ?>
+			<?php
+			/** This filter is documented in wp-includes/general-template.php */
+			echo apply_filters( 'the_date', get_the_date(), get_option( 'date_format' ), '', '' );
+			?>
 		</span>
 		<?php
 	}
@@ -978,5 +984,9 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 		$this->render_read_more();
 		$this->render_text_footer();
 		$this->render_post_footer();
+	}
+
+	public function render_amp() {
+
 	}
 }

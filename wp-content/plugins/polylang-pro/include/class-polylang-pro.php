@@ -53,7 +53,7 @@ class Polylang_Pro {
 	}
 
 	/**
-	 * Remove Polylang from the list of plugins to udpate if it is not installed
+	 * Remove Polylang from the list of plugins to update if it is not installed
 	 *
 	 * @since 2.1.1
 	 *
@@ -88,14 +88,12 @@ class Polylang_Pro {
 			$slugs_model = new PLL_Translate_Slugs_Model( $polylang );
 			$polylang->translate_slugs = $polylang instanceof PLL_Frontend ?
 				new PLL_Frontend_Translate_Slugs( $slugs_model, $polylang->curlang ) :
-				new PLL_Translate_Slugs( $slugs_model );
+				new PLL_Translate_Slugs( $slugs_model, $polylang->curlang );
 
 			// Share slugs only for pretty permalinks and language information in url
 			if ( $options['force_lang'] ) {
 				// Share post slugs
-				$polylang->share_post_slug = $polylang instanceof PLL_Frontend ?
-					new PLL_Frontend_Share_Post_Slug( $polylang ) :
-					new PLL_Share_Post_Slug( $polylang );
+				$polylang->share_post_slug = new PLL_Share_Post_Slug( $polylang );
 
 				// Share term slugs
 				// The unique key for term slug has been removed in WP 4.1
@@ -114,13 +112,13 @@ class Polylang_Pro {
 		// Active languages
 		$polylang->active_languages = new PLL_Active_Languages( $polylang );
 
-		// Advanced media
-		if ( ! $polylang instanceof PLL_Frontend && $polylang->options['media_support'] ) {
-			$polylang->advanced_media = new PLL_Admin_Advanced_Media( $polylang );
-		}
+		if ( $polylang instanceof PLL_Admin ) {
+			// Advanced media
+			if ( $polylang->options['media_support'] ) {
+				$polylang->advanced_media = new PLL_Admin_Advanced_Media( $polylang );
+			}
 
-		// Duplicate content
-		if ( ! $polylang instanceof PLL_Frontend ) {
+			// Duplicate content
 			$polylang->duplicate = new PLL_Duplicate( $polylang );
 			$polylang->sync_post = new PLL_Sync_Post( $polylang );
 		}
@@ -162,4 +160,3 @@ class Polylang_Pro {
 }
 
 add_action( 'pll_pre_init', array( new Polylang_Pro(), 'init' ) );
-PLL_Advanced_Plugins_Compat::instance();

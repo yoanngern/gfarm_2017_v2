@@ -5,7 +5,9 @@ use ElementorPro\Base\Module_Base;
 use ElementorPro\Modules\Library\Classes\Shortcode;
 use ElementorPro\Plugin;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class Module extends Module_Base {
 
@@ -51,8 +53,8 @@ class Module extends Module_Base {
 		add_filter( 'elementor_pro/editor/localize_settings', [ $this, 'localize_settings' ] );
 		add_filter( 'elementor_pro/admin/localize_settings', [ $this, 'localize_settings' ] ); // For WordPress Widgets and Customizer
 
-		add_filter( 'elementor/widgets/black_list', function ( $black_list ) {
-			$black_list[] = 'ElementorPro\Modules\Library\WP_Widgets\Elementor_Template';
+		add_filter( 'elementor/widgets/black_list', function( $black_list ) {
+			$black_list[] = 'ElementorPro\Modules\Library\WP_Widgets\Elementor_Library';
 
 			return $black_list;
 		} );
@@ -66,7 +68,7 @@ class Module extends Module_Base {
 		return '<div id="elementor-widget-template-empty-templates">
 				<div class="elementor-widget-template-empty-templates-icon"><i class="eicon-nerd"></i></div>
 				<div class="elementor-widget-template-empty-templates-title">' . __( 'You Haven’t Saved Templates Yet.', 'elementor-pro' ) . '</div>
-				<div class="elementor-widget-template-empty-templates-footer">' . __( 'What is Library?', 'elementor-pro' ) . ' <a class="elementor-widget-template-empty-templates-footer-url" href="https://go.elementor.com/docs-library/" target="_blank">' . __( 'Read our tutorial on using Library templates.', 'elementor-pro' ) . '</a>
+				<div class="elementor-widget-template-empty-templates-footer">' . __( 'Want to learn more about Elementor library?', 'elementor-pro' ) . ' <a class="elementor-widget-template-empty-templates-footer-url" href="https://go.elementor.com/docs-library/" target="_blank">' . __( 'Click Here', 'elementor-pro' ) . '</a>
 				</div>
 				</div>';
 	}

@@ -8,11 +8,11 @@ use Elementor\Group_Control_Typography;
 use Elementor\Repeater;
 use Elementor\Scheme_Color;
 use Elementor\Scheme_Typography;
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Price_Table extends Widget_Base {
+class Price_Table extends Base_Widget {
 
 	public function get_name() {
 		return 'price-table';
@@ -26,12 +26,7 @@ class Price_Table extends Widget_Base {
 		return 'eicon-price-table';
 	}
 
-	public function get_categories() {
-		return [ 'pro-elements' ];
-	}
-
 	protected function _register_controls() {
-
 		$this->start_controls_section(
 			'section_header',
 			[
@@ -117,13 +112,24 @@ class Price_Table extends Widget_Base {
 		);
 
 		$this->add_control(
+			'currency_format',
+			[
+				'label' => __( 'Currency Format', 'elementor-pro' ),
+				'type' => Controls_Manager::SELECT,
+				'options' => [
+					'' => '1,234.56 (Default)',
+					',' => '1.234,56',
+				],
+			]
+		);
+
+		$this->add_control(
 			'sale',
 			[
 				'label' => __( 'Sale', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
 				'label_on' => __( 'On', 'elementor-pro' ),
 				'label_off' => __( 'Off', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => '',
 			]
 		);
@@ -193,7 +199,7 @@ class Price_Table extends Widget_Base {
 			'features_list',
 			[
 				'type' => Controls_Manager::REPEATER,
-				'fields' => array_values( $repeater->get_controls() ),
+				'fields' => $repeater->get_controls(),
 				'default' => [
 					[
 						'item_text' => __( 'List Item #1', 'elementor-pro' ),
@@ -235,7 +241,7 @@ class Price_Table extends Widget_Base {
 			[
 				'label' => __( 'Link', 'elementor-pro' ),
 				'type' => Controls_Manager::URL,
-				'placeholder' => 'http://your-link.com',
+				'placeholder' => __( 'https://your-link.com', 'elementor-pro' ),
 				'default' => [
 					'url' => '#',
 				],
@@ -266,9 +272,6 @@ class Price_Table extends Widget_Base {
 			[
 				'label' => __( 'Show', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 				'separator' => 'before',
 			]
@@ -487,6 +490,26 @@ class Price_Table extends Widget_Base {
 				],
 				'condition' => [
 					'currency_symbol!' => '',
+				],
+			]
+		);
+
+		$this->add_control(
+			'currency_position',
+			[
+				'label' => __( 'Position', 'elementor-pro' ),
+				'type' => Controls_Manager::CHOOSE,
+				'label_block' => false,
+				'default' => 'before',
+				'options' => [
+					'before' => [
+						'title' => __( 'Before', 'elementor-pro' ),
+						'icon' => 'eicon-h-align-left',
+					],
+					'after' => [
+						'title' => __( 'After', 'elementor-pro' ),
+						'icon' => 'eicon-h-align-right',
+					],
 				],
 			]
 		);
@@ -714,8 +737,8 @@ class Price_Table extends Widget_Base {
 				'type' => Controls_Manager::SELECT,
 				'label_block' => false,
 				'options' => [
-					'below' => 'Below',
-					'beside' => 'Beside',
+					'below' => __( 'Below', 'elementor-pro' ),
+					'beside' => __( 'Beside', 'elementor-pro' ),
 				],
 				'default' => 'below',
 				'condition' => [
@@ -793,15 +816,15 @@ class Price_Table extends Widget_Base {
 				'options' => [
 					'left' => [
 						'title' => __( 'Left', 'elementor-pro' ),
-						'icon'  => 'fa fa-align-left',
+						'icon' => 'fa fa-align-left',
 					],
 					'center' => [
 						'title' => __( 'Center', 'elementor-pro' ),
-						'icon'  => 'fa fa-align-center',
+						'icon' => 'fa fa-align-center',
 					],
 					'right' => [
 						'title' => __( 'Right', 'elementor-pro' ),
-						'icon'  => 'fa fa-align-right',
+						'icon' => 'fa fa-align-right',
 					],
 				],
 				'selectors' => [
@@ -832,9 +855,6 @@ class Price_Table extends Widget_Base {
 			[
 				'label' => __( 'Divider', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_on' => __( 'Yes', 'elementor-pro' ),
-				'label_off' => __( 'No', 'elementor-pro' ),
-				'return_value' => 'yes',
 				'default' => 'yes',
 				'separator' => 'before',
 			]
@@ -1038,7 +1058,6 @@ class Price_Table extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'button_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'selector' => '{{WRAPPER}} .elementor-price-table__button',
 				'condition' => [
@@ -1068,7 +1087,6 @@ class Price_Table extends Widget_Base {
 		$this->add_group_control(
 			Group_Control_Border::get_type(), [
 				'name' => 'button_border',
-				'label' => __( 'Border', 'elementor-pro' ),
 				'placeholder' => '1px',
 				'default' => '1px',
 				'selector' => '{{WRAPPER}} .elementor-price-table__button',
@@ -1323,6 +1341,14 @@ class Price_Table extends Widget_Base {
 		$this->end_controls_section();
 	}
 
+	private function render_currency_symbol( $symbol, $location ) {
+		$currency_position = $this->get_settings( 'currency_position' );
+		$location_setting = ! empty( $currency_position ) ? $currency_position : 'before';
+		if ( ! empty( $symbol ) && $location === $location_setting ) {
+			echo '<span class="elementor-price-table__currency elementor-currency--' . $location . '">' . $symbol . '</span>';
+		}
+	}
+
 	private function get_currency_symbol( $symbol_name ) {
 		$symbols = [
 			'dollar' => '&#36;',
@@ -1357,45 +1383,58 @@ class Price_Table extends Widget_Base {
 				$symbol = $settings['currency_symbol_custom'];
 			}
 		}
-
-		$price = explode( '.', $settings['price'] );
+		$currency_format = empty( $settings['currency_format'] ) ? '.' : $settings['currency_format'];
+		$price = explode( $currency_format, $settings['price'] );
 		$intpart = $price[0];
 		$fraction = '';
-		if ( 2 === sizeof( $price ) ) {
+		if ( 2 === count( $price ) ) {
 			$fraction = $price[1];
 		}
 
-		$period_position = $settings['period_position'];
-		$period_element = '<span class="elementor-price-table__period elementor-typo-excluded">' . $settings['period'] . '</span>';
-
-		$this->add_render_attribute( 'button', 'class', [
-				'elementor-price-table__button',
-				'elementor-button',
-				'elementor-size-' . $settings['button_size'],
-			]
-		);
+		$this->add_render_attribute( 'button_text', 'class', [
+			'elementor-price-table__button',
+			'elementor-button',
+			'elementor-size-' . $settings['button_size'],
+		] );
 
 		if ( ! empty( $settings['link']['url'] ) ) {
-			$this->add_render_attribute( 'button', 'href', $settings['link']['url'] );
+			$this->add_render_attribute( 'button_text', 'href', $settings['link']['url'] );
 
 			if ( ! empty( $settings['link']['is_external'] ) ) {
-				$this->add_render_attribute( 'button', 'target', '_blank' );
+				$this->add_render_attribute( 'button_text', 'target', '_blank' );
 			}
 		}
 
 		if ( ! empty( $settings['button_hover_animation'] ) ) {
-			$this->add_render_attribute( 'button', 'class', 'elementor-animation-' . $settings['button_hover_animation'] );
+			$this->add_render_attribute( 'button_text', 'class', 'elementor-animation-' . $settings['button_hover_animation'] );
 		}
+
+		$this->add_render_attribute( 'heading', 'class', 'elementor-price-table__heading' );
+		$this->add_render_attribute( 'sub_heading', 'class', 'elementor-price-table__subheading' );
+		$this->add_render_attribute( 'period', 'class', ['elementor-price-table__period', 'elementor-typo-excluded'] );
+		$this->add_render_attribute( 'footer_additional_info', 'class', 'elementor-price-table__additional_info' );
+		$this->add_render_attribute( 'ribbon_title', 'class', 'elementor-price-table__ribbon-inner' );
+
+		$this->add_inline_editing_attributes( 'heading', 'none' );
+		$this->add_inline_editing_attributes( 'sub_heading', 'none' );
+		$this->add_inline_editing_attributes( 'period', 'none' );
+		$this->add_inline_editing_attributes( 'footer_additional_info' );
+		$this->add_inline_editing_attributes( 'button_text' );
+		$this->add_inline_editing_attributes( 'ribbon_title' );
+
+		$period_position = $settings['period_position'];
+		$period_element = '<span ' . $this->get_render_attribute_string( 'period' ) . '>' . $settings['period'] . '</span>';
 		?>
+
 		<div class="elementor-price-table">
 			<?php if ( $settings['heading'] || $settings['sub_heading'] ) : ?>
 				<div class="elementor-price-table__header">
 					<?php if ( ! empty( $settings['heading'] ) ) : ?>
-						<h3 class="elementor-price-table__heading"><?php echo $settings['heading']; ?></h3>
+						<h3 <?php echo $this->get_render_attribute_string( 'heading' ); ?>><?php echo $settings['heading']; ?></h3>
 					<?php endif; ?>
-	
+
 					<?php if ( ! empty( $settings['sub_heading'] ) ) : ?>
-						<span class="elementor-price-table__subheading"><?php echo $settings['sub_heading']; ?></span>
+						<span <?php echo $this->get_render_attribute_string( 'sub_heading' ); ?>><?php echo $settings['sub_heading']; ?></span>
 					<?php endif; ?>
 				</div>
 			<?php endif; ?>
@@ -1404,21 +1443,22 @@ class Price_Table extends Widget_Base {
 				<?php if ( 'yes' === $settings['sale'] && ! empty( $settings['original_price'] ) ) : ?>
 					<div class="elementor-price-table__original-price elementor-typo-excluded"><?php echo $symbol . $settings['original_price']; ?></div>
 				<?php endif; ?>
-				<?php if ( ! empty( $symbol ) && is_numeric( $intpart ) ) : ?>
-					<span class="elementor-price-table__currency"><?php echo $symbol; ?></span>
-				<?php endif; ?>
+				<?php $this->render_currency_symbol( $symbol, 'before' ); ?>
 				<?php if ( ! empty( $intpart ) || 0 <= $intpart ) : ?>
 					<span class="elementor-price-table__integer-part"><?php echo $intpart; ?></span>
 				<?php endif; ?>
 
-				<?php if ( 0 < $fraction || ( ! empty( $settings['period'] ) && 'beside' === $period_position ) ) : ?>
+				<?php if ( '' !== $fraction || ( ! empty( $settings['period'] ) && 'beside' === $period_position ) ) : ?>
 					<div class="elementor-price-table__after-price">
 						<span class="elementor-price-table__fractional-part"><?php echo $fraction; ?></span>
+
 						<?php if ( ! empty( $settings['period'] ) && 'beside' === $period_position ) : ?>
 							<?php echo $period_element; ?>
 						<?php endif; ?>
 					</div>
 				<?php endif; ?>
+
+				<?php $this->render_currency_symbol( $symbol, 'after' ); ?>
 
 				<?php if ( ! empty( $settings['period'] ) && 'below' === $period_position ) : ?>
 					<?php echo $period_element; ?>
@@ -1427,15 +1467,20 @@ class Price_Table extends Widget_Base {
 
 			<?php if ( ! empty( $settings['features_list'] ) ) : ?>
 				<ul class="elementor-price-table__features-list">
-					<?php foreach ( $settings['features_list'] as $item ) : ?>
+					<?php foreach ( $settings['features_list'] as $index => $item ) :
+						$repeater_setting_key = $this->get_repeater_setting_key( 'item_text', 'features_list', $index );
+						$this->add_inline_editing_attributes( $repeater_setting_key );
+						?>
 						<li class="elementor-repeater-item-<?php echo $item['_id']; ?>">
 							<div class="elementor-price-table__feature-inner">
 								<?php if ( ! empty( $item['item_icon'] ) ) : ?>
-									<i class="<?php echo esc_attr( $item['item_icon'] ); ?>"></i>
+									<i class="<?php echo esc_attr( $item['item_icon'] ); ?>" aria-hidden="true"></i>
 								<?php endif; ?>
-								<?php if ( ! empty( $item['item_text'] ) ) :
-									echo $item['item_text'];
-								else :
+								<?php if ( ! empty( $item['item_text'] ) ) : ?>
+									<span <?php echo $this->get_render_attribute_string( $repeater_setting_key ); ?>>
+										<?php echo $item['item_text']; ?>
+									</span>
+								<?php else :
 									echo '&nbsp;';
 								endif;
 								?>
@@ -1444,17 +1489,15 @@ class Price_Table extends Widget_Base {
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
-		
+
 			<?php if ( ! empty( $settings['button_text'] ) || ! empty( $settings['footer_additional_info'] ) ) : ?>
 			<div class="elementor-price-table__footer">
 				<?php if ( ! empty( $settings['button_text'] ) ) : ?>
-					<a <?php echo $this->get_render_attribute_string( 'button' ); ?>>
-						<?php echo $settings['button_text']; ?>
-					</a>
+					<a <?php echo $this->get_render_attribute_string( 'button_text' ); ?>><?php echo $settings['button_text']; ?></a>
 				<?php endif; ?>
 
 				<?php if ( ! empty( $settings['footer_additional_info'] ) ) : ?>
-					<div class="elementor-price-table__additional_info"><?php echo $settings['footer_additional_info']; ?></div>
+					<div <?php echo $this->get_render_attribute_string( 'footer_additional_info' ); ?>><?php echo $settings['footer_additional_info']; ?></div>
 				<?php endif; ?>
 			</div>
 			<?php endif; ?>
@@ -1469,7 +1512,7 @@ class Price_Table extends Widget_Base {
 
 			?>
 			<div <?php echo $this->get_render_attribute_string( 'ribbon-wrapper' ); ?>>
-				<div class="elementor-price-table__ribbon-inner"><?php echo $settings['ribbon_title']; ?></div>
+				<div <?php echo $this->get_render_attribute_string( 'ribbon_title' ); ?>><?php echo $settings['ribbon_title']; ?></div>
 			</div>
 		<?php endif;
 	}
@@ -1507,27 +1550,43 @@ class Price_Table extends Widget_Base {
 				}
 			}
 
-			var price = settings.price.split( '.' ),
-				intpart = price[0],
-				fraction = price[1],
-
-				periodElement = '<span class="elementor-price-table__period elementor-typo-excluded">' + settings.period + '</span>',
-
-				buttonClasses = 'elementor-price-table__button elementor-button elementor-size-' + settings.button_size;
+			var buttonClasses = 'elementor-price-table__button elementor-button elementor-size-' + settings.button_size;
 
 			if ( settings.button_hover_animation ) {
 				buttonClasses += ' elementor-animation-' + settings.button_hover_animation;
 			}
+
+		view.addRenderAttribute( 'heading', 'class', 'elementor-price-table__heading' );
+		view.addRenderAttribute( 'sub_heading', 'class', 'elementor-price-table__subheading' );
+		view.addRenderAttribute( 'period', 'class', ['elementor-price-table__period', 'elementor-typo-excluded'] );
+		view.addRenderAttribute( 'footer_additional_info', 'class', 'elementor-price-table__additional_info'  );
+		view.addRenderAttribute( 'button_text', 'class', buttonClasses  );
+		view.addRenderAttribute( 'ribbon_title', 'class', 'elementor-price-table__ribbon-inner'  );
+
+		view.addInlineEditingAttributes( 'heading', 'none' );
+		view.addInlineEditingAttributes( 'sub_heading', 'none' );
+		view.addInlineEditingAttributes( 'period', 'none' );
+		view.addInlineEditingAttributes( 'footer_additional_info' );
+		view.addInlineEditingAttributes( 'button_text' );
+		view.addInlineEditingAttributes( 'ribbon_title' );
+
+		var currencyFormat = settings.currency_format || '.',
+			price = settings.price.split( currencyFormat ),
+			intpart = price[0],
+			fraction = price[1],
+
+			periodElement = '<span ' + view.getRenderAttributeString( "period" ) + '>' + settings.period + '</span>';
+
 
 		#>
 		<div class="elementor-price-table">
 			<# if ( settings.heading || settings.sub_heading ) { #>
 				<div class="elementor-price-table__header">
 					<# if ( settings.heading ) { #>
-						<h3 class="elementor-price-table__heading">{{{ settings.heading }}}</h3>
+						<h3 {{{ view.getRenderAttributeString( 'heading' ) }}}>{{{ settings.heading }}}</h3>
 					<# } #>
 					<# if ( settings.sub_heading ) { #>
-						<span class="elementor-price-table__subheading">{{{ settings.sub_heading }}}</span>
+						<span {{{ view.getRenderAttributeString( 'sub_heading' ) }}}>{{{ settings.sub_heading }}}</span>
 					<# } #>
 				</div>
 			<# } #>
@@ -1537,8 +1596,8 @@ class Price_Table extends Widget_Base {
 					<div class="elementor-price-table__original-price elementor-typo-excluded">{{{ symbol + settings.original_price }}}</div>
 				<# } #>
 
-				<# if (  ! _.isEmpty( symbol ) && isFinite( intpart ) ) { #>
-					<span class="elementor-price-table__currency">{{{ symbol }}}</span>
+				<# if ( ! _.isEmpty( symbol ) && ( 'before' == settings.currency_position || _.isEmpty( settings.currency_position ) ) ) { #>
+					<span class="elementor-price-table__currency elementor-currency--before">{{{ symbol }}}</span>
 				<# } #>
 				<# if ( intpart ) { #>
 					<span class="elementor-price-table__integer-part">{{{ intpart }}}</span>
@@ -1552,6 +1611,10 @@ class Price_Table extends Widget_Base {
 					<# } #>
 				</div>
 
+				<# if ( ! _.isEmpty( symbol ) && 'after' == settings.currency_position ) { #>
+				<span class="elementor-price-table__currency elementor-currency--after">{{{ symbol }}}</span>
+				<# } #>
+
 				<# if ( settings.period && 'below' === settings.period_position ) { #>
 					{{{ periodElement }}}
 				<# } #>
@@ -1559,18 +1622,22 @@ class Price_Table extends Widget_Base {
 
 			<# if ( settings.features_list ) { #>
 				<ul class="elementor-price-table__features-list">
-					<# _.each( settings.features_list, function( item ) { #>
+				<# _.each( settings.features_list, function( item, index ) {
+
+					var featureKey = view.getRepeaterSettingKey( 'item_text', 'features_list', index );
+
+					view.addInlineEditingAttributes( featureKey ); #>
+
 						<li class="elementor-repeater-item-{{ item._id }}">
 							<div class="elementor-price-table__feature-inner">
 								<# if ( item.item_icon ) { #>
-									<i class="{{ item.item_icon }}"></i>
+									<i class="{{ item.item_icon }}" aria-hidden="true"></i>
 								<# } #>
 								<# if ( ! _.isEmpty( item.item_text.trim() ) ) { #>
-									{{{ item.item_text }}}
+									<span {{{ view.getRenderAttributeString( featureKey ) }}}>{{{ item.item_text }}}</span>
 								<# } else { #>
 									&nbsp;
 								<# } #>
-
 							</div>
 						</li>
 					<# } ); #>
@@ -1580,10 +1647,10 @@ class Price_Table extends Widget_Base {
 			<# if ( settings.button_text || settings.footer_additional_info ) { #>
 				<div class="elementor-price-table__footer">
 					<# if ( settings.button_text ) { #>
-						<a href="#" class="{{ buttonClasses }}">{{{ settings.button_text }}}</a>
+						<a href="#" {{{ view.getRenderAttributeString( 'button_text' ) }}}>{{{ settings.button_text }}}</a>
 					<# } #>
 					<# if ( settings.footer_additional_info ) { #>
-						<p class="elementor-price-table__additional_info">{{{ settings.footer_additional_info }}}</p>
+						<p {{{ view.getRenderAttributeString( 'footer_additional_info' ) }}}>{{{ settings.footer_additional_info }}}</p>
 					<# } #>
 				</div>
 			<# } #>
@@ -1595,7 +1662,7 @@ class Price_Table extends Widget_Base {
 				ribbonClasses += ' elementor-ribbon-' + settings.ribbon_horizontal_position;
 			} #>
 			<div class="{{ ribbonClasses }}">
-				<div class="elementor-price-table__ribbon-inner">{{{ settings.ribbon_title }}}</div>
+				<div {{{ view.getRenderAttributeString( 'ribbon_title' ) }}}>{{{ settings.ribbon_title }}}</div>
 			</div>
 		<# } #>
 		<?php

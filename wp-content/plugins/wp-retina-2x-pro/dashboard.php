@@ -17,9 +17,9 @@ class Meow_WR2X_Dashboard {
 	}
 
 	function dashboard() {
-		$refresh = isset ( $_GET[ 'refresh' ] ) ? $_GET[ 'refresh' ] : 0;
-		$clearlogs = isset ( $_GET[ 'clearlogs' ] ) ? $_GET[ 'clearlogs' ] : 0;
-		$ignore = isset ( $_GET[ 'ignore' ] ) ? $_GET[ 'ignore' ] : false;
+		$refresh = isset ( $_GET[ 'refresh' ] ) ? sanitize_text_field( $_GET[ 'refresh' ] ) : 0;
+		$clearlogs = isset ( $_GET[ 'clearlogs' ] ) ? sanitize_text_field( $_GET[ 'clearlogs' ] ) : 0;
+		$ignore = isset ( $_GET[ 'ignore' ] ) ? sanitize_text_field( $_GET[ 'ignore' ] ) : false;
 		if ( $ignore ) {
 			if ( !$this->core->admin->is_registered() ) {
 				echo "<div class='error' style='margin-top: 20px;'><p>";
@@ -39,11 +39,14 @@ class Meow_WR2X_Dashboard {
 		}
 
 		$hide_ads = get_option( 'meowapps_hide_ads', false );
-		$view = isset ( $_GET[ 'view' ] ) ? $_GET[ 'view' ] : 'issues';
-		$paged = isset ( $_GET[ 'paged' ] ) ? $_GET[ 'paged' ] : 1;
+		$view = isset( $_GET[ 'view' ] ) ? sanitize_text_field( $_GET[ 'view' ] ) : 'issues';
+		$paged = isset( $_GET[ 'paged' ] ) ? sanitize_text_field( $_GET[ 'paged' ] ) : 1;
 		$s = isset( $_GET[ 's' ] ) && !empty( $_GET[ 's' ] ) ? sanitize_text_field( $_GET[ 's' ] ) : null;
 		$issues = $count = 0;
-		$posts_per_page = 15; // TODO: HOW TO GET THE NUMBER OF MEDIA PER PAGES? IT IS NOT get_option('posts_per_page');
+
+		$posts_per_page = get_user_meta( get_current_user_id(), 'upload_per_page', true );
+		if ( empty( $posts_per_page ) )
+			$posts_per_page = 20;
 		$issues = $this->core->get_issues();
 		$ignored = $this->core->get_ignores();
 
@@ -193,7 +196,7 @@ class Meow_WR2X_Dashboard {
 		?>
 
 		<p>
-			<?php printf( __( 'The full-size images should have a resolution of <b>%d×%d</b> at least for the plugin to be able generate the <b>%d retina images</b> required by your website.', 'wp-retina-2x' ), $max_width, $max_height, count( $active_sizes ) ); ?>
+			<?php printf( __( 'Based on your <i>image sizes</i> settings, the full-size images should be uploaded at a resolution of at least <b>%d×%d</b> for the plugin to be able generate the <b>%d retina images</b>. Please note that it vares depending on your needs for each image (you will need to discuss this with your developer).', 'wp-retina-2x' ), $max_width, $max_height, count( $active_sizes ) ); ?>
 			<?php if ( $full_size_needed ) printf( __(  "You <b>also need</b> to upload a retina image for the Full-Size image (might be <b>%d×%d</b>).", 'wp-retina-2x' ), $max_width * 2, $max_height * 2 ); ?>
 			<?php _e("You can upload or replace the images by drag & drop.", 'wp-retina-2x' ); ?>
 			<?php printf( __( "Your PHP configuration allows uploads of <b>%dMB</b> maximum.", 'wp-retina-2x'), $upload_max_size / 1000000 ); ?>
@@ -204,6 +207,19 @@ class Meow_WR2X_Dashboard {
 				}
 			?>
 		</p>
+
+		<?php
+			$method = get_option( 'wr2x_method' );
+			$cdn = get_option( 'wr2x_cdn_domain' );
+			$disable_responsive = get_option( 'wr2x_disable_responsive', false );
+			$keep_src = get_option( 'wr2x_picturefill_keep_src', false );
+
+			if ( $method == 'HTML Rewrite' || $method == 'Retina-Images' || !empty( $cdn ) || $disable_responsive || $keep_src ) {
+				echo '<div class="error"><p>';
+				echo __( '<b>WARNING</b>. You are using an option that will be removed in a future release. The plan is to remove two methods (HTML Rewrite and Retina-Images), Disable Responsive, Custom CDN Domain, and Keep IMG SRC. Those options are not necessary, and it is better to keep the plugin clean and focus. This warning message will go away if you avoid using those options (and will disappear in a future release). If you are using one of those options and really would like to keep it, please come here to talk about it: <a target= "_blank" href="https://wordpress.org/support/topic/simplifying-wp-retina-2x-by-removing-options/">Discussions about removing options from WP Retina 2x</a>. Thanks :)', 'wp-retina-2x' );
+				echo '</p></div>';
+			}
+		?>
 
 		<?php
 		if ( !$this->core->admin->is_registered() && !get_option( "wr2x_hide_pro", false ) ) {
@@ -263,26 +279,31 @@ class Meow_WR2X_Dashboard {
 					if ( $view != 'issues' ) {
 						$this->core->update_issue_status( $post->ID, $issues, $info );
 					}
-					if ( isset( $meta ) && isset( $meta['width'] ) ) {
-						$original_width = $meta['width'];
-						$original_height = $meta['height'];
-					}
+					$original_width = ( isset( $meta ) && isset( $meta['width'] ) ) ? $meta['width'] : null;
+					$original_height = ( isset( $meta ) && isset( $meta['height'] ) ) ? $meta['height'] : null;
 
 					$attachmentsrc = wp_get_attachment_image_src( $post->ID, 'thumbnail' );
 					echo "<tr class='wr2x-file-row' postId='" . $post->ID . "'>";
-					echo "<td class='wr2x-image wr2x-info-thumbnail'><img src='" . $attachmentsrc[0] . "' /></td>";
-					echo "<td class='wr2x-title'><a href='media.php?attachment_id=" . $post->ID . "&action=edit'>" . ( $post->post_title ? $post->post_title : '<i>Untitled</i>' ) . '</a><br />' .
-						"<span class='resolution'>Full-Size: <span class='" . ( $original_width < $max_width ? "red" : "" ) . "'>" . $original_width . "</span>×<span class='" . ( $original_height < $max_height ? "red" : "" ) . "'>" . $original_height . "</span></span>";
-					echo "<div class='actions'>";
-					echo "<a style='position: relative;' onclick='wr2x_generate(" . $post->ID . ", true)' id='wr2x_generate_button_" . $post->ID . "' class='wr2x-button'>" . __( "GENERATE", 'wp-retina-2x' ) . "</a>";
-					if ( !$this->core->is_ignore( $post->ID ) )
-						echo " <a href='?page=wp-retina-2x&view=" . $view . "&paged=" . $paged . "&ignore=" . $post->ID . "' id='wr2x_generate_button_" . $post->ID . "' class='wr2x-button wr2x-button-ignore'>" . __( "IGNORE", 'wp-retina-2x' ) . "</a>";
-					echo " <a style='position: relative;' class='wr2x-button wr2x-button-view'>" . __( "DETAILS", 'wp-retina-2x' ) . "</a>";
-					echo "</div></td>";
+
+					if ( !$original_width || !$original_height ) {
+						echo "<td colspan='2' style='padding: 15px;'>The metadata for the <a href='media.php?attachment_id={$post->ID}&action=edit'>Media #{$post->ID}</a> is broken. You can try <b>Generate</b> for this media (in the Media Library), <b>Bulk Generate</b>, or a <b>Full-Size Replace</b>.</td>";
+					}
+					else {
+						echo "<td class='wr2x-image wr2x-info-thumbnail'><img src='" . $attachmentsrc[0] . "' /></td>";
+						echo "<td class='wr2x-title'><a href='media.php?attachment_id=" . $post->ID . "&action=edit'>" . ( $post->post_title ? $post->post_title : '<i>Untitled</i>' ) . '</a><br />' .
+							"<span class='resolution'>Full-Size: <span class='" . ( $original_width < $max_width ? "red" : "" ) . "'>" . $original_width . "</span>×<span class='" . ( $original_height < $max_height ? "red" : "" ) . "'>" . $original_height . "</span></span>";
+						echo "<div class='actions'>";
+						echo "<a style='position: relative;' onclick='wr2x_generate(" . $post->ID . ", true)' id='wr2x_generate_button_" . $post->ID . "' class='wr2x-button'>" . __( "GENERATE", 'wp-retina-2x' ) . "</a>";
+						if ( !$this->core->is_ignore( $post->ID ) )
+							echo " <a href='?page=wp-retina-2x&view=" . $view . "&paged=" . $paged . "&ignore=" . $post->ID . "' id='wr2x_generate_button_" . $post->ID . "' class='wr2x-button wr2x-button-ignore'>" . __( "IGNORE", 'wp-retina-2x' ) . "</a>";
+						echo " <a style='position: relative;' class='wr2x-button wr2x-button-view'>" . __( "DETAILS", 'wp-retina-2x' ) . "</a>";
+						echo "</div></td>";
+					}
 
 					// Media Sizes Retina-ized
 					echo '<td id="wr2x-info-' . $post->ID . '" style="padding-top: 10px;" class="wr2x-info">';
-					echo $this->core->html_get_basic_retina_info( $post, $info );
+					if ( $original_width && $original_height )
+						echo $this->core->html_get_basic_retina_info( $post, $info );
 					echo "</td>";
 
 					if ( $this->core->admin->is_registered() ) {

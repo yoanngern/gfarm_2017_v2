@@ -1,7 +1,9 @@
 <?php
 namespace ElementorPro\License;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 class Updater {
 
@@ -22,7 +24,7 @@ class Updater {
 	}
 
 	private function setup_hooks() {
-		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
+		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ], 50 );
 		add_action( 'delete_site_transient_update_plugins', [ $this, 'delete_transients' ] );
 		add_filter( 'plugins_api', [ $this, 'plugins_api_filter' ], 10, 3 );
 
@@ -31,7 +33,7 @@ class Updater {
 	}
 
 	public function delete_transients() {
-		delete_transient( $this->response_transient_key );
+		$this->delete_transient( $this->response_transient_key );
 	}
 
 	private function maybe_delete_transients() {
@@ -44,14 +46,14 @@ class Updater {
 
 	private function check_transient_data( $_transient_data ) {
 		if ( ! is_object( $_transient_data ) ) {
-			$_transient_data = new \stdClass;
+			$_transient_data = new \stdClass();
 		}
 
 		if ( empty( $_transient_data->checked ) ) {
 			return $_transient_data;
 		}
 
-		$version_info = get_transient( $this->response_transient_key );
+		$version_info = $this->get_transient( $this->response_transient_key );
 		if ( false === $version_info ) {
 			$version_info = API::get_version();
 
@@ -60,7 +62,7 @@ class Updater {
 				$version_info->error = true;
 			}
 
-			set_transient( $this->response_transient_key, $version_info, 12 * HOUR_IN_SECONDS );
+			$this->set_transient( $this->response_transient_key, $version_info );
 		}
 
 		if ( ! empty( $version_info->error ) ) {
@@ -106,7 +108,7 @@ class Updater {
 		global $pagenow;
 
 		if ( ! is_object( $_transient_data ) ) {
-			$_transient_data = new \stdClass;
+			$_transient_data = new \stdClass();
 		}
 
 		if ( 'plugins.php' === $pagenow && is_multisite() ) {
@@ -184,5 +186,33 @@ class Updater {
 
 		// Restore our filter
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
+	}
+
+	protected function get_transient( $cache_key ) {
+		$cache_data = get_option( $cache_key );
+
+		if ( empty( $cache_data['timeout'] ) || current_time( 'timestamp' ) > $cache_data['timeout'] ) {
+			// Cache is expired.
+			return false;
+		}
+
+		return $cache_data['value'];
+	}
+
+	protected function set_transient( $cache_key, $value, $expiration = 0 ) {
+		if ( empty( $expiration ) ) {
+			$expiration = strtotime( '+12 hours', current_time( 'timestamp' ) );
+		}
+
+		$data = [
+			'timeout' => $expiration,
+			'value' => $value,
+		];
+
+		update_option( $cache_key, $data, 'no' );
+	}
+
+	protected function delete_transient( $cache_key ) {
+		delete_option( $cache_key );
 	}
 }

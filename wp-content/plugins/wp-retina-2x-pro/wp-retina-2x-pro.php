@@ -1,26 +1,34 @@
 <?php
 /*
 Plugin Name: WP Retina 2x Pro
-Plugin URI: http://meowapps.com
+Plugin URI: https://meowapps.com
 Description: Make your website look beautiful and crisp on modern displays by creating + displaying retina images.
-Version: 5.1.4
+Version: 5.2.9
 Author: Jordy Meow
-Author URI: http://meowapps.com
+Author URI: https://meowapps.com
 Text Domain: wp-retina-2x
 Domain Path: /languages
 
 Originally developed for two of my websites:
-- Jordy Meow (http://offbeatjapan.org)
-- Haikyo (http://offbeatjapan.org)
+- Jordy Meow (https://offbeatjapan.org)
+- Haikyo (https://offbeatjapan.org)
 */
+
+if ( class_exists( 'Meow_WR2X_Core' ) ) {
+  function mfrh_admin_notices() {
+    echo '<div class="error"><p>Thanks for installing the Pro version of WP Retina 2x :) However, the free version is still enabled. Please disable or uninstall it.</p></div>';
+  }
+  add_action( 'admin_notices', 'mfrh_admin_notices' );
+  return;
+}
 
 global $wr2x_picturefill, $wr2x_retinajs, $wr2x_lazysizes,
 	$wr2x_retina_image, $wr2x_core;
 
-$wr2x_version = '5.1.4';
+$wr2x_version = '5.2.9';
 $wr2x_retinajs = '2.0.0';
 $wr2x_picturefill = '3.0.2';
-$wr2x_lazysizes = '3.0.0';
+$wr2x_lazysizes = '4.0.1';
 $wr2x_retina_image = '1.7.2';
 
 // Admin

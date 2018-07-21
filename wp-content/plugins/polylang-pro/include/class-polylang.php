@@ -101,12 +101,21 @@ class Polylang {
 		// Special test for plupload which does not use jquery ajax and thus does not pass our ajax prefilter
 		// Special test for customize_save done in frontend but for which we want to load the admin
 		$in = isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], array( 'upload-attachment', 'customize_save' ) );
-		return wp_doing_ajax() && empty( $_REQUEST['pll_ajax_backend'] ) && ! $in;
+		$is_ajax_on_front = wp_doing_ajax() && empty( $_REQUEST['pll_ajax_backend'] ) && ! $in;
+
+		/**
+		 * Filters whether the current request is an ajax request on front.
+		 *
+		 * @since 2.3
+		 *
+		 * @param bool $is_ajax_on_front Whether the current request is an ajax request on front.
+		 */
+		return apply_filters( 'pll_is_ajax_on_front', $is_ajax_on_front );
 	}
 
 	/**
 	 * Defines constants
-	 * May be overriden by a plugin if set before plugins_loaded, 1
+	 * May be overridden by a plugin if set before plugins_loaded, 1
 	 *
 	 * @since 1.6
 	 */
@@ -116,14 +125,14 @@ class Polylang {
 			define( 'PLL_COOKIE', 'pll_language' );
 		}
 
-		// Avoid loading polylang admin for frontend ajax requests
+		// Backward compatibility with Polylang < 2.3
 		if ( ! defined( 'PLL_AJAX_ON_FRONT' ) ) {
 			define( 'PLL_AJAX_ON_FRONT', self::is_ajax_on_front() );
 		}
 
 		// Admin
 		if ( ! defined( 'PLL_ADMIN' ) ) {
-			define( 'PLL_ADMIN', defined( 'DOING_CRON' ) || ( is_admin() && ! PLL_AJAX_ON_FRONT ) );
+			define( 'PLL_ADMIN', defined( 'DOING_CRON' ) || ( defined( 'WP_CLI' ) && WP_CLI ) || ( is_admin() && ! PLL_AJAX_ON_FRONT ) );
 		}
 
 		// Settings page whatever the tab
@@ -181,7 +190,7 @@ class Polylang {
 		if ( ! $model->get_languages_list() ) {
 			/**
 			 * Fires when no language has been defined yet
-			 * Used to load overriden textdomains
+			 * Used to load overridden textdomains
 			 *
 			 * @since 1.2
 			 */

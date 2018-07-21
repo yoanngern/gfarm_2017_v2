@@ -1,19 +1,21 @@
 <?php
 /**
  * Plugin Name: Elementor Pro
- * Description: Elementor Pro adds new features to the Elementor Page Builder plugin. Control your conversions, your user engagement, your entire website, from one page builder.
+ * Description: Elementor Pro brings a whole new design experience to WordPress. Customize your entire theme: header, footer, single post, archive and 404 page, all with one page builder.
  * Plugin URI: https://elementor.com/
  * Author: Elementor.com
- * Version: 1.6.0
+ * Version: 2.0.16
  * Author URI: https://elementor.com/
  *
  * Text Domain: elementor-pro
 */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
-define( 'ELEMENTOR_PRO_VERSION', '1.6.0' );
-define( 'ELEMENTOR_PRO_PREVIOUS_STABLE_VERSION', '1.5.9' );
+define( 'ELEMENTOR_PRO_VERSION', '2.0.16' );
+define( 'ELEMENTOR_PRO_PREVIOUS_STABLE_VERSION', '1.15.6' );
 
 define( 'ELEMENTOR_PRO__FILE__', __FILE__ );
 define( 'ELEMENTOR_PRO_PLUGIN_BASE', plugin_basename( ELEMENTOR_PRO__FILE__ ) );
@@ -38,13 +40,13 @@ function elementor_pro_load_plugin() {
 		return;
 	}
 
-	$elementor_version_required = '1.5.0';
+	$elementor_version_required = '2.1.0';
 	if ( ! version_compare( ELEMENTOR_VERSION, $elementor_version_required, '>=' ) ) {
 		add_action( 'admin_notices', 'elementor_pro_fail_load_out_of_date' );
 		return;
 	}
 
-	$elementor_version_recommendation = '1.6.5';
+	$elementor_version_recommendation = '2.1.0';
 	if ( ! version_compare( ELEMENTOR_VERSION, $elementor_version_recommendation, '>=' ) ) {
 		add_action( 'admin_notices', 'elementor_pro_admin_notice_upgrade_recommendation' );
 	}
@@ -84,7 +86,7 @@ function elementor_pro_fail_load() {
 
 		$install_url = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=elementor' ), 'install-plugin_elementor' );
 
-		$message = '<p>' . __( 'Elementor Pro not working because you need to install the Elemenor plugin', 'elementor-pro' ) . '</p>';
+		$message = '<p>' . __( 'Elementor Pro not working because you need to install the Elementor plugin', 'elementor-pro' ) . '</p>';
 		$message .= '<p>' . sprintf( '<a href="%s" class="button-primary">%s</a>', $install_url, __( 'Install Elementor Now', 'elementor-pro' ) ) . '</p>';
 	}
 

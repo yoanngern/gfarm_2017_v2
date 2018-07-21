@@ -6,7 +6,6 @@ use Elementor\Controls_Stack;
 use Elementor\Element_Base;
 use Elementor\Element_Column;
 use Elementor\Element_Section;
-use Elementor\PageSettings\Manager as PageSettingsManager;
 use Elementor\Post_CSS_File;
 use Elementor\Widget_Base;
 use ElementorPro\Base\Module_Base;
@@ -31,6 +30,11 @@ class Module extends Module_Base {
 	 * @param $section_id string
 	 */
 	public function register_controls( Controls_Stack $element, $section_id ) {
+		// Remove Custom CSS Banner (From free version)
+		if ( 'section_custom_css_pro' === $section_id ) {
+			$this->remove_go_pro_custom_css( $element );
+		}
+
 		if ( $element instanceof Element_Section || $element instanceof Widget_Base ) {
 			$required_section_id = '_section_responsive';
 		} elseif ( $element instanceof Element_Column ) {
@@ -124,8 +128,8 @@ class Module extends Module_Base {
 	 * @param $post_css Post_CSS_File
 	 */
 	public function add_page_settings_css( $post_css ) {
-		$page_settings_instance = PageSettingsManager::get_page( $post_css->get_post_id() );
-		$custom_css = $page_settings_instance->get_settings( 'custom_css' );
+		$document = Plugin::elementor()->documents->get( $post_css->get_post_id() );
+		$custom_css = $document->get_settings( 'custom_css' );
 
 		$custom_css = trim( $custom_css );
 
@@ -147,24 +151,12 @@ class Module extends Module_Base {
 	public function remove_go_pro_custom_css( $element ) {
 		$controls_to_remove = [ 'section_custom_css_pro', 'custom_css_pro' ];
 
-		// Check if elementor free is higher than 1.6.0
-		if ( method_exists( $element, 'get_unique_name' ) ) {
-			$element_name = $element->get_unique_name();
-		} else {
-			$element_name = $element->get_name();
-		}
-
-		Plugin::elementor()->controls_manager->remove_control_from_stack( $element_name, $controls_to_remove );
+		Plugin::elementor()->controls_manager->remove_control_from_stack( $element->get_unique_name(), $controls_to_remove );
 	}
 
 	protected function add_actions() {
 		add_action( 'elementor/element/after_section_end', [ $this, 'register_controls' ], 10, 2 );
 		add_action( 'elementor/element/parse_css', [ $this, 'add_post_css' ], 10, 2 );
 		add_action( 'elementor/post-css-file/parse', [ $this, 'add_page_settings_css' ] );
-
-		// Remove Custom CSS Banner (From free version)
-		foreach ( [ 'section', 'column', 'common' ] as $element ) {
-			add_action( 'elementor/element/' . $element . '/section_custom_css_pro/after_section_end', [ $this, 'remove_go_pro_custom_css' ] );
-		}
 	}
 }

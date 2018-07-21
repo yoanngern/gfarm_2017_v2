@@ -26,7 +26,7 @@ class PLL_Admin_Filters extends PLL_Filters {
 		add_action( 'edit_user_profile_update', array( $this, 'personal_options_update' ) );
 		add_action( 'personal_options', array( $this, 'personal_options' ) );
 
-		// Ugrades languages files after a core upgrade ( timing is important )
+		// Upgrades languages files after a core upgrade ( timing is important )
 		// Backward compatibility WP < 4.0 *AND* Polylang < 1.6
 		add_action( '_core_updated_successfully', array( $this, 'upgrade_languages' ), 1 ); // since WP 3.3
 
@@ -45,7 +45,7 @@ class PLL_Admin_Filters extends PLL_Filters {
 	}
 
 	/**
-	 * Modifies the widgets forms to add our language dropdwown list
+	 * Modifies the widgets forms to add our language dropdown list
 	 *
 	 * @since 0.3
 	 *
@@ -57,7 +57,8 @@ class PLL_Admin_Filters extends PLL_Filters {
 		$screen = get_current_screen();
 
 		// Test the Widgets screen and the Customizer to avoid displaying the option in page builders
-		if ( ( isset( $screen ) && 'widgets' === $screen->base ) || isset( $GLOBALS['wp_customize'] ) ) {
+		// Saving the widget reloads the form. And curiously the action is in $_REQUEST but neither in $_POST, not in $_GET.
+		if ( ( isset( $screen ) && 'widgets' === $screen->base ) || ( isset( $_REQUEST['action'] ) && 'save-widget' === $_REQUEST['action'] ) || isset( $GLOBALS['wp_customize'] ) ) {
 			$dropdown = new PLL_Walker_Dropdown();
 			printf( '<p><label for="%1$s">%2$s %3$s</label></p>',
 				esc_attr( $widget->id . '_lang_choice' ),
@@ -156,7 +157,7 @@ class PLL_Admin_Filters extends PLL_Filters {
 			);
 		}
 
-		// Hidden informations to modify the biography form with js
+		// Hidden information to modify the biography form with js
 		foreach ( $this->model->get_languages_list() as $lang ) {
 			$meta = $lang->slug == $this->options['default_lang'] ? 'description' : 'description_' . $lang->slug;
 
@@ -172,7 +173,7 @@ class PLL_Admin_Filters extends PLL_Filters {
 	}
 
 	/**
-	 * Ugprades languages files after a core upgrade
+	 * Upgrades languages files after a core upgrade
 	 * only for backward compatibility WP < 4.0 *AND* Polylang < 1.6
 	 *
 	 * @since 0.6
@@ -211,7 +212,17 @@ class PLL_Admin_Filters extends PLL_Filters {
 	 * @return string
 	 */
 	public function get_locale( $locale ) {
-		return $this->curlang->locale;
+		if ( isset( $_POST['post_lang_choice'] ) && $lang = $this->model->get_language( $_POST['post_lang_choice'] ) ) {
+			$locale = $lang->locale;
+		} elseif ( isset( $_POST['term_lang_choice'] ) && $lang = $this->model->get_language( $_POST['term_lang_choice'] ) ) {
+			$locale = $lang->locale;
+		} elseif ( isset( $_POST['inline_lang_choice'] ) && $lang = $this->model->get_language( $_POST['inline_lang_choice'] ) ) {
+			$locale = $lang->locale;
+		} elseif ( ! empty( $this->curlang ) ) {
+			$locale = $this->curlang->locale;
+		}
+
+		return $locale;
 	}
 
 	/**

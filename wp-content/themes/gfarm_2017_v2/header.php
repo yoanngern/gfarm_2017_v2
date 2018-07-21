@@ -55,7 +55,7 @@
 
 <header>
 
-	<a class="title" href="/">Gospel Farm</a>
+	<a class="title" href="<?php echo pll_home_url(); ?>">Gospel Farm</a>
 
 	<?php
 	wp_nav_menu( array(
@@ -63,7 +63,7 @@
 	) );
 	?>
 
-	<a href="/" id="burger"></a>
+	<a href="<?php echo pll_home_url(); ?>" id="burger"></a>
 
 	<?php
 	wp_nav_menu( array(

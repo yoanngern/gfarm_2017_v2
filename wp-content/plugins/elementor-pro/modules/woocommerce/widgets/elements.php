@@ -2,13 +2,13 @@
 namespace ElementorPro\Modules\Woocommerce\Widgets;
 
 use Elementor\Controls_Manager;
-use Elementor\Widget_Base;
+use ElementorPro\Base\Base_Widget;
 use ElementorPro\Modules\QueryControl\Module as QueryModule;
 use ElementorPro\Modules\Woocommerce\Module;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class Elements extends Widget_Base {
+class Elements extends Base_Widget {
 
 	public function get_name() {
 		return 'wc-elements';
@@ -20,10 +20,6 @@ class Elements extends Widget_Base {
 
 	public function get_icon() {
 		return 'eicon-woocommerce';
-	}
-
-	public function get_categories() {
-		return [ 'pro-elements' ];
 	}
 
 	public function on_export( $element ) {

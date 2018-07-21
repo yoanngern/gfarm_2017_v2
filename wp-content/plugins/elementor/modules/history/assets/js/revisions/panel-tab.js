@@ -27,18 +27,16 @@ module.exports = Marionette.CompositeView.extend( {
 
 	initialize: function() {
 		this.listenTo( elementor.channels.editor, 'saved', this.onEditorSaved );
+		this.currentPreviewId = elementor.config.current_revision_id;
 	},
 
 	getRevisionViewData: function( revisionView ) {
-		var self = this,
-			revisionID = revisionView.model.get( 'id' );
+		var self = this;
 
-		self.jqueryXhr = elementor.ajax.send( 'get_revision_data', {
-			data: {
-				id: revisionID
-			},
+		this.jqueryXhr = elementor.history.revisions.getRevisionDataAsync( revisionView.model.get( 'id' ), {
 			success: function( data ) {
-				self.setEditorData( data );
+				elementor.history.revisions.setEditorData( data.elements );
+				elementor.settings.page.model.set( data.settings );
 
 				self.setRevisionsButtonsActive( true );
 
@@ -48,7 +46,7 @@ module.exports = Marionette.CompositeView.extend( {
 
 				self.enterReviewMode();
 			},
-			error: function( data ) {
+			error: function() {
 				revisionView.$el.removeClass( 'elementor-revision-item-loading' );
 
 				if ( 'abort' === self.jqueryXhr.statusText ) {
@@ -68,12 +66,6 @@ module.exports = Marionette.CompositeView.extend( {
 		this.ui.apply.add( this.ui.discard ).prop( 'disabled', ! active );
 	},
 
-	setEditorData: function( data ) {
-		var collection = elementor.getRegion( 'sections' ).currentView.collection;
-
-		collection.reset( data );
-	},
-
 	deleteRevision: function( revisionView ) {
 		var self = this;
 
@@ -87,7 +79,7 @@ module.exports = Marionette.CompositeView.extend( {
 
 				self.currentPreviewId = null;
 			},
-			error: function( data ) {
+			error: function() {
 				revisionView.$el.removeClass( 'elementor-revision-item-loading' );
 
 				alert( 'An error occurred' );
@@ -122,20 +114,26 @@ module.exports = Marionette.CompositeView.extend( {
 		this.exitReviewMode();
 
 		this.setRevisionsButtonsActive( false );
+
+		this.currentPreviewId = elementor.config.current_revision_id;
 	},
 
 	onApplyClick: function() {
-		elementor.getPanelView().getChildView( 'footer' )._publishBuilder();
+		elementor.saver.setFlagEditorChange( true );
+
+		elementor.saver.saveAutoSave();
 
 		this.isRevisionApplied = true;
 
 		this.currentPreviewId = null;
+
+		elementor.history.history.getItems().reset();
 	},
 
 	onDiscardClick: function() {
-		this.setEditorData( elementor.config.data );
+		elementor.history.revisions.setEditorData( elementor.config.data );
 
-		elementor.setFlagEditorChange( this.isRevisionApplied );
+		elementor.saver.setFlagEditorChange( this.isRevisionApplied );
 
 		this.isRevisionApplied = false;
 
@@ -151,7 +149,7 @@ module.exports = Marionette.CompositeView.extend( {
 	},
 
 	onDestroy: function() {
-		if ( this.currentPreviewId ) {
+		if ( this.currentPreviewId && this.currentPreviewId !== elementor.config.current_revision_id ) {
 			this.onDiscardClick();
 		}
 	},
@@ -163,9 +161,11 @@ module.exports = Marionette.CompositeView.extend( {
 
 		var currentPreviewModel = this.collection.findWhere({ id: this.currentPreviewId });
 
-		this.currentPreviewItem = this.children.findByModelCid( currentPreviewModel.cid );
-
-		this.currentPreviewItem.$el.addClass( 'elementor-revision-current-preview' );
+		// Ensure the model is exist and not deleted during a save.
+		if ( currentPreviewModel ) {
+			this.currentPreviewItem = this.children.findByModelCid( currentPreviewModel.cid );
+			this.currentPreviewItem.$el.addClass( 'elementor-revision-current-preview' );
+		}
 	},
 
 	onChildviewDetailsAreaClick: function( childView ) {
@@ -186,8 +186,8 @@ module.exports = Marionette.CompositeView.extend( {
 
 		childView.$el.addClass( 'elementor-revision-current-preview elementor-revision-item-loading' );
 
-		if ( elementor.isEditorChanged() && null === self.currentPreviewId ) {
-			elementor.saveEditor( {
+		if ( elementor.saver.isEditorChanged() && null === self.currentPreviewId ) {
+			elementor.saver.saveEditor( {
 				status: 'autosave',
 				onSuccess: function() {
 					self.getRevisionViewData( childView );
@@ -204,8 +204,7 @@ module.exports = Marionette.CompositeView.extend( {
 
 	onChildviewDeleteClick: function( childView ) {
 		var self = this,
-			type = childView.model.get( 'type' ),
-			id = childView.model.get( 'id' );
+			type = childView.model.get( 'type' );
 
 		var removeDialog = elementor.dialogsManager.createWidget( 'confirm', {
 			message: elementor.translate( 'dialog_confirm_delete', [ type ] ),

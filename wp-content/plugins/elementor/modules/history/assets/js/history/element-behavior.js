@@ -4,7 +4,7 @@ module.exports = Marionette.Behavior.extend( {
 	listenerAttached: false,
 
 	initialize: function() {
-		this.lazySaveTextHistory = _.debounce( _.bind( this.saveTextHistory, this ), 800 );
+		this.lazySaveTextHistory = _.debounce( this.saveTextHistory.bind( this ), 800 );
 	},
 
 	// use beforeRender that runs after the settingsModel is exist
@@ -36,7 +36,7 @@ module.exports = Marionette.Behavior.extend( {
 			type: 'change',
 			elementType: 'control',
 			title: elementor.history.history.getModelLabel( model ),
-			subTitle: model.controls[ changed[0] ].label,
+			subTitle: control.label,
 			history: {
 				behavior: this,
 				changed: changedAttributes,
@@ -49,21 +49,24 @@ module.exports = Marionette.Behavior.extend( {
 		delete this.oldValues[ control.name ];
 	},
 
-	saveHistory: function( model ) {
+	saveHistory: function( model, options ) {
 		if ( ! elementor.history.history.getActive() ) {
 			return;
 		}
 
 		var self = this,
-			changed = Object.keys( model.changed );
+			changed = Object.keys( model.changed ),
+			control = model.controls[ changed[0] ];
 
-		if ( ! changed.length || ! model.controls[ changed[0] ] ) {
+		if ( ! control && options && options.control ) {
+			control = options.control;
+		}
+
+		if ( ! changed.length || ! control ) {
 			return;
 		}
 
 		if ( 1 === changed.length ) {
-			var control = model.controls[ changed[0] ];
-
 			if ( _.isUndefined( self.oldValues[ control.name ] ) ) {
 				self.oldValues[ control.name ] = model.previous( control.name );
 			}
@@ -99,7 +102,7 @@ module.exports = Marionette.Behavior.extend( {
 		};
 
 		if ( 1 === changed.length ) {
-			historyItem.subTitle = model.controls[ changed[0] ].label;
+			historyItem.subTitle = control.label;
 		}
 
 		elementor.history.history.addItem( historyItem );
@@ -121,13 +124,17 @@ module.exports = Marionette.Behavior.extend( {
 		// Stop listen to restore actions
 		behavior.stopListening( settings, 'change', this.saveHistory );
 
+		var restoredValues = {};
 		_.each( history.changed, function( values, key ) {
 			if ( isRedo ) {
-				settings.setExternalChange( key, values['new'] );
+				restoredValues[ key ] = values['new'];
 			} else {
-				settings.setExternalChange( key, values.old );
+				restoredValues[ key ] = values.old;
 			}
 		} );
+
+		// Set at once.
+		settings.setExternalChange( restoredValues );
 
 		historyItem.set( 'status', isRedo ? 'not_applied' : 'applied' );
 

@@ -3,7 +3,9 @@ namespace ElementorPro;
 
 use Elementor\Revisions_Manager;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 class Upgrades {
 
@@ -31,15 +33,12 @@ class Upgrades {
 
 		// Fix Button widget to new sizes options
 		$post_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				'SELECT `post_id` FROM %1$s WHERE `meta_key` = "_elementor_data" AND `meta_value` LIKE "%2$s";',
-				$wpdb->postmeta,
-				'%"widgetType":"form"%'
-			)
+			'SELECT `post_id` FROM `' . $wpdb->postmeta . '` WHERE `meta_key` = "_elementor_data" AND `meta_value` LIKE \'%"widgetType":"form"%\';'
 		);
 
-		if ( empty( $post_ids ) )
+		if ( empty( $post_ids ) ) {
 			return;
+		}
 
 		foreach ( $post_ids as $post_id ) {
 			$data = Plugin::elementor()->db->get_plain_editor( $post_id );
@@ -100,6 +99,16 @@ class Upgrades {
 			unset( $GLOBALS['post'] );
 		}
 
+		/**
+		 * After editor saves data.
+		 *
+		 * Fires after Elementor editor data was saved.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int   $post_id     The ID of the post.
+		 * @param array $editor_data The editor data.
+		 */
 		do_action( 'elementor/editor/after_save', $post_id, $editor_data );
 	}
 
@@ -124,15 +133,12 @@ class Upgrades {
 
 		// Move all posts columns to classic skin (Just add prefix)
 		$post_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				'SELECT `post_id` FROM %1$s WHERE `meta_key` = "_elementor_data" AND `meta_value` LIKE "%2$s";',
-				$wpdb->postmeta,
-				'%"widgetType":"posts"%'
-			)
+			'SELECT `post_id` FROM `' . $wpdb->postmeta . '` WHERE `meta_key` = "_elementor_data" AND `meta_value` LIKE \'%"widgetType":"posts"%\';'
 		);
 
-		if ( empty( $post_ids ) )
+		if ( empty( $post_ids ) ) {
 			return;
+		}
 
 		foreach ( $post_ids as $post_id ) {
 			$data = Plugin::elementor()->db->get_plain_editor( $post_id );
@@ -166,6 +172,101 @@ class Upgrades {
 		}
 	}
 
+	private static function _upgrade_v1120() {
+		global $wpdb;
+
+		// Set `mailchimp_api_key_source` to `custom`.
+		$post_ids = $wpdb->get_col(
+			'SELECT `post_id` FROM `' . $wpdb->postmeta . '` WHERE `meta_key` = "_elementor_data" AND `meta_value` LIKE \'%"widgetType":"form"%\';'
+		);
+
+		if ( empty( $post_ids ) ) {
+			return;
+		}
+
+		foreach ( $post_ids as $post_id ) {
+			$do_update = false;
+			$data = Plugin::elementor()->db->get_plain_editor( $post_id );
+			if ( empty( $data ) ) {
+				continue;
+			}
+
+			$data = Plugin::elementor()->db->iterate_data( $data, function( $element ) use ( & $do_update ) {
+				if ( empty( $element['widgetType'] ) || 'form' !== $element['widgetType'] ) {
+					return $element;
+				}
+
+				if ( ! empty( $element['settings']['mailchimp_api_key'] ) ) {
+					$element['settings']['mailchimp_api_key_source'] = 'custom';
+					$do_update = true;
+				}
+
+				return $element;
+			} );
+
+			// Only update if form has mailchimp
+			if ( ! $do_update ) {
+				continue;
+			}
+			// We need the `wp_slash` in order to avoid the unslashing during the `update_post_meta`
+			$json_value = wp_slash( wp_json_encode( $data ) );
+
+			update_metadata( 'post', $post_id, '_elementor_data', $json_value );
+		}
+	}
+
+	/**
+	 * Replace 'sticky' => 'yes' with 'sticky' => 'top' in sections.
+	 */
+	private static function _upgrade_v203() {
+		global $wpdb;
+
+		$post_ids = $wpdb->get_col(
+			'SELECT `post_id` FROM `' . $wpdb->postmeta . '` WHERE `meta_key` = "_elementor_data" AND `meta_value` LIKE \'%"sticky":"yes"%\';'
+		);
+
+		if ( empty( $post_ids ) ) {
+			return;
+		}
+
+		foreach ( $post_ids as $post_id ) {
+			$do_update = false;
+
+			$document = Plugin::elementor()->documents->get( $post_id );
+
+			if ( ! $document ) {
+				continue;
+			}
+
+			$data = $document->get_elements_data();
+
+			if ( empty( $data ) ) {
+				continue;
+			}
+
+			$data = Plugin::elementor()->db->iterate_data( $data, function( $element ) use ( & $do_update ) {
+				if ( empty( $element['elType'] ) || 'section' !== $element['elType'] ) {
+					return $element;
+				}
+
+				if ( ! empty( $element['settings']['sticky'] ) && 'yes' === $element['settings']['sticky'] ) {
+					$element['settings']['sticky'] = 'top';
+					$do_update = true;
+				}
+
+				return $element;
+			} );
+
+			if ( ! $do_update ) {
+				continue;
+			}
+			// We need the `wp_slash` in order to avoid the unslashing during the `update_metadata`
+			$json_value = wp_slash( wp_json_encode( $data ) );
+
+			update_metadata( 'post', $post_id, '_elementor_data', $json_value );
+		} // End foreach().
+	}
+
 	private static function check_upgrades( $elementor_pro_version ) {
 		// It's a new install
 		if ( ! $elementor_pro_version ) {
@@ -175,12 +276,14 @@ class Upgrades {
 		$elementor_pro_upgrades = get_option( 'elementor_pro_upgrades', [] );
 
 		$upgrades = [
-			'1.3.0'  => '_upgrade_v130',
-			'1.4.0'  => '_upgrade_v140',
+			'1.3.0' => '_upgrade_v130',
+			'1.4.0' => '_upgrade_v140',
+			'1.12.0' => '_upgrade_v1120',
+			'2.0.3' => '_upgrade_v203',
 		];
 
 		foreach ( $upgrades as $version => $function ) {
-			if ( version_compare( $elementor_pro_version, $version, '<' ) && ! isset( $elementor_upgrades[ $version ] ) ) {
+			if ( version_compare( $elementor_pro_version, $version, '<' ) && ! isset( $elementor_pro_upgrades[ $version ] ) ) {
 				self::$function();
 				$elementor_pro_upgrades[ $version ] = true;
 				update_option( 'elementor_pro_upgrades', $elementor_pro_upgrades );

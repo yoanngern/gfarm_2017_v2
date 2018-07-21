@@ -7,31 +7,98 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+/**
+ * Elementor typography control.
+ *
+ * A base control for creating typography control. Displays input fields to define
+ * the content typography including font size, font family, font weight, text
+ * transform, font style, line height and letter spacing.
+ *
+ * @since 1.0.0
+ */
 class Group_Control_Typography extends Group_Control_Base {
 
+	/**
+	 * Fields.
+	 *
+	 * Holds all the typography control fields.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @static
+	 *
+	 * @var array Typography control fields.
+	 */
 	protected static $fields;
 
+	/**
+	 * Scheme fields keys.
+	 *
+	 * Holds all the typography control scheme fields keys.
+	 * Default is an array containing `font_family` and `font_weight`.
+	 *
+	 * @since 1.0.0
+	 * @access private
+	 * @static
+	 *
+	 * @var array Typography control scheme fields keys.
+	 */
 	private static $_scheme_fields_keys = [ 'font_family', 'font_weight' ];
 
+	/**
+	 * Get scheme fields keys.
+	 *
+	 * Retrieve all the available typography control scheme fields keys.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @static
+	 *
+	 * @return array Scheme fields keys.
+	 */
 	public static function get_scheme_fields_keys() {
 		return self::$_scheme_fields_keys;
 	}
 
+	/**
+	 * Get typography control type.
+	 *
+	 * Retrieve the control type, in this case `typography`.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @static
+	 *
+	 * @return string Control type.
+	 */
 	public static function get_type() {
 		return 'typography';
 	}
 
+	/**
+	 * Init fields.
+	 *
+	 * Initialize typography control fields.
+	 *
+	 * @since 1.2.2
+	 * @access protected
+	 *
+	 * @return array Control fields.
+	 */
 	protected function init_fields() {
 		$fields = [];
 
-		$fields['typography'] = [
-			'label' => _x( 'Typography', 'Typography Control', 'elementor' ),
-			'type' => Controls_Manager::SWITCHER,
+		$default_fonts = SettingsManager::get_settings_managers( 'general' )->get_model()->get_settings( 'elementor_default_generic_fonts' );
+
+		if ( $default_fonts ) {
+			$default_fonts = ', ' . $default_fonts;
+		}
+
+		$fields['font_family'] = [
+			'label' => _x( 'Family', 'Typography Control', 'elementor' ),
+			'type' => Controls_Manager::FONT,
 			'default' => '',
-			'label_on' => __( 'On', 'elementor' ),
-			'label_off' => __( 'Off', 'elementor' ),
-			'return_value' => 'custom',
-			'render_type' => 'ui',
+			'selector_value' => 'font-family: "{{VALUE}}"' . $default_fonts . ';',
 		];
 
 		$fields['font_size'] = [
@@ -46,19 +113,6 @@ class Group_Control_Typography extends Group_Control_Base {
 			],
 			'responsive' => true,
 			'selector_value' => 'font-size: {{SIZE}}{{UNIT}}',
-		];
-
-		$default_fonts = SettingsManager::get_settings_managers( 'general' )->get_model()->get_settings( 'elementor_default_generic_fonts' );
-
-		if ( $default_fonts ) {
-			$default_fonts = ', ' . $default_fonts;
-		}
-
-		$fields['font_family'] = [
-			'label' => _x( 'Family', 'Typography Control', 'elementor' ),
-			'type' => Controls_Manager::FONT,
-			'default' => '',
-			'selector_value' => 'font-family: "{{VALUE}}"' . $default_fonts . ';',
 		];
 
 		$typo_weight_options = [
@@ -101,6 +155,19 @@ class Group_Control_Typography extends Group_Control_Base {
 			],
 		];
 
+		$fields['text_decoration'] = [
+			'label' => _x( 'Decoration', 'Typography Control', 'elementor' ),
+			'type' => Controls_Manager::SELECT,
+			'default' => '',
+			'options' => [
+				'' => __( 'Default', 'elementor' ),
+				'underline' => _x( 'Underline', 'Typography Control', 'elementor' ),
+				'overline' => _x( 'Overline', 'Typography Control', 'elementor' ),
+				'line-through' => _x( 'Line Through', 'Typography Control', 'elementor' ),
+				'none' => _x( 'None', 'Typography Control', 'elementor' ),
+			],
+		];
+
 		$fields['line_height'] = [
 			'label' => _x( 'Line-Height', 'Typography Control', 'elementor' ),
 			'type' => Controls_Manager::SLIDER,
@@ -134,10 +201,22 @@ class Group_Control_Typography extends Group_Control_Base {
 		return $fields;
 	}
 
+	/**
+	 * Prepare fields.
+	 *
+	 * Process typography control fields before adding them to `add_control()`.
+	 *
+	 * @since 1.2.3
+	 * @access protected
+	 *
+	 * @param array $fields Typography control fields.
+	 *
+	 * @return array Processed fields.
+	 */
 	protected function prepare_fields( $fields ) {
 		array_walk(
 			$fields, function( &$field, $field_name ) {
-				if ( 'typography' === $field_name ) {
+				if ( in_array( $field_name, [ 'typography', 'popover_toggle' ] ) ) {
 					return;
 				}
 
@@ -148,7 +227,7 @@ class Group_Control_Typography extends Group_Control_Base {
 				];
 
 				$field['condition'] = [
-					'typography' => [ 'custom' ],
+					'typography' => 'custom',
 				];
 			}
 		);
@@ -156,6 +235,19 @@ class Group_Control_Typography extends Group_Control_Base {
 		return parent::prepare_fields( $fields );
 	}
 
+	/**
+	 * Add group arguments to field.
+	 *
+	 * Register field arguments to typography control.
+	 *
+	 * @since 1.2.2
+	 * @access protected
+	 *
+	 * @param string $control_id Typography control id.
+	 * @param array  $field_args Typography control field arguments.
+	 *
+	 * @return array Field arguments.
+	 */
 	protected function add_group_args_to_field( $control_id, $field_args ) {
 		$field_args = parent::add_group_args_to_field( $control_id, $field_args );
 
@@ -170,5 +262,25 @@ class Group_Control_Typography extends Group_Control_Base {
 		}
 
 		return $field_args;
+	}
+
+	/**
+	 * Get default options.
+	 *
+	 * Retrieve the default options of the typography control. Used to return the
+	 * default options while initializing the typography control.
+	 *
+	 * @since 1.9.0
+	 * @access protected
+	 *
+	 * @return array Default typography control options.
+	 */
+	protected function get_default_options() {
+		return [
+			'popover' => [
+				'starter_name' => 'typography',
+				'starter_title' => _x( 'Typography', 'Typography Control', 'elementor' ),
+			],
+		];
 	}
 }

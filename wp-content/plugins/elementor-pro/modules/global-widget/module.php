@@ -1,16 +1,16 @@
 <?php
 namespace ElementorPro\Modules\GlobalWidget;
 
+use Elementor\Core\Documents_Manager;
 use Elementor\Element_Base;
-use Elementor\Post_CSS_File;
 use Elementor\TemplateLibrary\Source_Local;
 use Elementor\Widget_Base;
-use Elementor\Plugin as ElementorPlugin;
 use ElementorPro\Base\Module_Base;
-use ElementorPro\Modules\GlobalWidget\Widgets\Global_Widget;
 use ElementorPro\Plugin;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 class Module extends Module_Base {
 
@@ -23,11 +23,9 @@ class Module extends Module_Base {
 	public function __construct() {
 		parent::__construct();
 
-		Source_Local::add_template_type( self::TEMPLATE_TYPE );
-
 		Widget_Base::add_edit_tool( 'save', [
 			'title' => sprintf( __( 'Save %s', 'elementor-pro' ), __( 'Widget', 'elementor-pro' ) ),
-			'icon' => 'floppy-o',
+			'icon' => 'save',
 		], 'duplicate' );
 
 		Plugin::elementor()->editor->add_editor_template( __DIR__ . '/views/panel-template.php' );
@@ -63,7 +61,6 @@ class Module extends Module_Base {
 				'elType' => 'widget',
 				'title' => $widget_template['title'],
 				'widgetType' => $widget_template['widgetType'],
-				'keywords' => $widget_template['keywords'],
 			];
 		}
 
@@ -86,9 +83,7 @@ class Module extends Module_Base {
 
 	public function set_template_widget_type_meta( $post_id, $template_data ) {
 		if ( self::TEMPLATE_TYPE === $template_data['type'] ) {
-			$template_content = isset( $template_data['content'] ) ? $template_data['content'] : $template_data['data'];
-
-			update_post_meta( $post_id, self::WIDGET_TYPE_META_KEY, $template_content[0]['widgetType'] );
+			update_post_meta( $post_id, self::WIDGET_TYPE_META_KEY, $template_data['content'][0]['widgetType'] );
 		}
 	}
 
@@ -125,39 +120,69 @@ class Module extends Module_Base {
 			return $is_supported;
 		}
 
-		return ! $this->is_widget_template( $post_id );
+		$is_widget_template = $this->is_widget_template( $post_id );
+
+		// FIX ME: Change `get_current_screen()` condition to better way.
+		if ( $is_widget_template && function_exists( 'get_current_screen' ) ) {
+			if ( in_array( get_current_screen()->id, [ 'elementor_library', 'edit-elementor_library' ], true ) ) {
+				$is_supported = false;
+			}
+		}
+
+		return $is_supported;
 	}
 
 	public function is_template_supports_export( $default_value, $template_id ) {
 		return $default_value && ! $this->is_widget_template( $template_id );
 	}
 
-	public function remove_user_edit_cap( $all_caps, $caps, $args ) {
+	/**
+	 * Remove user edit capabilities.
+	 *
+	 * Filters the user capabilities to disable editing in admin.
+	 *
+	 * @param array $allcaps An array of all the user's capabilities.
+	 * @param array $caps    Actual capabilities for meta capability.
+	 * @param array $args    Optional parameters passed to has_cap(), typically object ID.
+	 *
+	 * @return array
+	 */
+	public function remove_user_edit_cap( $allcaps, $caps, $args ) {
 		$capability = $args[0];
 
 		if ( empty( $args[2] ) ) {
-			return $all_caps;
+			return $allcaps;
+		}
+
+		global $pagenow;
+
+		if ( ! in_array( $pagenow, [ 'post.php', 'edit.php' ], true ) ) {
+			return $allcaps;
 		}
 
 		$post_id = $args[2];
 
 		if ( 'edit_post' !== $capability ) {
-			return $all_caps;
+			return $allcaps;
 		}
 
 		$post = get_post( $post_id );
 
+		if ( ! $post ) {
+			return $allcaps;
+		}
+
 		if ( Source_Local::CPT !== $post->post_type ) {
-			return $all_caps;
+			return $allcaps;
 		}
 
 		if ( ! $this->is_widget_template( $post_id ) ) {
-			return $all_caps;
+			return $allcaps;
 		}
 
-		$all_caps[ $caps[0] ] = false;
+		$allcaps[ $caps[0] ] = false;
 
-		return $all_caps;
+		return $allcaps;
 	}
 
 	public function is_widget_template( $template_id ) {
@@ -169,7 +194,7 @@ class Module extends Module_Base {
 	public function set_global_widget_included_posts_list( $post_id, $editor_data ) {
 		$global_widget_ids = [];
 
-		Plugin::elementor()->db->iterate_data( $editor_data, function ( $element_data ) use ( & $global_widget_ids ) {
+		Plugin::elementor()->db->iterate_data( $editor_data, function( $element_data ) use ( & $global_widget_ids ) {
 			if ( isset( $element_data['templateID'] ) ) {
 				$global_widget_ids[] = $element_data['templateID'];
 			}
@@ -177,6 +202,10 @@ class Module extends Module_Base {
 
 		foreach ( $global_widget_ids as $widget_id ) {
 			$included_posts = get_post_meta( $widget_id, self::INCLUDED_POSTS_LIST_META_KEY, true );
+
+			if ( ! is_array( $included_posts ) ) {
+				$included_posts = [];
+			}
 
 			$included_posts[ $post_id ] = true;
 
@@ -195,28 +224,29 @@ class Module extends Module_Base {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->postmeta} WHERE `meta_key` = '%s' AND `post_id` IN (%s);",
-				'_elementor_css',
+				"DELETE FROM {$wpdb->postmeta} WHERE `meta_key` = '_elementor_css' AND `post_id` IN (%s);",
 				implode( ',', array_keys( $including_post_ids ) )
 			)
 		);
 	}
 
+	/**
+	 * @param Documents_Manager $documents_manager
+	 */
+	public function register_documents( $documents_manager ) {
+		$documents_manager->register_document_type( self::TEMPLATE_TYPE, Documents\Widget::get_class_full_name() );
+	}
+
 	private function _add_hooks() {
+		add_action( 'elementor/documents/register', [ $this, 'register_documents' ] );
 		add_action( 'elementor/template-library/after_save_template', [ $this, 'set_template_widget_type_meta' ], 10, 2 );
-
 		add_action( 'elementor/template-library/after_update_template', [ $this, 'on_template_update' ] , 10, 2 );
-
 		add_action( 'elementor/editor/after_save', [ $this, 'set_global_widget_included_posts_list' ], 10, 2 );
 
 		add_filter( 'elementor_pro/editor/localize_settings', [ $this, 'add_templates_localize_data' ] );
-
 		add_filter( 'elementor/template-library/get_template', [ $this, 'filter_template_data' ] );
-
 		add_filter( 'elementor/element/get_child_type', [ $this, 'get_element_child_type' ], 10, 2 );
-
 		add_filter( 'elementor/utils/is_post_type_support', [ $this, 'is_post_type_support_elementor' ], 10, 3 );
-
 		add_filter( 'user_has_cap', [ $this, 'remove_user_edit_cap' ], 10, 3 );
 
 		add_filter( 'elementor/template_library/is_template_supports_export', [ $this, 'is_template_supports_export' ], 10, 2 );

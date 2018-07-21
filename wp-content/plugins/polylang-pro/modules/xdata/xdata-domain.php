@@ -40,7 +40,7 @@ class PLL_Xdata_Domain extends PLL_Xdata_Base {
 	 *
 	 * @since 2.0
 	 *
-	 * @param string $lang language code
+	 * @param string $lang Language code
 	 */
 	protected function maybe_set_cookie( $lang ) {
 		if ( ! headers_sent() && ( ! isset( $_COOKIE[ PLL_COOKIE ] ) || $_COOKIE[ PLL_COOKIE ] !== $lang ) ) {
@@ -52,7 +52,7 @@ class PLL_Xdata_Domain extends PLL_Xdata_Base {
 
 	/**
 	 * Allow to use the correct domain for preview links
-	 * as we force them to be on main domain when not using the Xdata module
+	 * as we force them to be on the main domain when not using the Xdata module
 	 *
 	 * @since 2.0
 	 *
@@ -89,7 +89,7 @@ class PLL_Xdata_Domain extends PLL_Xdata_Base {
 		);
 
 		$url = $this->ajax_url( $this->options['default_lang'], $args );
-		printf( '<script type="text/javascript" src="%s"></script>', esc_url( $url ) );
+		printf( '<script async type="text/javascript" src="%s"></script>', esc_url( $url ) );
 	}
 
 	/**
@@ -110,8 +110,14 @@ class PLL_Xdata_Domain extends PLL_Xdata_Base {
 
 		// Redirects to the preferred language home page at first visit
 		if ( ! empty( $this->options['browser'] ) && ! isset( $_COOKIE[ PLL_COOKIE ] ) && trailingslashit( $redirect ) === $this->model->get_language( $lang )->home_url ) {
-			$preflang = $this->choose_lang->get_preferred_browser_language();
-			if ( $preflang && $preflang !== $lang ) {
+			/** This filter is documented in frontend/choose-lang.php */
+			$preflang = apply_filters( 'pll_preferred_language', $this->choose_lang->get_preferred_browser_language() );
+
+			if ( ! $this->model->get_language( $preflang ) ) {
+				$preflang = $this->options['default_lang']; // Redirect to default language if there is no match
+			}
+
+			if ( $preflang !== $lang ) {
 				header( 'Content-Type: application/javascript' );
 				printf( 'window.location.replace("%s");', esc_url_raw( $this->model->get_language( $preflang )->home_url ) );
 				wp_die();

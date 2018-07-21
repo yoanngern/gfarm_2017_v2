@@ -1,5 +1,5 @@
-/*! elementor-pro - v1.6.0 - 22-08-2017 */
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*! elementor-pro - v2.0.16 - 16-07-2018 */
+(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 var ElementorProFrontend = function( $ ) {
 	var self = this;
 
@@ -14,7 +14,12 @@ var ElementorProFrontend = function( $ ) {
 		slides: require( 'modules/slides/assets/js/frontend/frontend' ),
         share_buttons: require( 'modules/share-buttons/assets/js/frontend/frontend' ),
         nav_menu: require( 'modules/nav-menu/assets/js/frontend/frontend' ),
-        animatedText: require( 'modules/animated-headline/assets/js/frontend/frontend' )
+        animatedText: require( 'modules/animated-headline/assets/js/frontend/frontend' ),
+		carousel: require( 'modules/carousel/assets/js/frontend/frontend' ),
+        social: require( 'modules/social/assets/js/frontend/frontend' ),
+		themeElements: require( 'modules/theme-elements/assets/js/frontend/frontend' ),
+		themeBuilder: require( 'modules/theme-builder/assets/js/frontend/frontend' ),
+		sticky: require( 'modules/sticky/assets/js/frontend/frontend' )
     };
 
 	var initModules = function() {
@@ -34,7 +39,7 @@ var ElementorProFrontend = function( $ ) {
 
 window.elementorProFrontend = new ElementorProFrontend( jQuery );
 
-},{"modules/animated-headline/assets/js/frontend/frontend":2,"modules/countdown/assets/js/frontend/frontend":4,"modules/forms/assets/js/frontend/frontend":6,"modules/nav-menu/assets/js/frontend/frontend":11,"modules/posts/assets/js/frontend/frontend":13,"modules/share-buttons/assets/js/frontend/frontend":17,"modules/slides/assets/js/frontend/frontend":19}],2:[function(require,module,exports){
+},{"modules/animated-headline/assets/js/frontend/frontend":2,"modules/carousel/assets/js/frontend/frontend":4,"modules/countdown/assets/js/frontend/frontend":8,"modules/forms/assets/js/frontend/frontend":10,"modules/nav-menu/assets/js/frontend/frontend":17,"modules/posts/assets/js/frontend/frontend":19,"modules/share-buttons/assets/js/frontend/frontend":23,"modules/slides/assets/js/frontend/frontend":25,"modules/social/assets/js/frontend/frontend":27,"modules/sticky/assets/js/frontend/frontend":29,"modules/theme-builder/assets/js/frontend/frontend":31,"modules/theme-elements/assets/js/frontend/frontend":34}],2:[function(require,module,exports){
 module.exports = function() {
     elementorFrontend.hooks.addAction( 'frontend/element_ready/animated-headline.default', require( './handlers/animated-headlines' ) );
 };
@@ -75,6 +80,7 @@ var AnimatedHeadlineHandler = elementorFrontend.Module.extend( {
 
 		settings.classes = {
 			dynamicText: 'elementor-headline-dynamic-text',
+			dynamicLetter: 'elementor-headline-dynamic-letter',
 			textActive: 'elementor-headline-text-active',
 			textInactive: 'elementor-headline-text-inactive',
 			letters: 'elementor-headline-letters',
@@ -120,13 +126,13 @@ var AnimatedHeadlineHandler = elementorFrontend.Module.extend( {
 			$word.empty();
 
 			letters.forEach( function( letter ) {
-				var $i = jQuery( '<i>' ).text( letter );
+				var $letter = jQuery( '<span>', { 'class': classes.dynamicLetter } ).text( letter );
 
 				if ( isActive ) {
-					$i.addClass( classes.animationIn );
+					$letter.addClass( classes.animationIn );
 				}
 
-				$word.append( $i );
+				$word.append( $letter );
 			} );
 
 			$word.css( 'opacity', 1 );
@@ -176,7 +182,7 @@ var AnimatedHeadlineHandler = elementorFrontend.Module.extend( {
 			animationType = self.getElementSettings( 'animation_type' );
 
 		if ( 'typing' === animationType ) {
-			self.showLetter( $word.find( 'i' ).eq( 0 ), $word, false, $duration );
+			self.showLetter( $word.find( '.' + settings.classes.dynamicLetter ).eq( 0 ), $word, false, $duration );
 
 			$word
 				.addClass( settings.classes.textActive )
@@ -194,6 +200,7 @@ var AnimatedHeadlineHandler = elementorFrontend.Module.extend( {
 		var self = this,
 			settings = self.getSettings(),
 			classes = settings.classes,
+			letterSelector = '.' + classes.dynamicLetter,
 			animationType = self.getElementSettings( 'animation_type' ),
 			nextWord = self.getNextWord( $word );
 
@@ -206,7 +213,7 @@ var AnimatedHeadlineHandler = elementorFrontend.Module.extend( {
 				$word
 					.addClass( settings.classes.textInactive )
 					.removeClass( classes.textActive )
-					.children( 'i' )
+					.children( letterSelector )
 					.removeClass( classes.animationIn );
 			}, settings.selectionDuration );
 			setTimeout( function() {
@@ -214,11 +221,11 @@ var AnimatedHeadlineHandler = elementorFrontend.Module.extend( {
 			}, settings.typeAnimationDelay );
 
 		} else if ( self.elements.$headline.hasClass( classes.letters ) ) {
-			var bool = $word.children( 'i' ).length >= nextWord.children( 'i' ).length;
+			var bool = $word.children( letterSelector ).length >= nextWord.children( letterSelector ).length;
 
-			self.hideLetter( $word.find( 'i' ).eq( 0 ), $word, bool, settings.lettersDelay );
+			self.hideLetter( $word.find( letterSelector ).eq( 0 ), $word, bool, settings.lettersDelay );
 
-			self.showLetter( nextWord.find( 'i' ).eq( 0 ), nextWord, bool, settings.lettersDelay );
+			self.showLetter( nextWord.find( letterSelector ).eq( 0 ), nextWord, bool, settings.lettersDelay );
 
 		} else if ( 'clip' === animationType ) {
 			self.elements.$dynamicWrapper.animate( { width: '2px' }, settings.revealDuration, function() {
@@ -279,10 +286,10 @@ var AnimatedHeadlineHandler = elementorFrontend.Module.extend( {
 			$dynamicWrapper = this.elements.$dynamicWrapper;
 
 		if ( 'rotate' === elementSettings.headline_style ) {
-			var rotatingText = elementSettings.rotating_text.split( '\n' );
+			var rotatingText = ( elementSettings.rotating_text || '' ).split( '\n' );
 
 			rotatingText.forEach( function( word, index ) {
-				var $dynamicText = jQuery( '<span>', { 'class': classes.dynamicText } ).text( word );
+				var $dynamicText = jQuery( '<span>', { 'class': classes.dynamicText } ).html( word.replace( / /g, '&nbsp;' ) );
 
 				if ( ! index ) {
 					$dynamicText.addClass( classes.textActive );
@@ -307,7 +314,7 @@ var AnimatedHeadlineHandler = elementorFrontend.Module.extend( {
 	rotateHeadline: function() {
 		var settings = this.getSettings();
 
-		//insert <i> element for each letter of a changing word
+		//insert <span> for each letter of a changing word
 		if ( this.elements.$headline.hasClass( settings.classes.letters ) ) {
 			this.singleLetters();
 		}
@@ -337,10 +344,417 @@ module.exports = function( $scope ) {
 
 },{}],4:[function(require,module,exports){
 module.exports = function() {
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/media-carousel.default', require( './handlers/media-carousel' ) );
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/testimonial-carousel.default', require( './handlers/testimonial-carousel' ) );
+};
+
+},{"./handlers/media-carousel":6,"./handlers/testimonial-carousel":7}],5:[function(require,module,exports){
+module.exports = elementorFrontend.Module.extend( {
+
+	getDefaultSettings: function() {
+		return {
+			selectors: {
+				mainSwiper: '.elementor-main-swiper',
+				swiperSlide: '.swiper-slide'
+			},
+			slidesPerView: {
+				desktop: 3,
+				tablet: 2,
+				mobile: 1
+			}
+		};
+	},
+
+	getDefaultElements: function() {
+		var selectors = this.getSettings( 'selectors' );
+
+		var elements = {
+			$mainSwiper: this.$element.find( selectors.mainSwiper )
+		};
+
+		elements.$mainSwiperSlides = elements.$mainSwiper.find( selectors.swiperSlide );
+
+		return elements;
+	},
+
+	getSlidesCount: function() {
+		return this.elements.$mainSwiperSlides.length;
+	},
+
+	getInitialSlide: function() {
+		var editSettings = this.getEditSettings();
+
+		return editSettings.activeItemIndex ? editSettings.activeItemIndex - 1 : Math.floor( ( this.getSlidesCount() - 1 ) / 2 );
+	},
+
+	getEffect: function() {
+		return this.getElementSettings( 'effect' );
+	},
+
+	getDeviceSlidesPerView: function( device ) {
+		var slidesPerViewKey = 'slides_per_view' + ( 'desktop' === device ? '' : '_' + device );
+
+		return Math.min( this.getSlidesCount(), +this.getElementSettings( slidesPerViewKey ) || this.getSettings( 'slidesPerView' )[ device ] );
+	},
+
+	getSlidesPerView: function( device ) {
+		if ( 'slide' === this.getEffect() ) {
+			return this.getDeviceSlidesPerView( device );
+		}
+
+		return 1;
+	},
+
+	getDesktopSlidesPerView: function() {
+		return this.getSlidesPerView( 'desktop' );
+	},
+
+	getTabletSlidesPerView: function() {
+		return this.getSlidesPerView( 'tablet' );
+	},
+
+	getMobileSlidesPerView: function() {
+		return this.getSlidesPerView( 'mobile' );
+	},
+
+	getSlidesToScroll: function() {
+		return Math.min( this.getSlidesCount(), +this.getElementSettings( 'slides_to_scroll' ) || 1 );
+	},
+
+	getSpaceBetween: function( device ) {
+		var propertyName = 'space_between';
+
+		if ( device && 'desktop' !== device ) {
+			propertyName += '_' + device;
+		}
+
+		return this.getElementSettings( propertyName ).size || 0;
+	},
+
+	// TODO: since 2.1.0
+	// Remove later.
+	isNewSwiperAPI: function() {
+		return !! Swiper.defaults;
+	},
+
+	getOldSwiperOptions: function() {
+		var elementSettings = this.getElementSettings();
+
+		return {
+			pagination: '.swiper-pagination',
+			nextButton: '.elementor-swiper-button-next',
+			prevButton: '.elementor-swiper-button-prev',
+			paginationClickable: true,
+			grabCursor: true,
+			initialSlide: this.getInitialSlide(),
+			slidesPerView: this.getDesktopSlidesPerView(),
+			slidesPerGroup: this.getSlidesToScroll(),
+			spaceBetween: this.getSpaceBetween(),
+			paginationType: elementSettings.pagination,
+			autoplay: this.isEdit ? 0 : elementSettings.autoplay_speed,
+			autoplayDisableOnInteraction: !! elementSettings.pause_on_interaction,
+			loop: 'yes' === elementSettings.loop,
+			loopedSlides: this.getSlidesCount(),
+			speed: elementSettings.speed,
+			effect: this.getEffect(),
+			breakpoints: {
+				1024: {
+					slidesPerView: this.getTabletSlidesPerView(),
+					spaceBetween: this.getSpaceBetween( 'tablet' )
+				},
+				767: {
+					slidesPerView: this.getMobileSlidesPerView(),
+					spaceBetween: this.getSpaceBetween( 'mobile' )
+				}
+			}
+		};
+	},
+
+	getSwiperOptions: function() {
+		if ( ! this.isNewSwiperAPI() ) {
+			return this.getOldSwiperOptions();
+		}
+
+		var elementSettings = this.getElementSettings(),
+			breakpointsSettings = {},
+			breakpoints = elementorFrontend.config.breakpoints;
+
+		breakpointsSettings[ breakpoints.lg - 1 ] = {
+			slidesPerView: this.getTabletSlidesPerView(),
+			spaceBetween: this.getSpaceBetween( 'tablet' )
+		};
+
+		breakpointsSettings[ breakpoints.md - 1 ] = {
+			slidesPerView: this.getMobileSlidesPerView(),
+			spaceBetween: this.getSpaceBetween( 'mobile' )
+		};
+
+		var swiperOptions = {
+			navigation: {
+				prevEl: '.elementor-swiper-button-prev',
+				nextEl: '.elementor-swiper-button-next'
+			},
+			pagination: {
+				el: '.swiper-pagination',
+				type: elementSettings.pagination,
+				clickable: true
+			},
+			grabCursor: true,
+			initialSlide: this.getInitialSlide(),
+			slidesPerView: this.getDesktopSlidesPerView(),
+			slidesPerGroup: this.getSlidesToScroll(),
+			spaceBetween: this.getSpaceBetween(),
+			loop: 'yes' === elementSettings.loop,
+			speed: elementSettings.speed,
+			effect: this.getEffect(),
+			breakpoints: breakpointsSettings
+		};
+
+		if ( ! this.isEdit && elementSettings.autoplay ) {
+			swiperOptions.autoplay = {
+				delay: elementSettings.autoplay_speed,
+				disableOnInteraction: !! elementSettings.pause_on_interaction
+			};
+		}
+
+		return swiperOptions;
+	},
+
+	updateSpaceBetween: function( swiper, propertyName ) {
+		var deviceMatch = propertyName.match( 'space_between_(.*)' ),
+			device = deviceMatch ? deviceMatch[1] : 'desktop',
+			newSpaceBetween = this.getSpaceBetween( device );
+
+		if ( 'desktop' !== device ) {
+			var breakpointDictionary = {
+				tablet: 1024,
+				mobile: 767
+			};
+
+			swiper.params.breakpoints[ breakpointDictionary[ device ] ].spaceBetween = newSpaceBetween;
+		} else {
+			swiper.originalParams.spaceBetween = newSpaceBetween;
+		}
+
+		swiper.params.spaceBetween = newSpaceBetween;
+
+		swiper.update();
+	},
+
+	onInit: function() {
+		elementorFrontend.Module.prototype.onInit.apply( this, arguments );
+
+		this.swipers = {};
+
+		if ( 1 >= this.getSlidesCount() ) {
+			return;
+		}
+
+		this.swipers.main = new Swiper( this.elements.$mainSwiper, this.getSwiperOptions() );
+	},
+
+	onElementChange: function( propertyName ) {
+		if ( 0 === propertyName.indexOf( 'width' ) ) {
+			this.swipers.main.update();
+		}
+
+		if ( 0 === propertyName.indexOf( 'space_between' ) ) {
+			this.updateSpaceBetween( this.swipers.main, propertyName );
+		}
+	},
+
+	onEditSettingsChange: function( propertyName ) {
+		if ( 'activeItemIndex' === propertyName ) {
+			this.swipers.main.slideTo( this.getEditSettings( 'activeItemIndex' ) - 1 );
+		}
+	}
+} );
+
+},{}],6:[function(require,module,exports){
+var Base = require( './base' ),
+	MediaCarousel;
+
+MediaCarousel = Base.extend( {
+
+	slideshowSpecialElementSettings: [
+		'slides_per_view',
+		'slides_per_view_tablet',
+		'slides_per_view_mobile'
+	],
+
+	isSlideshow: function() {
+		return 'slideshow' === this.getElementSettings( 'skin' );
+	},
+
+	getDefaultSettings: function() {
+		var defaultSettings = Base.prototype.getDefaultSettings.apply( this, arguments );
+
+		if ( this.isSlideshow() ) {
+			defaultSettings.selectors.thumbsSwiper = '.elementor-thumbnails-swiper';
+
+			defaultSettings.slidesPerView = {
+				desktop: 5,
+				tablet: 4,
+				mobile: 3
+			};
+		}
+
+		return defaultSettings;
+	},
+
+	getElementSettings: function( setting ) {
+		if ( -1 !== this.slideshowSpecialElementSettings.indexOf( setting ) && this.isSlideshow() ) {
+			setting = 'slideshow_' + setting;
+		}
+
+		return Base.prototype.getElementSettings.call( this, setting );
+	},
+
+	getDefaultElements: function() {
+		var selectors = this.getSettings( 'selectors' ),
+			defaultElements = Base.prototype.getDefaultElements.apply( this, arguments );
+
+		if ( this.isSlideshow() ) {
+			defaultElements.$thumbsSwiper = this.$element.find( selectors.thumbsSwiper );
+		}
+
+		return defaultElements;
+	},
+
+	getEffect: function() {
+		if ( 'coverflow' === this.getElementSettings( 'skin' ) ) {
+			return 'coverflow';
+		}
+
+		return Base.prototype.getEffect.apply( this, arguments );
+	},
+
+	getSlidesPerView: function( device ) {
+		if ( this.isSlideshow() ) {
+			return 1;
+		}
+
+		if ( 'coverflow' === this.getElementSettings( 'skin' ) ) {
+			return this.getDeviceSlidesPerView( device );
+		}
+
+		return Base.prototype.getSlidesPerView.apply( this, arguments );
+	},
+
+	getSwiperOptions: function() {
+		var options = Base.prototype.getSwiperOptions.apply( this, arguments );
+
+		if ( this.isSlideshow() ) {
+			if ( this.isNewSwiperAPI() ) {
+				options.loopedSlides = this.getSlidesCount();
+			}
+
+			delete options.pagination;
+			delete options.breakpoints;
+		}
+
+		return options;
+	},
+
+	onInit: function() {
+		Base.prototype.onInit.apply( this, arguments );
+
+		if ( ! this.isSlideshow() || 1 >= this.getSlidesCount() ) {
+			return;
+		}
+
+		var elementSettings = this.getElementSettings(),
+			loop = 'yes' === elementSettings.loop;
+
+		var thumbsSliderOptions = {
+			slidesPerView: this.getDeviceSlidesPerView( 'desktop' ),
+			initialSlide: this.getInitialSlide(),
+			centeredSlides: true,
+			slideToClickedSlide: true,
+			spaceBetween: this.getSpaceBetween(),
+			loopedSlides: this.getSlidesCount(),
+			loop: loop,
+			onSlideChangeEnd: function( swiper ) {
+				if ( loop ) {
+					swiper.fixLoop();
+				}
+			},
+			breakpoints: {
+				1024: {
+					slidesPerView: this.getDeviceSlidesPerView( 'tablet' ),
+					spaceBetween: this.getSpaceBetween( 'tablet' )
+				},
+				767: {
+					slidesPerView: this.getDeviceSlidesPerView( 'mobile' ),
+					spaceBetween: this.getSpaceBetween( 'mobile' )
+				}
+			}
+		};
+
+		if ( this.isNewSwiperAPI() ) {
+			this.swipers.main.controller.control = this.swipers.thumbs = new Swiper( this.elements.$thumbsSwiper, thumbsSliderOptions );
+			this.swipers.thumbs.controller.control = this.swipers.main;
+		} else {
+			this.swipers.main.params.control = this.swipers.thumbs = new Swiper( this.elements.$thumbsSwiper, thumbsSliderOptions );
+			this.swipers.thumbs.params.control = this.swipers.main;
+		}
+	},
+
+	onElementChange: function( propertyName ) {
+		if ( ! this.isSlideshow() ) {
+			Base.prototype.onElementChange.apply( this, arguments );
+
+			return;
+		}
+
+		if ( 0 === propertyName.indexOf( 'width' ) ) {
+			this.swipers.main.update();
+			this.swipers.thumbs.update();
+		}
+
+		if ( 0 === propertyName.indexOf( 'space_between' ) ) {
+			this.updateSpaceBetween( this.swipers.thumbs, propertyName );
+		}
+	}
+} );
+
+module.exports = function( $scope ) {
+	new MediaCarousel( { $element: $scope } );
+};
+
+},{"./base":5}],7:[function(require,module,exports){
+var Base = require( './base' ),
+	TestimonialCarousel;
+
+TestimonialCarousel = Base.extend( {
+
+	getDefaultSettings: function() {
+		var defaultSettings = Base.prototype.getDefaultSettings.apply( this, arguments );
+
+		defaultSettings.slidesPerView = {
+			desktop: 1,
+			tablet: 1,
+			mobile: 1
+		};
+
+		return defaultSettings;
+	},
+
+	getEffect: function() {
+		return 'slide';
+	}
+} );
+
+module.exports = function( $scope ) {
+	new TestimonialCarousel( { $element: $scope } );
+};
+
+},{"./base":5}],8:[function(require,module,exports){
+module.exports = function() {
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/countdown.default', require( './handlers/countdown' ) );
 };
 
-},{"./handlers/countdown":5}],5:[function(require,module,exports){
+},{"./handlers/countdown":9}],9:[function(require,module,exports){
 var Countdown = function( $countdown, endTime, $ ) {
 	var timeInterval,
 		elements = {
@@ -409,15 +823,65 @@ module.exports = function( $scope, $ ) {
 	new Countdown( $element, date, $ );
 };
 
-},{}],6:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function() {
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/form.default', require( './handlers/form' ) );
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/subscribe.default', require( './handlers/form' ) );
 
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/form.default', require( './handlers/recaptcha' ) );
+
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/form.default', require( './handlers/fields/date' ) );
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/form.default', require( './handlers/fields/time' ) );
 };
 
-},{"./handlers/form":9,"./handlers/recaptcha":10}],7:[function(require,module,exports){
+},{"./handlers/fields/date":11,"./handlers/fields/time":12,"./handlers/form":15,"./handlers/recaptcha":16}],11:[function(require,module,exports){
+module.exports = function( $scope, $ ) {
+	var $elements = $scope.find( '.elementor-date-field' );
+
+	if ( ! $elements.length ) {
+		return;
+	}
+
+	var addDatePicker = function ( $element ) {
+		if ( $( $element ).hasClass( 'elementor-use-native' ) ) {
+			return;
+		}
+		var options = {
+			minDate: $($element).attr( 'min' ) || null,
+			maxDate: $($element).attr( 'max' ) || null,
+			allowInput: true
+		};
+		$element.flatpickr( options );
+	};
+	$.each($elements, function( i, $element ) {
+		addDatePicker( $element );
+	});
+};
+
+},{}],12:[function(require,module,exports){
+module.exports = function( $scope, $ ) {
+	var $elements = $scope.find( '.elementor-time-field' );
+
+	if ( ! $elements.length ) {
+		return;
+	}
+
+	var addTimePicker = function ( $element ) {
+		if ( $( $element ).hasClass( 'elementor-use-native' ) ) {
+			return;
+		}
+		$element.flatpickr( {
+			noCalendar: true,
+			enableTime: true,
+			allowInput: true
+		} );
+	};
+	$.each($elements, function( i, $element ) {
+		addTimePicker( $element );
+	});
+};
+
+},{}],13:[function(require,module,exports){
 module.exports = elementorFrontend.Module.extend( {
 	getDefaultSettings: function() {
 		return {
@@ -447,7 +911,7 @@ module.exports = elementorFrontend.Module.extend( {
 	}
 } );
 
-},{}],8:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = elementorFrontend.Module.extend( {
 
 	getDefaultSettings: function() {
@@ -600,7 +1064,7 @@ module.exports = elementorFrontend.Module.extend( {
 	}
 } );
 
-},{}],9:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var FormSender = require( './form-sender' ),
 	Form = FormSender.extend();
 
@@ -611,7 +1075,7 @@ module.exports = function( $scope ) {
 	new RedirectAction( { $element: $scope } );
 };
 
-},{"./form-redirect":7,"./form-sender":8}],10:[function(require,module,exports){
+},{"./form-redirect":13,"./form-sender":14}],16:[function(require,module,exports){
 module.exports = function( $scope, $ ) {
 	var $element = $scope.find( '.elementor-g-recaptcha:last' );
 
@@ -631,7 +1095,7 @@ module.exports = function( $scope, $ ) {
 	};
 
 	var onRecaptchaApiReady = function( callback ) {
-		if ( window.grecaptcha ) {
+		if ( window.grecaptcha && window.grecaptcha.render ) {
 			callback();
 		} else {
 			// If not ready check again by timeout..
@@ -646,7 +1110,7 @@ module.exports = function( $scope, $ ) {
 	} );
 };
 
-},{}],11:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 module.exports = function() {
 	if ( jQuery.fn.smartmenus ) {
 		// Override the default stupid detection
@@ -662,15 +1126,17 @@ module.exports = function() {
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/nav-menu.default', require( './handlers/nav-menu' ) );
 };
 
-},{"./handlers/nav-menu":12}],12:[function(require,module,exports){
+},{"./handlers/nav-menu":18}],18:[function(require,module,exports){
 var MenuHandler = elementorFrontend.Module.extend( {
+
+	stretchElement: null,
+
 	getDefaultSettings: function() {
 		return {
 			selectors: {
 				menu: '.elementor-nav-menu',
-				menuContainer: '.elementor-nav-menu__container',
-				menuToggle: '.elementor-menu-toggle',
-				offCanvasCloseButton: '.elementor-nav-menu--close'
+				dropdownMenu: '.elementor-nav-menu__container.elementor-nav-menu--dropdown',
+				menuToggle: '.elementor-menu-toggle'
 			}
 		};
 	},
@@ -680,66 +1146,86 @@ var MenuHandler = elementorFrontend.Module.extend( {
 			elements = {};
 
 		elements.$menu = this.$element.find( selectors.menu );
-
-		elements.$menuContainer = this.$element.find( selectors.menuContainer );
-
+		elements.$dropdownMenu = this.$element.find( selectors.dropdownMenu );
+		elements.$dropdownMenuFinalItems = elements.$dropdownMenu.find( '.menu-item:not(.menu-item-has-children) > a' );
 		elements.$menuToggle = this.$element.find( selectors.menuToggle );
-
-		elements.$offCanvasCloseButton = this.$element.find( selectors.offCanvasCloseButton );
 
 		return elements;
 	},
 
 	bindEvents: function() {
-		var self = this;
-
-		self.elements.$menuToggle.on( 'click', function() {
-			self.elements.$menuToggle.toggleClass( 'elementor-active' );
-
-			self.toggleMenu( self.elements.$menuToggle.hasClass( 'elementor-active' ) );
-		} );
-
-		self.elements.$offCanvasCloseButton.on( 'click', this.closeOffCanvas );
-	},
-
-	toggleMenu: function( show ) {
-		var elementSettings = this.getElementSettings();
-
-		if ( 'off_canvas' === elementSettings.mobile_layout || ! elementSettings.toggle  ) {
+		if ( ! this.elements.$menu.length ) {
 			return;
 		}
 
-		var $menuContainer = this.elements.$menuContainer;
+		this.elements.$menuToggle.on( 'click', this.toggleMenu.bind( this ) );
+
+		this.elements.$dropdownMenuFinalItems.on( 'click', this.toggleMenu.bind( this, false ) );
+
+		elementorFrontend.addListenerOnce( this.$element.data( 'model-cid' ), 'resize', this.stretchMenu );
+	},
+
+	initStretchElement: function() {
+		this.stretchElement = new elementorFrontend.modules.StretchElement( { element: this.elements.$dropdownMenu } );
+	},
+
+	toggleMenu: function( show ) {
+		var $dropdownMenu = this.elements.$dropdownMenu,
+			isDropdownVisible =  this.elements.$menuToggle.hasClass( 'elementor-active' );
+
+		if ( 'boolean' !== typeof show ) {
+			show = ! isDropdownVisible;
+		}
+
+		this.elements.$menuToggle.toggleClass( 'elementor-active', show );
 
 		if ( show ) {
-			$menuContainer.hide().slideDown( 250, function() {
-				$menuContainer.css( 'display', '' );
+			$dropdownMenu.hide().slideDown( 250, function() {
+				$dropdownMenu.css( 'display', '' );
 			} );
+
+			if ( this.getElementSettings( 'full_width' ) ) {
+				this.stretchElement.stretch();
+			}
 		} else {
-			$menuContainer.show().slideUp( 250, function() {
-				$menuContainer.css( 'display', '' );
+			$dropdownMenu.show().slideUp( 250, function() {
+				$dropdownMenu.css( 'display', '' );
 			} );
 		}
 	},
 
-	closeOffCanvas: function() {
-		this.elements.$menuToggle.removeClass( 'elementor-active' );
+	stretchMenu: function() {
+		if ( this.getElementSettings( 'full_width' ) ) {
+			this.stretchElement.stretch();
+
+			this.elements.$dropdownMenu.css( 'top', this.elements.$menuToggle.outerHeight() );
+		} else {
+			this.stretchElement.reset();
+		}
 	},
 
 	onInit: function() {
 		elementorFrontend.Module.prototype.onInit.apply( this, arguments );
 
+		if ( ! this.elements.$menu.length ) {
+			return;
+		}
+
 		this.elements.$menu.smartmenus( {
 			subIndicatorsText: '',
-			subIndicatorsPos: 'append'
+			subIndicatorsPos: 'append',
+            subMenusMaxWidth: '1000px'
 		} );
 
-		this.toggleMenu( false );
+		this.initStretchElement();
 
-		var ESC_KEY = 27,
-			hotKeysManager = elementorFrontend.isEditMode() ? elementor.hotKeys : elementorFrontend.hotKeys;
+		this.stretchMenu();
+	},
 
-		hotKeysManager.addHotKeyHandler( ESC_KEY, 'closeOffCanvas' + this.getID(), { handle: this.closeOffCanvas } );
+	onElementChange: function( propertyName ) {
+		if ( 'full_width' === propertyName ) {
+			this.stretchMenu();
+		}
 	}
 } );
 
@@ -747,7 +1233,7 @@ module.exports = function( $scope ) {
 	new MenuHandler( { $element: $scope } );
 };
 
-},{}],13:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports = function() {
 	var PostsModule = require( './handlers/posts' ),
 		CardsModule = require( './handlers/cards' ),
@@ -770,7 +1256,7 @@ module.exports = function() {
 	} );
 };
 
-},{"./handlers/cards":14,"./handlers/portfolio":15,"./handlers/posts":16}],14:[function(require,module,exports){
+},{"./handlers/cards":20,"./handlers/portfolio":21,"./handlers/posts":22}],20:[function(require,module,exports){
 var PostsHandler = require( './posts' );
 
 module.exports = PostsHandler.extend( {
@@ -779,7 +1265,7 @@ module.exports = PostsHandler.extend( {
 	}
 } );
 
-},{"./posts":16}],15:[function(require,module,exports){
+},{"./posts":22}],21:[function(require,module,exports){
 var PostsHandler = require( './posts' );
 
 module.exports = PostsHandler.extend( {
@@ -887,9 +1373,9 @@ module.exports = PostsHandler.extend( {
 		var $ = jQuery,
 			self = this,
 			settings = self.getSettings(),
-			$activeItems = this.elements.$posts.filter( '.' + settings.classes.active ),
-			$inactiveItems = this.elements.$posts.not( '.' + settings.classes.active ),
-			$shownItems = this.elements.$posts.filter( ':visible' ),
+			$activeItems = self.elements.$posts.filter( '.' + settings.classes.active ),
+			$inactiveItems = self.elements.$posts.not( '.' + settings.classes.active ),
+			$shownItems = self.elements.$posts.filter( ':visible' ),
 			$activeOrShownItems = $activeItems.add( $shownItems ),
 			$activeShownItems = $activeItems.filter( ':visible' ),
 			$activeHiddenItems = $activeItems.filter( ':hidden' ),
@@ -897,11 +1383,11 @@ module.exports = PostsHandler.extend( {
 			itemWidth = $shownItems.outerWidth(),
 			itemHeight = $shownItems.outerHeight();
 
-		this.elements.$posts.css( 'transition-duration', settings.transitionDuration + 'ms' );
+		self.elements.$posts.css( 'transition-duration', settings.transitionDuration + 'ms' );
 
 		self.showItems( $activeHiddenItems );
 
-		if ( elementorFrontend.isEditMode() ) {
+		if ( self.isEdit ) {
 			self.fitImages();
 		}
 
@@ -983,15 +1469,15 @@ module.exports = PostsHandler.extend( {
 		}, settings.transitionDuration );
 	},
 
-    activeFilterButton: function( filter ) {
-        var activeClass = this.getSettings( 'classes.active' ),
-            $filterButtons = this.elements.$filterButtons,
-            $button = $filterButtons.filter( '[data-filter="' + filter + '"]' );
+	activeFilterButton: function( filter ) {
+		var activeClass = this.getSettings( 'classes.active' ),
+			$filterButtons = this.elements.$filterButtons,
+			$button = $filterButtons.filter( '[data-filter="' + filter + '"]' );
 
-        $filterButtons.removeClass( activeClass );
+		$filterButtons.removeClass( activeClass );
 
-        $button.addClass( activeClass );
-    },
+		$button.addClass( activeClass );
+	},
 
 	setFilter: function( filter ) {
 		this.activeFilterButton( filter );
@@ -1046,8 +1532,9 @@ module.exports = PostsHandler.extend( {
 	}
 } );
 
-},{"./posts":16}],16:[function(require,module,exports){
+},{"./posts":22}],22:[function(require,module,exports){
 module.exports = elementorFrontend.Module.extend( {
+
 	getElementName: function() {
 		return 'posts';
 	},
@@ -1155,17 +1642,17 @@ module.exports = elementorFrontend.Module.extend( {
 	},
 
 	initMasonry: function() {
-		this.elements.$posts.imagesLoaded().always( this.runMasonry );
+		imagesLoaded( this.elements.$posts, this.runMasonry );
 	},
 
 	runMasonry: function() {
 		var $ = jQuery,
 			elements = this.elements;
 
-        elements.$posts.css( {
-            marginTop: '',
-            transitionDuration: ''
-        } );
+		elements.$posts.css( {
+			marginTop: '',
+			transitionDuration: ''
+		} );
 
 		this.setColsCountSettings();
 
@@ -1180,27 +1667,14 @@ module.exports = elementorFrontend.Module.extend( {
 			return;
 		}
 
-		var heights = [],
-			distanceFromTop = elements.$postsContainer.position().top,
-			$shownPosts = elements.$posts.filter( ':visible' );
-
-		$shownPosts.each( function( index ) {
-			var row = Math.floor( index / colsCount ),
-				indexAtRow = index % colsCount,
-				$post = $( this ),
-				itemPosition = $post.position(),
-				itemHeight = $post.outerHeight();
-
-			if ( row ) {
-				$post.css( 'margin-top', '-' + ( itemPosition.top - distanceFromTop - heights[ indexAtRow ] ) + 'px' );
-
-				heights[ indexAtRow ] += itemHeight;
-			} else {
-				heights.push( itemHeight );
-			}
+		var masonry = new elementorFrontend.modules.Masonry( {
+			container: elements.$postsContainer,
+			items: elements.$posts.filter( ':visible' ),
+			columnsCount: this.getSettings( 'colsCount' ),
+			verticalSpaceBetween: 0
 		} );
 
-		elements.$postsContainer.height( Math.max.apply( Math, heights ) );
+		masonry.run();
 	},
 
 	run: function() {
@@ -1231,14 +1705,14 @@ module.exports = elementorFrontend.Module.extend( {
 	}
 } );
 
-},{}],17:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports = function() {
 	if ( ! elementorFrontend.isEditMode() ) {
 		elementorFrontend.hooks.addAction( 'frontend/element_ready/share-buttons.default', require( './handlers/share-buttons' ) );
 	}
 };
 
-},{"./handlers/share-buttons":18}],18:[function(require,module,exports){
+},{"./handlers/share-buttons":24}],24:[function(require,module,exports){
 var HandlerModule = elementorFrontend.Module,
 	ShareButtonsHandler;
 
@@ -1257,8 +1731,8 @@ ShareButtonsHandler = HandlerModule.extend( {
 			shareLinkSettings.url = elementSettings.share_url.url;
 		} else {
 			shareLinkSettings.url = location.href;
-			shareLinkSettings.title = elementorProFrontend.config.postTitle;
-			shareLinkSettings.text = elementorProFrontend.config.postDescription;
+			shareLinkSettings.title = elementorFrontend.config.post.title;
+			shareLinkSettings.text = elementorFrontend.config.post.excerpt;
 		}
 
 		this.elements.$shareButton.shareLink( shareLinkSettings );
@@ -1266,6 +1740,10 @@ ShareButtonsHandler = HandlerModule.extend( {
 		var shareCountProviders = jQuery.map( elementorProFrontend.config.shareButtonsNetworks, function( network, networkName ) {
 			return network.has_counter ? networkName : null;
 		} );
+
+		if ( ! ElementorProFrontendConfig.hasOwnProperty( 'donreach') ) {
+			return;
+		}
 
 		this.elements.$shareCounter.shareCounter( {
 			url:  isCustomURL ? elementSettings.share_url.url : location.href,
@@ -1300,42 +1778,409 @@ module.exports = function( $scope ) {
 	new ShareButtonsHandler( { $element: $scope } );
 };
 
-},{}],19:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 module.exports = function() {
 	elementorFrontend.hooks.addAction( 'frontend/element_ready/slides.default', require( './handlers/slides' ) );
 };
 
-},{"./handlers/slides":20}],20:[function(require,module,exports){
-module.exports = function( $scope, $ ) {
-	var $slider = $scope.find( '.elementor-slides' );
+},{"./handlers/slides":26}],26:[function(require,module,exports){
+var SlidesHandler = elementorFrontend.Module.extend( {
+	getDefaultSettings: function() {
+		return {
+			selectors: {
+				slider: '.elementor-slides',
+				slideContent: '.elementor-slide-content'
+			},
+			classes: {
+				animated: 'animated'
+			},
+			attributes: {
+				dataSliderOptions: 'slider_options',
+				dataAnimation: 'animation'
+			}
+		};
+	},
 
-	if ( ! $slider.length ) {
+	getDefaultElements: function() {
+		var selectors = this.getSettings( 'selectors' );
+
+		return {
+			$slider: this.$element.find( selectors.slider )
+		};
+	},
+
+	initSlider: function() {
+		var $slider = this.elements.$slider;
+
+		if ( ! $slider.length ) {
+			return;
+		}
+
+		$slider.slick( $slider.data( this.getSettings( 'attributes.dataSliderOptions' ) ) );
+	},
+
+	goToActiveSlide: function() {
+		this.elements.$slider.slick( 'slickGoTo', this.getEditSettings( 'activeItemIndex' ) - 1 );
+	},
+
+	onPanelShow: function() {
+		var $slider = this.elements.$slider;
+
+		$slider.slick( 'slickPause' );
+
+		// On switch between slides while editing. stop again.
+		$slider.on( 'afterChange', function() {
+			$slider.slick( 'slickPause' );
+		} );
+	},
+
+	bindEvents: function() {
+		var $slider = this.elements.$slider,
+			settings = this.getSettings(),
+			animation = $slider.data( settings.attributes.dataAnimation );
+
+		if ( ! animation ) {
+			return;
+		}
+
+		if ( elementorFrontend.isEditMode() ) {
+			elementor.hooks.addAction( 'panel/open_editor/widget/slides', this.onPanelShow );
+		}
+
+		$slider.on( {
+			beforeChange: function() {
+				var $sliderContent = $slider.find( settings.selectors.slideContent );
+
+				$sliderContent.removeClass( settings.classes.animated + ' ' + animation ).hide();
+			},
+			afterChange: function( event, slick, currentSlide ) {
+				var $currentSlide = jQuery( slick.$slides.get( currentSlide ) ).find( settings.selectors.slideContent );
+
+				$currentSlide
+					.show()
+					.addClass( settings.classes.animated + ' ' + animation );
+			}
+		} );
+	},
+
+	onInit: function() {
+		elementorFrontend.Module.prototype.onInit.apply( this, arguments );
+
+		this.initSlider();
+
+		if ( this.isEdit ) {
+			this.goToActiveSlide();
+		}
+	},
+
+	onEditSettingsChange: function( propertyName ) {
+		if ( 'activeItemIndex' === propertyName ) {
+			this.goToActiveSlide();
+		}
+	}
+} );
+
+module.exports = function( $scope ) {
+	new SlidesHandler( { $element: $scope } );
+};
+
+},{}],27:[function(require,module,exports){
+var facebookHandler = require( './handlers/facebook-sdk' );
+
+module.exports = function() {
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/facebook-button.default', facebookHandler );
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/facebook-comments.default', facebookHandler );
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/facebook-embed.default', facebookHandler );
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/facebook-page.default', facebookHandler );
+};
+
+},{"./handlers/facebook-sdk":28}],28:[function(require,module,exports){
+var config = ElementorProFrontendConfig.facebook_sdk,
+	loadSDK = function() {
+	// Don't load in parallel
+	if ( config.isLoading || config.isLoaded ) {
 		return;
 	}
 
-	$slider.slick( $slider.data( 'slider_options' ) );
+	config.isLoading = true;
 
-	// Add and remove animation classes to slide content, on slider change
-	if ( '' === $slider.data( 'animation' ) ) {
-		return;
-	}
-
-	$slider.on( {
-		beforeChange: function() {
-			var $sliderContent = $slider.find( '.elementor-slide-content' );
-
-			$sliderContent.removeClass( 'animated ' + $slider.data( 'animation' ) ).hide();
-		},
-
-		afterChange: function( event, slick, currentSlide ) {
-			var $currentSlide = $( slick.$slides.get( currentSlide ) ).find( '.elementor-slide-content' ),
-				animationClass = $slider.data( 'animation' );
-
-			$currentSlide
-				.show()
-				.addClass( 'animated ' + animationClass );
+	jQuery.ajax( {
+		url: 'https://connect.facebook.net/' + config.lang + '/sdk.js',
+		dataType: 'script',
+		cache: true,
+		success: function() {
+			FB.init( {
+				appId: config.app_id,
+				version: 'v2.10',
+				xfbml: false
+			} );
+			config.isLoaded = true;
+			config.isLoading = false;
+			jQuery( document ).trigger( 'fb:sdk:loaded' );
 		}
 	} );
+};
+
+module.exports = function( $scope, $ ) {
+	loadSDK();
+	// On FB SDK is loaded, parse current element
+	var parse = function() {
+		$scope.find( '.elementor-widget-container div' ).attr( 'data-width', $scope.width() + 'px' );
+		FB.XFBML.parse( $scope[0] );
+	};
+
+	if ( config.isLoaded ) {
+		parse();
+	} else {
+		jQuery( document ).on( 'fb:sdk:loaded', parse );
+	}
+};
+
+},{}],29:[function(require,module,exports){
+module.exports = function() {
+    elementorFrontend.hooks.addAction( 'frontend/element_ready/section', require( './handlers/sticky' ) );
+};
+
+},{"./handlers/sticky":30}],30:[function(require,module,exports){
+var StickyHandler = elementorFrontend.Module.extend( {
+
+	getDefaultSettings: function() {
+		return {
+			classes: {
+				stickyActive: 'elementor-sticky--active'
+			}
+		};
+	},
+
+	bindEvents: function() {
+		elementorFrontend.addListenerOnce( this.$element.data( 'model-cid' ) + 'sticky', 'resize', this.run );
+	},
+
+	isActive: function() {
+		return undefined !== this.$element.data( 'sticky_kit' );
+	},
+
+	activateSticky: function() {
+		var classes = this.getSettings( 'classes' ),
+			$element = this.$element,
+			stickyOptions = {
+				sticky_class: classes.stickyActive,
+				parent: 'body'
+			},
+			$wpAdminBar = elementorFrontend.getElements( '$wpAdminBar' );
+
+		if ( $wpAdminBar.length && 'fixed' === $wpAdminBar.css( 'position' ) ) {
+			stickyOptions.offset_top = $wpAdminBar.height();
+		}
+
+		$element.stick_in_parent( stickyOptions );
+	},
+
+	deactivateSticky: function() {
+		this.$element.trigger( 'sticky_kit:detach' );
+	},
+
+	run: function() {
+		var isActive = this.isActive();
+
+		if ( ! this.getElementSettings( 'sticky' ) ) {
+			if ( isActive ) {
+				this.deactivateSticky();
+			}
+
+			return;
+		}
+
+		var currentDeviceMode = elementorFrontend.getCurrentDeviceMode(),
+			activeDevices = this.getElementSettings( 'sticky_on' );
+
+		if ( -1 !== activeDevices.indexOf( currentDeviceMode ) ) {
+			if ( ! isActive ) {
+				this.activateSticky();
+			}
+		} else {
+			if ( isActive ) {
+				this.deactivateSticky();
+			}
+		}
+	},
+
+	onElementChange: function( settingKey ) {
+		if ( 0 === settingKey.indexOf( 'sticky' ) ) {
+			this.run();
+		}
+	},
+
+	onInit: function() {
+		elementorFrontend.Module.prototype.onInit.apply( this, arguments );
+
+		this.run();
+	}
+} );
+
+module.exports = function( $scope ) {
+	new StickyHandler( { $element: $scope } );
+};
+
+},{}],31:[function(require,module,exports){
+module.exports = function() {
+
+	var PostsArchiveClassic = require( './handlers/archive-posts-skin-classic' ),
+		PostsArchiveCards = require( './handlers/archive-posts-skin-cards' );
+
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/archive-posts.archive_classic', function( $scope ) {
+		new PostsArchiveClassic( { $element: $scope } );
+	} );
+
+	elementorFrontend.hooks.addAction( 'frontend/element_ready/archive-posts.archive_cards', function( $scope ) {
+		new PostsArchiveCards( { $element: $scope } );
+	} );
+
+	jQuery( function() {
+		// Go to elementor element - if the URL is something like http://domain.com/any-page?preview=true&theme_template_id=6479
+		var match = location.search.match( /theme_template_id=(\d*)/ ),
+			$element = match ? jQuery( '.elementor-' + match[1] ) : [];
+		if ( $element.length ) {
+			jQuery( 'html, body' ).animate( {
+				scrollTop: $element.offset().top - window.innerHeight / 2
+			} );
+		}
+	} );
+};
+
+},{"./handlers/archive-posts-skin-cards":32,"./handlers/archive-posts-skin-classic":33}],32:[function(require,module,exports){
+var PostsCardHandler = require( 'modules/posts/assets/js/frontend/handlers/cards' );
+
+module.exports = PostsCardHandler.extend( {
+
+	getElementName: function() {
+		return 'archive-posts';
+	},
+
+	getSkinPrefix: function() {
+		return 'archive_cards_';
+	}
+} );
+
+},{"modules/posts/assets/js/frontend/handlers/cards":20}],33:[function(require,module,exports){
+var PostsClassicHandler = require( 'modules/posts/assets/js/frontend/handlers/posts' );
+
+module.exports = PostsClassicHandler.extend( {
+
+	getElementName: function() {
+		return 'archive-posts';
+	},
+
+	getSkinPrefix: function() {
+		return 'archive_classic_';
+	}
+} );
+
+},{"modules/posts/assets/js/frontend/handlers/posts":22}],34:[function(require,module,exports){
+module.exports = function() {
+    elementorFrontend.hooks.addAction( 'frontend/element_ready/search-form.default', require( './handlers/search-form' ) );
+};
+
+},{"./handlers/search-form":35}],35:[function(require,module,exports){
+var SearchBerHandler = elementorFrontend.Module.extend( {
+
+    getDefaultSettings: function() {
+        return {
+            selectors: {
+                wrapper: '.elementor-search-form',
+                container: '.elementor-search-form__container',
+                icon: '.elementor-search-form__icon',
+                input: '.elementor-search-form__input',
+                toggle: '.elementor-search-form__toggle',
+                submit: '.elementor-search-form__submit',
+                closeButton: '.dialog-close-button'
+            },
+            classes: {
+                isFocus: 'elementor-search-form--focus',
+                isFullScreen: 'elementor-search-form--full-screen',
+                lightbox: 'elementor-lightbox'
+            }
+        };
+    },
+
+    getDefaultElements: function() {
+        var selectors = this.getSettings( 'selectors' ),
+            elements = {};
+
+        elements.$wrapper = this.$element.find( selectors.wrapper );
+        elements.$container = this.$element.find( selectors.container );
+        elements.$input = this.$element.find( selectors.input );
+        elements.$icon = this.$element.find( selectors.icon );
+        elements.$toggle = this.$element.find( selectors.toggle );
+        elements.$submit = this.$element.find( selectors.submit );
+        elements.$closeButton = this.$element.find( selectors.closeButton );
+
+        return elements;
+    },
+
+    bindEvents: function() {
+        var self = this,
+            $container = self.elements.$container,
+            $closeButton = self.elements.$closeButton,
+            $input = self.elements.$input,
+            $wrapper = self.elements.$wrapper,
+            $icon = self.elements.$icon,
+            skin = this.getElementSettings( 'skin' ),
+            classes = this.getSettings( 'classes' );
+
+        if ( 'full_screen' === skin ) {
+
+            // Activate full-screen mode on click
+            self.elements.$toggle.on( 'click', function() {
+                $container.toggleClass( classes.isFullScreen ).toggleClass( classes.lightbox );
+                $input.focus();
+            } );
+
+            // Deactivate full-screen mode on click or on esc.
+            $container.on( 'click', function( event ) {
+                if ( $container.hasClass( classes.isFullScreen ) && ( $container[0] === event.target ) ) {
+                    $container.removeClass( classes.isFullScreen ).removeClass( classes.lightbox );
+                }
+            } );
+            $closeButton.on( 'click', function() {
+                $container.removeClass( classes.isFullScreen ).removeClass( classes.lightbox );
+            } );
+            elementorFrontend.getElements( '$document' ).keyup( function( event ) {
+	            var ESC_KEY = 27;
+
+                if ( ESC_KEY === event.keyCode ) {
+                    if ( $container.hasClass( classes.isFullScreen ) ) {
+                        $container.click();
+                    }
+                }
+            } );
+
+        } else {
+
+            // Apply focus style on wrapper element when input is focused
+            $input.on( {
+                focus: function() {
+                    $wrapper.addClass( classes.isFocus );
+                },
+                blur: function() {
+                    $wrapper.removeClass( classes.isFocus );
+                }
+            } );
+        }
+
+        if ( 'minimal' === skin ) {
+
+            // Apply focus style on wrapper element when icon is clicked in minimal skin
+            $icon.on( 'click', function() {
+                $wrapper.addClass( classes.isFocus );
+                $input.focus();
+            } );
+        }
+    }
+} );
+
+module.exports = function( $scope ) {
+    new SearchBerHandler( { $element: $scope } );
 };
 
 },{}]},{},[1])

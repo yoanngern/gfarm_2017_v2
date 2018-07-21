@@ -7,17 +7,81 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+/**
+ * Elementor compatibility.
+ *
+ * Elementor compatibility handler class is responsible for compatibility with
+ * external plugins. The class resolves different issues with non-compatible
+ * plugins.
+ *
+ * @since 1.0.0
+ */
 class Compatibility {
 
+	/**
+	 * Register actions.
+	 *
+	 * Run Elementor compatibility with external plugins using custom filters and
+	 * actions.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @static
+	 */
 	public static function register_actions() {
 		add_action( 'init', [ __CLASS__, 'init' ] );
 
-		if ( is_admin() ) {
+		self::polylang_compatibility();
+
+		if ( is_admin() || defined( 'WP_LOAD_IMPORTERS' ) ) {
 			add_filter( 'wp_import_post_meta', [ __CLASS__, 'on_wp_import_post_meta' ] );
 			add_filter( 'wxr_importer.pre_process.post_meta', [ __CLASS__, 'on_wxr_importer_pre_process_post_meta' ] );
 		}
 	}
 
+	/**
+	 * Add new button to gutenberg.
+	 *
+	 * Insert new "Elementor" button to the gutenberg editor to create new post
+	 * using Elementor page builder.
+	 *
+	 * @since 1.9.0
+	 * @access public
+	 * @static
+	 */
+	public static function add_new_button_to_gutenberg() {
+		global $typenow;
+		if ( ! gutenberg_can_edit_post_type( $typenow ) || ! User::is_current_user_can_edit_post_type( $typenow ) ) {
+			return;
+		}
+		?>
+		<script type="text/javascript">
+			document.addEventListener( 'DOMContentLoaded', function() {
+				var dropdown = document.querySelector( '#split-page-title-action .dropdown' );
+
+				if ( ! dropdown ) {
+					return;
+				}
+
+				var url = '<?php echo esc_url( Utils::get_create_new_post_url( $typenow ) ); ?>';
+
+				dropdown.insertAdjacentHTML( 'afterbegin', '<a href="' + url + '">Elementor</a>' );
+			} );
+		</script>
+		<?php
+	}
+
+	/**
+	 * Init.
+	 *
+	 * Initialize Elementor compatibility with external plugins.
+	 *
+	 * Fired by `init` action.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @static
+	 */
 	public static function init() {
 		// Hotfix for NextGEN Gallery plugin.
 		if ( defined( 'NGG_PLUGIN_VERSION' ) ) {
@@ -78,6 +142,15 @@ class Compatibility {
 			return $tabs;
 		} );
 
+		// Fix WC session not defined in editor.
+		if ( function_exists( 'WC' ) ) {
+			add_action( 'elementor/editor/before_enqueue_scripts', function() {
+				remove_action( 'woocommerce_shortcode_before_product_cat_loop', 'wc_print_notices' );
+				remove_action( 'woocommerce_before_shop_loop', 'wc_print_notices' );
+				remove_action( 'woocommerce_before_single_product', 'wc_print_notices' );
+			} );
+		}
+
 		// Fix Jetpack Contact Form in Editor Mode.
 		if ( class_exists( 'Grunion_Editor_View' ) ) {
 			add_action( 'elementor/editor/before_enqueue_scripts', function() {
@@ -106,8 +179,8 @@ class Compatibility {
 
 		// Fix Preview URL for https://premium.wpmudev.org/project/domain-mapping/ plugin
 		if ( class_exists( 'domain_map' ) ) {
-			add_filter( 'elementor/utils/preview_url', function( $preview_url ) {
-				if ( wp_parse_url( $preview_url, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
+			add_filter( 'elementor/document/urls/preview', function( $preview_url ) {
+				if ( wp_parse_url( $preview_url, PHP_URL_HOST ) !== $_SERVER['HTTP_HOST'] ) {
 					$preview_url = \domain_map::utils()->unswap_url( $preview_url );
 					$preview_url = add_query_arg( [
 						'dm' => \Domainmap_Module_Mapping::BYPASS,
@@ -118,10 +191,64 @@ class Compatibility {
 			} );
 		}
 
+		// Gutenberg
+		if ( function_exists( 'gutenberg_init' ) ) {
+			add_action( 'admin_print_scripts-edit.php', [ __CLASS__, 'add_new_button_to_gutenberg' ], 11 );
+		}
+	}
+
+	/**
+	 * Polylang compatibility.
+	 *
+	 * Fix Polylang compatibility with Elementor.
+	 *
+	 * @since 2.0.0
+	 * @access private
+	 * @static
+	 */
+	private static function polylang_compatibility() {
+		// Fix language if the `get_user_locale` is difference from the `get_locale
+		if ( isset( $_REQUEST['action'] ) && 0 === strpos( $_REQUEST['action'], 'elementor' ) ) {
+			add_action( 'set_current_user', function() {
+				global $current_user;
+				$current_user->locale = get_locale();
+			} );
+
+			// Fix for Polylang
+			define( 'PLL_AJAX_ON_FRONT', true );
+
+			add_action( 'pll_pre_init', function( $polylang ) {
+				if ( isset( $_REQUEST['post'] ) ) {
+					$post_language = $polylang->model->post->get_language( $_REQUEST['post'], 'locale' );
+					if ( ! empty( $post_language ) ) {
+						$_REQUEST['lang'] = $post_language->locale;
+					}
+				}
+			} );
+		}
+
 		// Copy elementor data while polylang creates a translation copy
 		add_filter( 'pll_copy_post_metas', [ __CLASS__, 'save_polylang_meta' ], 10 , 4 );
 	}
 
+	/**
+	 * Save polylang meta.
+	 *
+	 * Copy elementor data while polylang creates a translation copy.
+	 *
+	 * Fired by `pll_copy_post_metas` filter.
+	 *
+	 * @since 1.6.0
+	 * @access public
+	 * @static
+	 *
+	 * @param array $keys List of custom fields names.
+	 * @param bool  $sync True if it is synchronization, false if it is a copy.
+	 * @param int   $from ID of the post from which we copy information.
+	 * @param int   $to   ID of the post to which we paste information.
+	 *
+	 * @return array List of custom fields names.
+	 */
 	public static function save_polylang_meta( $keys, $sync, $from, $to ) {
 		// Copy only for a new post.
 		if ( ! $sync ) {
@@ -132,12 +259,20 @@ class Compatibility {
 	}
 
 	/**
-	 * Normalize Elementor post meta on import,
-	 * We need the `wp_slash` in order to avoid the unslashing during the `add_post_meta`
+	 * Process post meta before WP importer.
 	 *
-	 * @param array $post_meta
+	 * Normalize Elementor post meta on import, We need the `wp_slash` in order
+	 * to avoid the unslashing during the `add_post_meta`.
 	 *
-	 * @return array
+	 * Fired by `wp_import_post_meta` filter.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @static
+	 *
+	 * @param array $post_meta Post meta.
+	 *
+	 * @return array Updated post meta.
 	 */
 	public static function on_wp_import_post_meta( $post_meta ) {
 		foreach ( $post_meta as &$meta ) {
@@ -151,12 +286,20 @@ class Compatibility {
 	}
 
 	/**
-	 * Normalize Elementor post meta on import with the new WP_importer,
-	 * We need the `wp_slash` in order to avoid the unslashing during the `add_post_meta`
+	 * Process post meta before WXR importer.
 	 *
-	 * @param array $post_meta
+	 * Normalize Elementor post meta on import with the new WP_importer, We need
+	 * the `wp_slash` in order to avoid the unslashing during the `add_post_meta`.
 	 *
-	 * @return array
+	 * Fired by `wxr_importer.pre_process.post_meta` filter.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @static
+	 *
+	 * @param array $post_meta Post meta.
+	 *
+	 * @return array Updated post meta.
 	 */
 	public static function on_wxr_importer_pre_process_post_meta( $post_meta ) {
 		if ( '_elementor_data' === $post_meta['key'] ) {

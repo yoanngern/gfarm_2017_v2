@@ -32,6 +32,8 @@ class PLL_Model {
 		add_action( 'update_option_siteurl', array( $this, 'clean_languages_cache' ) );
 		add_action( 'update_option_home', array( $this, 'clean_languages_cache' ) );
 
+		add_filter( 'get_terms_args', array( $this, 'get_terms_args' ) );
+
 		// just in case someone would like to display the language description ;- )
 		add_filter( 'language_description', '__return_empty_string' );
 	}
@@ -147,6 +149,21 @@ class PLL_Model {
 	}
 
 	/**
+	 * Don't query term metas when only our taxonomies are queried
+	 *
+	 * @since 2.3
+	 *
+	 * @param array $args WP_Term_Query arguments
+	 * @return array
+	 */
+	public function get_terms_args( $args ) {
+		if ( isset( $args['taxonomy'] ) && ! array_diff( (array) $args['taxonomy'], array( 'language', 'term_language', 'post_translations', 'term_translations' ) ) ) {
+			$args['update_term_meta_cache'] = false;
+		}
+		return $args;
+	}
+
+	/**
 	 * Returns the language by its term_id, tl_term_id, slug or locale
 	 *
 	 * @since 0.1
@@ -179,7 +196,7 @@ class PLL_Model {
 	 *
 	 * @param array  $clauses the list of sql clauses in terms query
 	 * @param object $lang    PLL_Language object
-	 * @return array modifed list of clauses
+	 * @return array modified list of clauses
 	 */
 	public function terms_clauses( $clauses, $lang ) {
 		if ( ! empty( $lang ) && false === strpos( $clauses['join'], 'pll_tr' ) ) {
@@ -208,7 +225,7 @@ class PLL_Model {
 			}
 
 			if ( ! empty( $this->options['post_types'] ) && is_array( $this->options['post_types'] ) ) {
-				$post_types = array_merge( $post_types,  array_combine( $this->options['post_types'], $this->options['post_types'] ) );
+				$post_types = array_merge( $post_types, array_combine( $this->options['post_types'], $this->options['post_types'] ) );
 			}
 
 			/**
@@ -242,7 +259,7 @@ class PLL_Model {
 	 */
 	public function is_translated_post_type( $post_type ) {
 		$post_types = $this->get_translated_post_types( false );
-		return ( is_array( $post_type ) && array_intersect( $post_type, $post_types ) || in_array( $post_type, $post_types ) );
+		return ( is_array( $post_type ) && array_intersect( $post_type, $post_types ) || in_array( $post_type, $post_types ) || 'any' === $post_type && ! empty( $post_types ) );
 	}
 
 	/**
@@ -250,7 +267,7 @@ class PLL_Model {
 	 *
 	 * @since 1.2
 	 *
-	 * @param bool $filter true if we should return only valid registered taxonmies
+	 * @param bool $filter true if we should return only valid registered taxonomies
 	 * @return array array of registered taxonomy names for which Polylang manages languages and translations
 	 */
 	public function get_translated_taxonomies( $filter = true ) {
@@ -459,7 +476,7 @@ class PLL_Model {
 			$select = "SELECT pll_tr.term_taxonomy_id, COUNT( * ) AS num_posts FROM {$wpdb->posts}";
 			$join = $this->post->join_clause();
 			$where = " WHERE post_status = 'publish'";
-			$where .= $wpdb->prepare( " AND {$wpdb->posts}.post_type IN ( '%s' )", join( "', '", $q['post_type'] ) );
+			$where .= sprintf( " AND {$wpdb->posts}.post_type IN ( '%s' )", join( "', '", esc_sql( $q['post_type'] ) ) );
 			$where .= $this->post->where_clause( $this->get_languages_list() );
 			$groupby = ' GROUP BY pll_tr.term_taxonomy_id';
 
@@ -487,7 +504,7 @@ class PLL_Model {
 			}
 
 			if ( ! empty( $q['author_name'] ) ) {
-				$author = get_user_by( 'slug',  sanitize_title_for_query( $q['author_name'] ) );
+				$author = get_user_by( 'slug', sanitize_title_for_query( $q['author_name'] ) );
 				if ( $author ) {
 					$q['author'] = $author->ID;
 				}

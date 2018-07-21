@@ -10,6 +10,14 @@ $(document).ready(function () {
         $("body > header #burger").toggleClass("open");
     });
 
+    $('a[href="#pll_switcher"]').on("click", function (event) {
+        event.preventDefault();
+
+        parent = $(this).parent();
+
+        $("> ul.sub-menu", parent).toggleClass('show');
+    });
+
 
 
 

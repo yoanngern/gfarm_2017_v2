@@ -62,7 +62,7 @@ class PLL_Uninstall {
 		// Need to register the taxonomies
 		$pll_taxonomies = array( 'language', 'term_language', 'post_translations', 'term_translations' );
 		foreach ( $pll_taxonomies as $taxonomy ) {
-			register_taxonomy( $taxonomy, null , array( 'label' => false, 'public' => false, 'query_var' => false, 'rewrite' => false ) );
+			register_taxonomy( $taxonomy, null, array( 'label' => false, 'public' => false, 'query_var' => false, 'rewrite' => false ) );
 		}
 
 		$languages = get_terms( 'language', array( 'hide_empty' => false ) );
@@ -70,6 +70,7 @@ class PLL_Uninstall {
 		// Delete users options
 		foreach ( get_users( array( 'fields' => 'ID' ) ) as $user_id ) {
 			delete_user_meta( $user_id, 'pll_filter_content' );
+			delete_user_meta( $user_id, 'pll_duplicate_content' );
 			foreach ( $languages as $lang ) {
 				delete_user_meta( $user_id, 'description_' . $lang->slug );
 			}
@@ -98,6 +99,7 @@ class PLL_Uninstall {
 		register_post_type( 'polylang_mo', array( 'rewrite' => false, 'query_var' => false ) );
 		$ids = get_posts( array(
 			'post_type'   => 'polylang_mo',
+			'post_status' => 'any',
 			'numberposts' => -1,
 			'nopaging'    => true,
 			'fields'      => 'ids',

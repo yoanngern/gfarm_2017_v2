@@ -23,6 +23,14 @@ class PLL_Admin_Links extends PLL_Links {
 			return '';
 		}
 
+		// Special case for the privacy policy page which is associated to a specific capability
+		if ( 'page' === $post_type_object->name && ! current_user_can( 'manage_privacy_options' ) ) {
+			$privacy_page = get_option( 'wp_page_for_privacy_policy' );
+			if ( $privacy_page && in_array( $post_id, $this->model->post->get_translations( $privacy_page ) ) ) {
+				return '';
+			}
+		}
+
 		if ( 'attachment' == $post_type ) {
 			$args = array(
 				'action'     => 'translate_media',
@@ -30,7 +38,7 @@ class PLL_Admin_Links extends PLL_Links {
 				'new_lang'   => $language->slug,
 			);
 
-			// add nonce for media as we will directly publish a new attachment from a clic on this link
+			// add nonce for media as we will directly publish a new attachment from a click on this link
 			$link = wp_nonce_url( add_query_arg( $args, admin_url( 'admin.php' ) ), 'translate_media' );
 		} else {
 			$args = array(

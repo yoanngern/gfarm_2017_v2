@@ -8,7 +8,7 @@
 
 		<?php
 
-		get_gfarm_events_by_cat('evenement');
+		get_gfarm_events_by_cat('events');
 
 
 		if ( have_posts() ) : ?>

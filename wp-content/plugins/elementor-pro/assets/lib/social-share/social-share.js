@@ -199,7 +199,7 @@
 		url: location.href,
 		classPrefix: 'c_',
 		formatCount: false,
-		shareCountsAPI: 'https://count.donreach.com/?url={url}&providers={providers}',
+		shareCountsAPI: 'https://{domain}/shares?url={url}&providers={providers}',
 		providers: [ 'all' ]
 	};
 
@@ -208,18 +208,11 @@
 			url: function( url, providers ) {
 				return ShareCounter.defaultSettings.shareCountsAPI
 					.replace( '{url}', url )
+					.replace( '{domain}', ElementorProFrontendConfig.donreach.api_url )
 					.replace( '{providers}', providers.join( ',' ) );
 			},
 			getParsedData: function( data ) {
 				return data.shares;
-			}
-		},
-		facebook: {
-			url: function( url ) {
-				return 'https://graph.facebook.com/?id=' + url;
-			},
-			getParsedData: function( data ) {
-				return data.share.share_count;
 			}
 		}
 	};
@@ -259,12 +252,16 @@
 				}
 			} );
 
-			currentRequest.xhRequest.general = $.get(
-				ShareCounter.providers.general.url( url, generalProviders ),
-				function( data ) {
+			var requestParams = {
+				url: ShareCounter.providers.general.url( url, generalProviders ),
+				headers: {
+					Authorization:  ElementorProFrontendConfig.donreach.key
+				},
+				success: function( data ) {
 					$.extend( currentRequest.data, ShareCounter.providers.general.getParsedData( data ) );
 				}
-			);
+			};
+			currentRequest.xhRequest.general = $.get( requestParams );
 		}
 
 		$.when.apply( null, Object.values( currentRequest.xhRequest ) ).then( function() {

@@ -21,7 +21,7 @@ abstract class PLL_Metabox_Button {
 	 * deactivate => string displayed to deactivate the button
 	 * class      => classes to display the icon
 	 *
-	 * @param string $id id used for css class
+	 * @param string $id   Id used for css class
 	 * @param array  $args
 	 */
 	public function __construct( $id, $args ) {
@@ -46,9 +46,9 @@ abstract class PLL_Metabox_Button {
 	 *
 	 * @since 2.1
 	 *
-	 * @param string $post_type current post type
-	 * @param bool   $active    new requested button state
-	 * @return bool whether the new button state is accepted or not
+	 * @param string $post_type Current post type
+	 * @param bool   $active    New requested button state
+	 * @return bool Whether the new button state is accepted or not
 	 */
 	protected function toggle_option( $post_type, $active ) {
 		return true;
@@ -100,7 +100,7 @@ abstract class PLL_Metabox_Button {
 	 *
 	 * @since 2.1
 	 *
-	 * @param bool $is_active whether the button is already active or not
+	 * @param bool $is_active Whether the button is already active or not
 	 * @return string
 	 */
 	protected function get_html( $is_active ) {

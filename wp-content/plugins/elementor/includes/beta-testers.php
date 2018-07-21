@@ -5,10 +5,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+/**
+ * Elementor beta testers.
+ *
+ * Elementor beta testers handler class is responsible for the Beta Testers
+ * feature that allows developers to test Elementor beta versions.
+ *
+ * @since 1.5.0
+ */
 class Beta_Testers {
 
+	/**
+	 * Transient key.
+	 *
+	 * Holds the Elementor beta testers transient key.
+	 *
+	 * @since 1.5.0
+	 * @access private
+	 * @static
+	 *
+	 * @var string Transient key.
+	 */
 	private $transient_key;
 
+	/**
+	 * Get beta version.
+	 *
+	 * Retrieve Elementor beta version from wp.org plugin repository.
+	 *
+	 * @since 1.5.0
+	 * @access private
+	 *
+	 * @return string|false Beta version or false.
+	 */
 	private function get_beta_version() {
 		$beta_version = get_site_transient( $this->transient_key );
 
@@ -30,6 +59,21 @@ class Beta_Testers {
 		return $beta_version;
 	}
 
+	/**
+	 * Check version.
+	 *
+	 * Checks whether a beta version exist, and retrieve the version data.
+	 *
+	 * Fired by `pre_set_site_transient_update_plugins` filter, before WordPress
+	 * runs the plugin update checker.
+	 *
+	 * @since 1.5.0
+	 * @access public
+	 *
+	 * @param array $transient Plugin version data.
+	 *
+	 * @return array Plugin version data.
+	 */
 	public function check_version( $transient ) {
 		if ( empty( $transient->checked ) ) {
 			return $transient;
@@ -54,6 +98,14 @@ class Beta_Testers {
 		return $transient;
 	}
 
+	/**
+	 * Beta testers constructor.
+	 *
+	 * Initializing Elementor beta testers.
+	 *
+	 * @since 1.5.0
+	 * @access public
+	 */
 	public function __construct() {
 		if ( 'yes' !== get_option( 'elementor_beta', 'no' ) ) {
 			return;

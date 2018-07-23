@@ -560,3 +560,14 @@ function gfarm_order_events( $query ) {
 }
 
 add_action( 'pre_get_posts', 'gfarm_order_events' );
+
+
+function nav_menu_link_attributes( $atts, $item ) {
+
+	if ( isset( $item->lang ) ) {
+		$atts['short_name'] = $item->title;
+	}
+	return $atts;
+}
+
+add_filter( 'nav_menu_link_attributes', 'nav_menu_link_attributes', 10, 2 );
